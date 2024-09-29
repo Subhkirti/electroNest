@@ -153,7 +153,7 @@ export default function ProductDetails() {
               <div className="flex space-x-5 items-center text-lg lg:text-xl text-gray-900 mt-6">
                 <p className="font-semibold">₹199 </p>
                 <p className="line-through opacity-50">₹211</p>
-                <p className="text-green-600 font-semibold">5% Off</p>
+                <p className="text-secondary font-semibold">5% Off</p>
               </div>
 
               {/* Reviews */}

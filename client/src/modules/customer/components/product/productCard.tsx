@@ -24,7 +24,7 @@ function ProductCard({ product }: { product: any }) {
         <div className="flex items-center space-x-2">
           <p className="font-semibold">₹ {parseInt(product?.price)}</p>
           {product?.discountPercentage > 1 && (
-            <p className="text-green-600 font-semibold">
+            <p className="text-secondary font-semibold">
               {parseInt(product?.discountPercentage)}% off
             </p>
           )}

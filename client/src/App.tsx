@@ -5,6 +5,7 @@ import Home from "./modules/customer/pages/home";
 import Footer from "./modules/customer/components/footer/footer";
 import Product from "./modules/customer/components/product/product";
 import ProductDetails from "./modules/customer/components/productDetails/productDetails";
+import Cart from "./modules/customer/components/cart/cart";
 
 function App() {
   return (
@@ -13,7 +14,8 @@ function App() {
 
       <div className="container">
         {/* <Product /> */}
-        <ProductDetails />
+        {/* <ProductDetails /> */}
+        <Cart />
 
         {/* <Routes>
           <Route path="/" element={<Home />}></Route>
