@@ -2,18 +2,18 @@ import { Link } from "react-router-dom";
 import { footerSections } from "../../utils/homeUtils";
 
 function Footer() {
-
   return (
     <div className="bg-black text-slate-200 mb-0 mt-10 py-10 px-10 lg:px-40 ">
       <div className="container flex gap-x-14 gap-y-20 flex-wrap justify-between">
         {/* footer links */}
-        {footerSections.map((footer) => {
+        {footerSections.map((footer, i) => {
           return (
-            <div>
+            <div key={i}>
               <p className="text-center text-lg mb-6">{footer.section}</p>
-              {footer.items.map((section) => {
+              {footer.items.map((section, index) => {
                 return (
                   <Link
+                    key={index}
                     to={section?.path || "/"}
                     className="hover:underline hover:text-slate-400"
                   >
