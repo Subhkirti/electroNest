@@ -58,7 +58,7 @@ export default function Navigation() {
   };
 
   return (
-    <div className="bg-white pb-10">
+    <div className="bg-white">
       {/* Mobile menu */}
       <Transition.Root show={open} as={Fragment}>
         <Dialog as="div" className="relative z-40 lg:hidden" onClose={setOpen}>
@@ -247,15 +247,15 @@ export default function Navigation() {
                   <span className="sr-only">Your Company</span>
                   <img
                     src={AppIcons.imgLogo}
-                    alt="Shopwithzosh"
+                    alt="ElectroNestLogo"
                     width={'50%'}
-                    className="mr-2"
+                    className=""
                   />
                 </Link>
               </div>
 
               {/* Flyout menus */}
-              <Popover.Group className="hidden lg:ml-8 lg:block lg:self-stretch z-10">
+              <Popover.Group className="hidden lg:block lg:self-stretch z-10">
                 <div className="flex h-full space-x-8">
                   {navigation.categories.map((category) => (
                     <Popover key={category.name} className="flex">
