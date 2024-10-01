@@ -27,7 +27,10 @@ export default function CheckoutStepper() {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Stepper activeStep={step}>
+      <Stepper
+        activeStep={step}
+        style={{ backgroundColor: "white", padding: "20px 0px" }}
+      >
         {steps.map((label, index) => {
           const stepProps: { completed?: boolean } = {};
           const labelProps: {
@@ -49,7 +52,14 @@ export default function CheckoutStepper() {
         </React.Fragment>
       ) : (
         <React.Fragment>
-          <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              pt: 2,
+              bgcolor: "white",
+            }}
+          >
             <Button
               color="inherit"
               disabled={activeStep === 0}
@@ -65,7 +75,9 @@ export default function CheckoutStepper() {
             </Button>
           </Box>
 
-          <div className="mt-10">{step === 2 ? <AddDeliveryAddress /> : <OrderSummary />}</div>
+          <div className="mt-10">
+            {step === 2 ? <AddDeliveryAddress /> : <OrderSummary />}
+          </div>
         </React.Fragment>
       )}
     </Box>

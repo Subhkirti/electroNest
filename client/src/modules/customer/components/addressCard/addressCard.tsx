@@ -2,8 +2,7 @@ import React from "react";
 
 function AddressCard() {
   return (
-    <div>
-      <div className="space-y-3">
+      <div className="space-y-3 ">
         <p className="font-semibold">Ram Kapoor</p>
         <p>Mombail, Gokul nagar, 147301</p>
 
@@ -12,7 +11,6 @@ function AddressCard() {
           <p>6283810093</p>
         </div>
       </div>
-    </div>
   );
 }
 

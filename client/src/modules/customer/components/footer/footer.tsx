@@ -3,7 +3,7 @@ import { footerSections } from "../../utils/homeUtils";
 
 function Footer() {
   return (
-    <div className="bg-black text-slate-200 mb-0 mt-10 py-10 px-10 lg:px-40 ">
+    <div className=" bg-black text-slate-200 mt-10 px-20 py-10">
       <div className="container flex gap-x-14 gap-y-20 flex-wrap justify-between">
         {/* footer links */}
         {footerSections.map((footer, i) => {

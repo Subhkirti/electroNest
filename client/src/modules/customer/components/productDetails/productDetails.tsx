@@ -5,6 +5,7 @@ import { Box, Grid, LinearProgress, Rating } from "@mui/material";
 import ProductReviewCard from "./productReviewCard";
 import phones from "../../../../assets/productsData/phones";
 import HomeSectionCard from "../homeSectionCard/homeSectionCard";
+import { useNavigate } from "react-router-dom";
 
 const product = {
   name: "Basic Tee 6-Pack",
@@ -59,7 +60,6 @@ const product = {
   details:
     'The 6-Pack includes two black, two white, and two heather gray Basic Tees. Sign up for our subscription service and be the first to get new, exciting colors, like our upcoming "Charcoal Gray" limited release.',
 };
-const reviews = { href: "#", average: 4, totalCount: 117 };
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -68,14 +68,14 @@ function classNames(...classes: string[]) {
 export default function ProductDetails() {
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [selectedSize, setSelectedSize] = useState(product.sizes[2]);
-
+  const navigate = useNavigate();
   return (
-    <div className="bg-white lg:px-20">
+    <div className="bg-white">
       <div className="pt-6">
         <nav aria-label="Breadcrumb">
           <ol
             role="list"
-            className="mx-auto flex max-w-2xl items-center space-x-2 px-4 sm:px-6 lg:max-w-7xl lg:px-8"
+            className="mx-auto flex items-center space-x-2 max-w-full "
           >
             {product.breadcrumbs.map((breadcrumb) => (
               <li key={breadcrumb.id}>
@@ -170,6 +170,7 @@ export default function ProductDetails() {
               <form className="mt-10">
                 <button
                   type="submit"
+                  onClick={() => navigate('/cart')}
                   className="mt-10 flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                   Add to cart
