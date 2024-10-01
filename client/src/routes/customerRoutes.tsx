@@ -1,0 +1,43 @@
+import React from "react";
+import { Route, Routes } from "react-router-dom";
+import Home from "../modules/customer/pages/home";
+import Cart from "../modules/customer/components/cart/cart";
+import Navbar from "../modules/customer/components/navbar/navbar";
+import Footer from "../modules/customer/components/footer/footer";
+import Product from "../modules/customer/components/product/product";
+import ProductDetails from "../modules/customer/components/productDetails/productDetails";
+import Checkout from "../modules/customer/components/checkout/checkout";
+import Order from "../modules/customer/components/order/order";
+import OrderDetails from "../modules/customer/components/order/orderDetails";
+
+function CustomerRoutes() {
+  return (
+    <div>
+      <Navbar />
+      <div className="container">
+        <Routes>
+          <Route path="/" element={<Home />}></Route>
+          <Route path="/cart" element={<Cart />}></Route>
+          <Route
+            path="/:levelOne/:levelTwo/:levelThree"
+            element={<Product />}
+          ></Route>
+          <Route
+            path="/product/:productId"
+            element={<ProductDetails />}
+          ></Route>
+          <Route path="/checkout" element={<Checkout />}></Route>
+          <Route path="/account/order" element={<Order />}></Route>
+          <Route
+            path="/account/order/:orderId"
+            element={<OrderDetails />}
+          ></Route>
+        </Routes>
+      </div>
+
+      {window.location.pathname != "/" && <Footer />}
+    </div>
+  );
+}
+
+export default CustomerRoutes;
