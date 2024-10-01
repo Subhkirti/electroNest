@@ -17,7 +17,7 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Navigation() {
+export default function Navbar() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const [openAuthModal, setOpenAuthModal] = useState(false);
@@ -55,10 +55,11 @@ export default function Navigation() {
   };
   const handleMyOrderClick = () => {
     handleCloseUserMenu();
+    navigate("/account/order");
   };
 
   return (
-    <div className="bg-white pb-10">
+    <div className="bg-white mb-10">
       {/* Mobile menu */}
       <Transition.Root show={open} as={Fragment}>
         <Dialog as="div" className="relative z-40 lg:hidden" onClose={setOpen}>
@@ -226,7 +227,7 @@ export default function Navigation() {
 
       <header className="relative bg-white">
         <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
-          Get free delivery on orders over $100
+          Get free delivery on orders over ₹1000
         </p>
 
         <nav aria-label="Top" className="mx-auto">
@@ -247,15 +248,15 @@ export default function Navigation() {
                   <span className="sr-only">Your Company</span>
                   <img
                     src={AppIcons.imgLogo}
-                    alt="Shopwithzosh"
-                    width={'50%'}
-                    className="mr-2"
+                    alt="ElectroNestLogo"
+                    width={"50%"}
+                    className=""
                   />
                 </Link>
               </div>
 
               {/* Flyout menus */}
-              <Popover.Group className="hidden lg:ml-8 lg:block lg:self-stretch z-10">
+              <Popover.Group className="hidden lg:block lg:self-stretch z-10">
                 <div className="flex h-full space-x-8">
                   {navigation.categories.map((category) => (
                     <Popover key={category.name} className="flex">

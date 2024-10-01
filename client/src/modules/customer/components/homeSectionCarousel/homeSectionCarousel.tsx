@@ -34,7 +34,7 @@ function HomeSectionCarousel({
   }
 
   return (
-    <div className="border">
+    <div className="border bg-white">
       <h2 className="text-2xl font-extrabold text-gray-800 p-5 capitalize">
         {sectionName}
       </h2>

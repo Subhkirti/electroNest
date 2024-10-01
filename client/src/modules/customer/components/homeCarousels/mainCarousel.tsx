@@ -11,7 +11,7 @@ const MainCarousel = () => {
       src={carousel.image}
       role="presentation"
       alt=""
-      className="w-screen object-fill cursor-pointer"
+      className="w-screen h-auto lg:h-[400px] object-fill cursor-pointer"
       onClick={() => navigate(carousel.path)}
     />
   ));
