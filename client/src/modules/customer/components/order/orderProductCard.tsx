@@ -34,9 +34,14 @@ function OrderProductCard() {
             </Grid>
 
             <Grid item>
-              <div className="text-primary items-center flex space-x-2">
-                <StarOutline sx={{ fontSize: "18px" }} color="primary" />
-                <span>Rate & Review Product</span>
+              <div className="text-primary  items-center flex space-x-2">
+                <StarOutline
+                  sx={{ fontSize: "18px", cursor: "pointer" }}
+                  color="primary"
+                />
+                <span className="font-medium cursor-pointer">
+                  Rate & Review Product
+                </span>
               </div>
             </Grid>
           </Grid>
