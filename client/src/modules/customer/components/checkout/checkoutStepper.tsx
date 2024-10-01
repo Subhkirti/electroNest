@@ -6,8 +6,8 @@ import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { useLocation } from "react-router-dom";
-import DeliveryAddress from "./deliveryAddress";
 import OrderSummary from "./orderSummary";
+import AddDeliveryAddress from "./addDeliveryAddress";
 
 const steps = ["Login", "Add Delivery Address", "Order Summary", "Payment"];
 
@@ -65,7 +65,7 @@ export default function CheckoutStepper() {
             </Button>
           </Box>
 
-          <div>{step === 2 ? <DeliveryAddress /> : <OrderSummary />}</div>
+          <div className="mt-10">{step === 2 ? <AddDeliveryAddress /> : <OrderSummary />}</div>
         </React.Fragment>
       )}
     </Box>
