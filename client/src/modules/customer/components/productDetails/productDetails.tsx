@@ -1,6 +1,3 @@
-import { useState } from "react";
-import { StarIcon } from "@heroicons/react/20/solid";
-import { Radio, RadioGroup } from "@headlessui/react";
 import { Box, Grid, LinearProgress, Rating } from "@mui/material";
 import ProductReviewCard from "./productReviewCard";
 import phones from "../../../../assets/productsData/phones";
@@ -61,22 +58,13 @@ const product = {
     'The 6-Pack includes two black, two white, and two heather gray Basic Tees. Sign up for our subscription service and be the first to get new, exciting colors, like our upcoming "Charcoal Gray" limited release.',
 };
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export default function ProductDetails() {
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[2]);
   const navigate = useNavigate();
   return (
     <div className="bg-white">
       <div className="pt-6">
         <nav aria-label="Breadcrumb">
-          <ol
-            role="list"
-            className="mx-auto flex items-center space-x-2 max-w-full "
-          >
+          <ol className="mx-auto flex items-center space-x-2 max-w-full ">
             {product.breadcrumbs.map((breadcrumb) => (
               <li key={breadcrumb.id}>
                 <div className="flex items-center">
@@ -170,7 +158,7 @@ export default function ProductDetails() {
               <form className="mt-10">
                 <button
                   type="submit"
-                  onClick={() => navigate('/cart')}
+                  onClick={() => navigate("/cart")}
                   className="mt-10 flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                   Add to cart
@@ -196,7 +184,7 @@ export default function ProductDetails() {
                 </h3>
 
                 <div className="mt-4">
-                  <ul role="list" className="list-disc space-y-2 pl-4 text-sm">
+                  <ul className="list-disc space-y-2 pl-4 text-sm">
                     {product.highlights.map((highlight) => (
                       <li key={highlight} className="text-gray-400">
                         <span className="text-gray-600">{highlight}</span>
