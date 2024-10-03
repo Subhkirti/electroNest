@@ -12,8 +12,8 @@ import { deepPurple } from "@mui/material/colors";
 import navigation from "../../../../assets/productsData/navigation";
 import AppIcons from "../../../../common/appIcons";
 import AuthModal from "../auth/authModal";
-import { getCurrentUser } from "../../utils/localStorageUtils";
 import AppStrings from "../../../../common/appStrings";
+import { getCurrentUser } from "../../utils/localStorageUtils";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
