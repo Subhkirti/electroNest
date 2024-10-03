@@ -1,4 +1,4 @@
-import { Fragment, SetStateAction, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
@@ -6,12 +6,14 @@ import {
   ShoppingBagIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Avatar, Button, Menu, MenuItem } from "@mui/material";
 import { deepPurple } from "@mui/material/colors";
 import navigation from "../../../../assets/productsData/navigation";
-import AppIcons from "../../../../assets/common/appIcons";
+import AppIcons from "../../../../common/appIcons";
+import AuthModal from "../auth/authModal";
+import { getCurrentUser } from "../../utils/localStorageUtils";
+import AppStrings from "../../../../common/appStrings";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -23,9 +25,7 @@ export default function Navbar() {
   const [openAuthModal, setOpenAuthModal] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const openUserMenu = Boolean(anchorEl);
-  const jwt = localStorage.getItem("jwt");
-  const location = useLocation();
-
+  const user = getCurrentUser();
   const handleUserClick = (event: { currentTarget: any }) => {
     setAnchorEl(event.currentTarget);
   };
@@ -197,27 +197,13 @@ export default function Navbar() {
 
                 <div className="space-y-6 border-t border-gray-200 px-4 py-6">
                   <div className="flow-root">
-                    <a
-                      href="/"
+                    <Button
+                      onClick={handleOpen}
                       className="-m-2 block p-2 font-medium text-gray-900"
                     >
-                      Sign in
-                    </a>
+                      {AppStrings.login}
+                    </Button>
                   </div>
-                </div>
-
-                <div className="border-t border-gray-200 px-4 py-6">
-                  <a href="/" className="-m-2 flex items-center p-2">
-                    <img
-                      src="https://tailwindui.com/img/flags/flag-canada.svg"
-                      alt=""
-                      className="block h-auto w-5 flex-shrink-0"
-                    />
-                    <span className="ml-3 block text-base font-medium text-gray-900">
-                      CAD
-                    </span>
-                    <span className="sr-only">, change currency</span>
-                  </a>
                 </div>
               </Dialog.Panel>
             </Transition.Child>
@@ -389,7 +375,7 @@ export default function Navbar() {
 
               <div className="ml-auto flex items-center">
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  {true ? (
+                  {user ? (
                     <div>
                       <Avatar
                         className="text-white"
@@ -432,9 +418,9 @@ export default function Navbar() {
                   ) : (
                     <Button
                       onClick={handleOpen}
-                      className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                      className="text-sm text-primary font-medium"
                     >
-                      Signin
+                      {AppStrings.login}
                     </Button>
                   )}
                 </div>
@@ -475,6 +461,8 @@ export default function Navbar() {
           </div>
         </nav>
       </header>
+
+      <AuthModal handleClose={handleClose} open={openAuthModal} />
     </div>
   );
 }

@@ -38,6 +38,7 @@ export default function Product() {
     let filterValue = searchParams.getAll(sectionId);
 
     if (filterValue?.length > 0 && filterValue[0]?.split(",").includes(value)) {
+      // eslint-disable-next-line
       filterValue = filterValue[0]?.split(",")?.filter((item) => item != value);
 
       if (filterValue?.length === 0) {

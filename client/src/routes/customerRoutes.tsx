@@ -9,14 +9,18 @@ import ProductDetails from "../modules/customer/components/productDetails/produc
 import Checkout from "../modules/customer/components/checkout/checkout";
 import Order from "../modules/customer/components/order/order";
 import OrderDetails from "../modules/customer/components/order/orderDetails";
+import AppRoutes from "../common/appRoutes";
 
 function CustomerRoutes() {
+  const homePaths = [AppRoutes.home, AppRoutes.login, AppRoutes.register];
   return (
     <div>
       <Navbar />
       <div className="container">
         <Routes>
-          <Route path="/" element={<Home />}></Route>
+          {homePaths.map((path) => (
+            <Route key={path} path={path} element={<Home />} />
+          ))}
           <Route path="/cart" element={<Cart />}></Route>
           <Route
             path="/:levelOne/:levelTwo/:levelThree"
@@ -35,7 +39,7 @@ function CustomerRoutes() {
         </Routes>
       </div>
 
-      {window.location.pathname != "/" && <Footer />}
+      {!homePaths.includes(window.location.pathname) && <Footer />}
     </div>
   );
 }

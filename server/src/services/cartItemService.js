@@ -1,0 +1,2 @@
+const createQuery =
+  "CREATE TABLE cart_item (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT, total_price INT NOT NULL DEFAULT 0, total_item INT NOT NULL DEFAULT 0, total_discount_price INT DEFAULT 0, discount INT DEFAULT 0, FOREIGN KEY (cart_id) REFERENCES cart(id))";
