@@ -8,18 +8,24 @@ import {
   Snackbar,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
-import { login } from "../../store/auth/action";
 import { useDispatch } from "react-redux";
 import { passwordRegEx } from "../../../../common/constants";
+import { getUserProfile, login } from "../../store/auth/action";
+import { getCurrentUser } from "../../utils/localStorageUtils";
 
 function LoginForm() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const token = getCurrentUser()?.token;
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    return token && dispatch(getUserProfile() as any);
+  }, [token]);
 
   function handleOnSubmit(e: {
     preventDefault: () => void;
@@ -41,7 +47,7 @@ function LoginForm() {
       email: data.get("email"),
       password: password,
     };
-    dispatch(login(formData));
+    dispatch(login(formData) as any);
     // Reset error if the password is valid
     setError("");
   }

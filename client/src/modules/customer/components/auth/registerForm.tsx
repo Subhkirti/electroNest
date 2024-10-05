@@ -12,9 +12,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
 import { useDispatch } from "react-redux";
-import { getUserProfile, register } from "../../store/auth/action";
 import { passwordRegEx } from "../../../../common/constants";
 import { getCurrentUser } from "../../utils/localStorageUtils";
+import { getUserProfile, register } from "../../store/auth/action";
 
 function RegisterForm() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ function RegisterForm() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    return token && dispatch(getUserProfile());
+    return token && dispatch(getUserProfile() as any);
   }, [token]);
 
   function handleOnSubmit(e: {
@@ -50,7 +50,7 @@ function RegisterForm() {
       password: password,
     };
     console.log("formData:", formData);
-    dispatch(register(formData));
+    dispatch(register(formData) as any);
     // Reset error if the password is valid
     setError("");
   }
