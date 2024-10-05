@@ -1,10 +1,19 @@
-const express = require("express");
-const cors = require("cors");
-const app = express();
-const PORT = 7500;
+const app = require("./app");
+require("./connection");
+require("./services/userService");
+const dotenv = require("dotenv");
 
-app.use(cors());
-app.use(express.json());
+// Loading the appropriate .env file based on the NODE_ENV,
+// This key NODE_ENV already set in scripts of package.json, while starting the application
+const result = dotenv.config({
+  path: process.env.NODE_ENV === "production" ? ".env.prod" : ".env",
+});
+
+if (result.error) {
+  throw result.error;
+}
+
+const PORT = process.env.PORT;
 
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to electroNest apis,");
@@ -13,5 +22,3 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`ElectroNest application is running on: ${PORT}`);
 });
-
-module.exports = app;

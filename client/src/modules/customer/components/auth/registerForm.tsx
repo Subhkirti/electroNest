@@ -7,17 +7,25 @@ import {
   TextField,
   Snackbar,
   Alert,
-  Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
+import { useDispatch } from "react-redux";
+import { getUserProfile, register } from "../../store/auth/action";
+import { passwordRegEx } from "../../../../common/constants";
+import { getCurrentUser } from "../../utils/localStorageUtils";
 
 function RegisterForm() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const token = getCurrentUser()?.token;
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const passwordRegEx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+  useEffect(() => {
+    return token && dispatch(getUserProfile());
+  }, [token]);
 
   function handleOnSubmit(e: {
     preventDefault: () => void;
@@ -42,7 +50,7 @@ function RegisterForm() {
       password: password,
     };
     console.log("formData:", formData);
-
+    dispatch(register(formData));
     // Reset error if the password is valid
     setError("");
   }

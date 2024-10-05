@@ -11,9 +11,12 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
+import { login } from "../../store/auth/action";
+import { useDispatch } from "react-redux";
 
 function LoginForm() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const passwordRegEx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
@@ -38,8 +41,7 @@ function LoginForm() {
       email: data.get("email"),
       password: password,
     };
-    console.log("formData:", formData);
-
+    dispatch(login(formData));
     // Reset error if the password is valid
     setError("");
   }
