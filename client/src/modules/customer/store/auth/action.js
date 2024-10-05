@@ -18,15 +18,14 @@ const register = (userReqBody) => async (dispatch) => {
   dispatch(registerRequest());
   try {
     const res = await axios.post(ApiUrls.registerUser, userReqBody);
-    console.log("data:", res);
     const user = res?.data;
     const token = user?.token;
     if (token) {
       setCurrentUser({ token });
       dispatch(registerSuccess(token));
     }
-  } catch (error) {
-    dispatch(registerFailure(error?.message));
+  } catch ({ response }) {
+    dispatch(registerFailure(response?.data?.message));
   }
 };
 
@@ -48,8 +47,8 @@ const login = (userReqBody) => async (dispatch) => {
     const user = res?.data;
     setCurrentUser(user);
     dispatch(loginSuccess(user));
-  } catch (error) {
-    dispatch(loginFailure(error?.message));
+  } catch ({ response }) {
+    dispatch(loginFailure(response?.data?.message));
   }
 };
 
@@ -81,8 +80,8 @@ const getUserProfile = () => async (dispatch) => {
       setCurrentUser(user);
       dispatch(getUserProfileSuccess(user));
     }
-  } catch (error) {
-    dispatch(getUserProfileFailure(error?.message));
+  } catch ({ response }) {
+    dispatch(getUserProfileFailure(response?.data?.message));
   }
 };
 
@@ -92,4 +91,3 @@ const logout = () => async (dispatch) => {
 };
 
 export { register, login, getUserProfile, logout };
-
