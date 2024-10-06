@@ -3,6 +3,8 @@ import ApiUrls from "../../../../common/apiUrls";
 import { getCurrentUser, setCurrentUser } from "../../utils/localStorageUtils";
 import ActionTypes from "./actionTypes";
 import { toast } from "react-toastify";
+import AppRoutes from "../../../../common/appRoutes";
+import { userMap } from "../../mappers/userMapper";
 
 // register user actions
 const registerRequest = () => ({ type: ActionTypes.REGISTER_REQUEST });
@@ -19,10 +21,12 @@ const register = (userReqBody) => async (dispatch) => {
   dispatch(registerRequest());
   try {
     const res = await axios.post(ApiUrls.registerUser, userReqBody);
-    const user = res?.data;
+    const user = res?.data?.data;
     const token = user?.token;
     if (token) {
       setCurrentUser({ token });
+      dispatch(registerSuccess({ token }));
+      window.location = AppRoutes.home;
     }
   } catch ({ response }) {
     toast.error(response?.data?.message);
@@ -45,8 +49,10 @@ const login = (userReqBody) => async (dispatch) => {
   dispatch(loginRequest());
   try {
     const res = await axios.post(ApiUrls.login, userReqBody);
-    const user = res?.data;
+    const user = res?.data?.data && userMap(res.data.data);
     setCurrentUser(user);
+    dispatch(loginSuccess(user));
+    window.location = AppRoutes.home;
   } catch ({ response }) {
     toast.error(response?.data?.message);
 
@@ -77,7 +83,7 @@ const getUserProfile = () => async (dispatch) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    const user = res?.data;
+    const user = res?.data?.data;
     if (user) {
       setCurrentUser(user);
       dispatch(getUserProfileSuccess(user));
@@ -91,6 +97,8 @@ const getUserProfile = () => async (dispatch) => {
 // logout action
 const logout = () => async (dispatch) => {
   dispatch({ type: ActionTypes.LOGOUT, payload: null });
+  localStorage.clear();
+  window.location = "/";
 };
 
-export { register, registerSuccess, login, getUserProfile, logout };
+export { register, login, getUserProfile, logout };

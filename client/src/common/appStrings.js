@@ -1,5 +1,6 @@
 const AppStrings = {
   login: "Login",
+  logout: "Logout",
   register: "Register",
   notHaveAccount: "if you don't have an account?",
   alreadyHaveAccount: "if you already have an account?",

@@ -9,17 +9,20 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { passwordRegEx } from "../../../../common/constants";
 import { getUserProfile, login } from "../../store/auth/action";
 import { getCurrentUser } from "../../utils/localStorageUtils";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
+import { RootState } from "../../store/storeTypes";
+import Loader from "../common/loader";
 
 function LoginForm() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = getCurrentUser()?.token;
+  const auth = useSelector((state: RootState) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -101,7 +104,7 @@ function LoginForm() {
               variant="contained"
               className="h-12"
             >
-              {AppStrings.login}
+              {auth?.isLoading ? <Loader /> : AppStrings.login}
             </Button>
           </Grid>
         </Grid>
@@ -115,7 +118,7 @@ function LoginForm() {
             navigate(AppRoutes.register);
           }}
         >
-                {AppStrings.register}
+          {AppStrings.register}
         </span>
       </p>
     </div>

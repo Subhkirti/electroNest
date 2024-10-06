@@ -46,7 +46,7 @@ app.post("/register", (req, res) => {
       if (result.length > 0) {
         return res
           .status(400)
-          .json({ status: 400, message: "User already exists" });
+          .json({ status: 400, message: "User already exists. So, Please choose login option." });
       }
 
       // Hash password before saving

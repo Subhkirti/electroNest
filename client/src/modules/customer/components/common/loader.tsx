@@ -5,12 +5,21 @@ function Loader({
   color = "secondary",
 }: {
   fixed?: boolean;
-  color: "primary" | "secondary";
+  color?: "primary" | "secondary";
 }) {
   return (
-    <div className={fixed ? "fixed inset-0 bg-neutral-700" : ""}>
+    <div
+      className={
+        fixed
+          ? "fixed inset-0 bg-neutral-700"
+          : "flex items-center justify-center"
+      }
+    >
       <CircularProgress
-        sx={{ color: color === "primary" ? "primary" : "white" }}
+        size={"30px"}
+        style={{
+          color: color === "primary" ? "primary" : "white",
+        }}
       />
     </div>
   );

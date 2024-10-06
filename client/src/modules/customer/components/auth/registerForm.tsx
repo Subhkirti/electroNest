@@ -15,13 +15,14 @@ import { getCurrentUser } from "../../utils/localStorageUtils";
 import { getUserProfile, register } from "../../store/auth/action";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
+import { RootState } from "../../store/storeTypes";
+import Loader from "../common/loader";
 
 function RegisterForm() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = getCurrentUser()?.token;
-  const state = useSelector((state) => state);
-  console.log("auth:", state?.auth);
+  const auth = useSelector((state: RootState) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -125,7 +126,7 @@ function RegisterForm() {
               variant="contained"
               className="h-12"
             >
-              {AppStrings.register}
+              {auth?.isLoading ? <Loader /> : AppStrings.register}
             </Button>
           </Grid>
         </Grid>

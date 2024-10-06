@@ -6,7 +6,7 @@ import {
   ShoppingBagIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, Button, Menu, MenuItem } from "@mui/material";
 import { deepPurple } from "@mui/material/colors";
 import navigation from "../../../../assets/productsData/navigation";
@@ -14,18 +14,30 @@ import AppIcons from "../../../../common/appIcons";
 import AuthModal from "../auth/authModal";
 import AppStrings from "../../../../common/appStrings";
 import { getCurrentUser } from "../../utils/localStorageUtils";
+import { useDispatch } from "react-redux";
+import { logout } from "../../store/auth/action";
+import AppRoutes from "../../../../common/appRoutes";
+import { User } from "../../types/userTypes";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const [open, setOpen] = useState(false);
   const [openAuthModal, setOpenAuthModal] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const openUserMenu = Boolean(anchorEl);
   const user = getCurrentUser();
+  const authText = user
+    ? AppStrings.logout
+    : location?.pathname === AppRoutes.register
+    ? AppStrings.register
+    : AppStrings.login;
+
   const handleUserClick = (event: { currentTarget: any }) => {
     setAnchorEl(event.currentTarget);
   };
@@ -33,8 +45,12 @@ export default function Navbar() {
     setAnchorEl(null);
   };
 
-  const handleOpen = () => {
-    setOpenAuthModal(true);
+  const handleAuth = () => {
+    if (user) {
+      dispatch(logout() as any);
+    } else {
+      setOpenAuthModal(true);
+    }
   };
   const handleClose = () => {
     setOpenAuthModal(false);
@@ -198,10 +214,10 @@ export default function Navbar() {
                 <div className="space-y-6 border-t border-gray-200 px-4 py-6">
                   <div className="flow-root">
                     <Button
-                      onClick={handleOpen}
+                      onClick={handleAuth}
                       className="-m-2 block p-2 font-medium text-gray-900"
                     >
-                      {AppStrings.login}
+                      {authText}
                     </Button>
                   </div>
                 </div>
@@ -375,7 +391,7 @@ export default function Navbar() {
 
               <div className="ml-auto flex items-center">
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  {user ? (
+                  {user && (
                     <div>
                       <Avatar
                         className="text-white"
@@ -389,7 +405,7 @@ export default function Navbar() {
                           cursor: "pointer",
                         }}
                       >
-                        {"SK"}
+                        {user?.avatarText}
                       </Avatar>
                       {/* <Button
                         id="basic-button"
@@ -415,14 +431,14 @@ export default function Navbar() {
                         <MenuItem onClick={handleLogout}>Logout</MenuItem>
                       </Menu>
                     </div>
-                  ) : (
-                    <Button
-                      onClick={handleOpen}
-                      className="text-sm text-primary font-medium"
-                    >
-                      {AppStrings.login}
-                    </Button>
                   )}
+
+                  <Button
+                    onClick={handleAuth}
+                    className="text-sm text-primary font-medium"
+                  >
+                    {authText}
+                  </Button>
                 </div>
 
                 {/* Search */}
