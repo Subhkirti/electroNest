@@ -5,18 +5,18 @@ const tableName = "users";
 const app = require("../app");
 
 // Checked and created users table if it does not exist
-const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_name = ?`;
+const checkTableQuery =  `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
 
 connection.query(checkTableQuery, [tableName], (err, results) => {
   if (err) {
-    console.error("Error checking table existence:", err);
+    console.error("Error checking table existence:", results?.[0]?.count);
     return;
   }
 
   // If the table does not exist, create it
-  if (results[0].count === 0) {
+  if (results && results?.length && results[0].count === 0) {
     // Table creation query
-    const createQuery = `CREATE TABLE ${tableName} (id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255), email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255), token VARCHAR(255) UNIQUE, role VARCHAR(255) DEFAULT 'customer', mobile VARCHAR(10), createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`;
+    const createQuery = `CREATE TABLE ${tableName} (id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255), email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255), token VARCHAR(255) UNIQUE, role VARCHAR(255) DEFAULT 'customer', mobile VARCHAR(10), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`;
 
     connection.query(createQuery, (err) => {
       if (err) {
@@ -108,10 +108,10 @@ app.post("/signin", (req, res) => {
       if (err) {
         return res
           .status(500)
-          .json({ status: 500, message: "Error during login" });
+          .json({ status: 500, message: `Error during login ${err}` });
       }
       if (result.length === 0) {
-        return res.status(400).json({ status: 400, message: "User not found" });
+        return res.status(400).json({ status: 400, message: "Incorrect email-Id or password" });
       }
 
       // Compared hashed password
@@ -120,7 +120,7 @@ app.post("/signin", (req, res) => {
         if (err) {
           return res
             .status(500)
-            .json({ status: 500, message: "Error comparing passwords" });
+            .json({ status: 500, message: "Incorrect password" });
         }
         if (!isMatch) {
           return res
@@ -130,13 +130,11 @@ app.post("/signin", (req, res) => {
 
         // Generated token for logged-in user
         const token = generateToken(user.id);
-        res
-          .status(200)
-          .json({
-            status: 200,
-            message: "Login successful",
-            data: { ...user, token },
-          });
+        res.status(200).json({
+          status: 200,
+          message: "Login successful",
+          data: { ...user, token },
+        });
       });
     }
   );

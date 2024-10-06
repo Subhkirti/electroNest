@@ -1,6 +1,4 @@
 const app = require("./app");
-require("./connection");
-require("./services/userService");
 const dotenv = require("dotenv");
 
 // Loading the appropriate .env file based on the NODE_ENV,
@@ -12,6 +10,10 @@ const result = dotenv.config({
 if (result.error) {
   throw result.error;
 }
+
+require("./connection");
+require("./services/userService");
+
 
 const PORT = process.env.PORT;
 

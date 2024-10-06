@@ -10,11 +10,14 @@ import Checkout from "../modules/customer/components/checkout/checkout";
 import Order from "../modules/customer/components/order/order";
 import OrderDetails from "../modules/customer/components/order/orderDetails";
 import AppRoutes from "../common/appRoutes";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 function CustomerRoutes() {
   const homePaths = [AppRoutes.home, AppRoutes.login, AppRoutes.register];
   return (
     <div>
+      <ToastContainer />
       <Navbar />
       <div className="container">
         <Routes>
