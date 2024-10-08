@@ -1,22 +1,33 @@
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
-  Alert,
   Button,
   Grid,
   IconButton,
   InputAdornment,
-  Snackbar,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
+import { useDispatch, useSelector } from "react-redux";
+import { passwordRegEx } from "../../../../common/constants";
+import { getUserProfile, login } from "../../store/auth/action";
+import { getCurrentUser } from "../../utils/localStorageUtils";
+import { toast } from "react-toastify";
+import AppStrings from "../../../../common/appStrings";
+import { RootState } from "../../store/storeTypes";
+import Loader from "../common/loader";
 
 function LoginForm() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const token = getCurrentUser()?.token;
+  const auth = useSelector((state: RootState) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const passwordRegEx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+  useEffect(() => {
+    return token && dispatch(getUserProfile() as any);
+  }, [token]);
 
   function handleOnSubmit(e: {
     preventDefault: () => void;
@@ -28,9 +39,7 @@ function LoginForm() {
 
     // Validate password
     if (password && !passwordRegEx.test(password.toString())) {
-      setError(
-        "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character."
-      );
+      toast.error(AppStrings.passwordError);
       return;
     }
 
@@ -38,15 +47,9 @@ function LoginForm() {
       email: data.get("email"),
       password: password,
     };
-    console.log("formData:", formData);
-
+    dispatch(login(formData) as any);
     // Reset error if the password is valid
-    setError("");
   }
-
-  const handleCloseSnackbar = () => {
-    setError("");
-  };
 
   return (
     <div>
@@ -101,34 +104,23 @@ function LoginForm() {
               variant="contained"
               className="h-12"
             >
-              Login
+              {auth?.isLoading ? <Loader /> : AppStrings.login}
             </Button>
           </Grid>
         </Grid>
       </form>
 
       <p className="text-md text-center mt-6">
-        if you don't have an account?{" "}
+        {AppStrings.notHaveAccount + " "}
         <span
-          className="font-semibold text-primary hover:underline"
+          className="font-semibold text-primary hover:underline cursor-pointer"
           onClick={() => {
             navigate(AppRoutes.register);
           }}
         >
-          Register
+          {AppStrings.register}
         </span>
       </p>
-
-      {/* Snackbar for error messages */}
-      <Snackbar
-        open={Boolean(error)}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-      >
-        <Alert onClose={handleCloseSnackbar} severity="error">
-          {error}
-        </Alert>
-      </Snackbar>
     </div>
   );
 }
