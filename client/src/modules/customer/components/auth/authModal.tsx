@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
-import RegisterForm from "./register";
+import RegisterForm from "./registerForm";
 import { useLocation } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
 import LoginForm from "./loginForm";

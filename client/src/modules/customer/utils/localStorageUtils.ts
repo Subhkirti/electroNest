@@ -1,18 +1,22 @@
-const userKey = "user";
+import store from "../store/store";
+import { User } from "../types/userTypes";
 
-function getCurrentUser() {
-  const user = localStorage.getItem(userKey);
+const userKey = "user";
+const storeData = store.getState()?.auth;
+
+// if users data is not present in local-storage then get it from store
+function getCurrentUser(): User | null {
+  const user = localStorage.getItem(userKey) || storeData?.user;
   return user ? JSON.parse(user) : null;
 }
 
-function setCurrentUser(userData: any) {
+function setCurrentUser(userData: User) {
   const prevUserDetails = getCurrentUser();
-  localStorage.setItem(
-    userKey,
-    prevUserDetails
-      ? JSON.stringify({ ...prevUserDetails, ...userData })
-      : JSON.stringify(userData)
-  );
+  const mergedDetails = prevUserDetails
+    ? JSON.stringify({ ...prevUserDetails, ...userData })
+    : JSON.stringify(userData);
+
+  localStorage.setItem(userKey, mergedDetails);
 }
 
 export { getCurrentUser, setCurrentUser };

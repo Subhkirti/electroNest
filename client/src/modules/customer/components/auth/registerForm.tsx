@@ -5,19 +5,29 @@ import {
   IconButton,
   InputAdornment,
   TextField,
-  Snackbar,
-  Alert,
-  Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
+import { useDispatch, useSelector } from "react-redux";
+import { passwordRegEx } from "../../../../common/constants";
+import { getCurrentUser } from "../../utils/localStorageUtils";
+import { getUserProfile, register } from "../../store/auth/action";
+import { toast } from "react-toastify";
+import AppStrings from "../../../../common/appStrings";
+import { RootState } from "../../store/storeTypes";
+import Loader from "../common/loader";
 
 function RegisterForm() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const token = getCurrentUser()?.token;
+  const auth = useSelector((state: RootState) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const passwordRegEx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+  useEffect(() => {
+    return token && dispatch(getUserProfile() as any);
+  }, [token]);
 
   function handleOnSubmit(e: {
     preventDefault: () => void;
@@ -29,9 +39,7 @@ function RegisterForm() {
 
     // Validate password
     if (password && !passwordRegEx.test(password.toString())) {
-      setError(
-        "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character."
-      );
+      toast.error(AppStrings.passwordError);
       return;
     }
 
@@ -41,15 +49,8 @@ function RegisterForm() {
       email: data.get("email"),
       password: password,
     };
-    console.log("formData:", formData);
-
-    // Reset error if the password is valid
-    setError("");
+    dispatch(register(formData) as any);
   }
-
-  const handleCloseSnackbar = () => {
-    setError("");
-  };
 
   return (
     <div>
@@ -125,33 +126,23 @@ function RegisterForm() {
               variant="contained"
               className="h-12"
             >
-              Register
+              {auth?.isLoading ? <Loader /> : AppStrings.register}
             </Button>
           </Grid>
         </Grid>
       </form>
 
       <p className="text-md text-center mt-6">
-        if you already have an account?{" "}
+        {AppStrings.alreadyHaveAccount + " "}
         <span
-          className="font-semibold text-primary hover:underline"
+          className="font-semibold text-primary hover:underline cursor-pointer"
           onClick={() => {
             navigate(AppRoutes.login);
           }}
         >
-          Login
+          {AppStrings.login}
         </span>
       </p>
-      {/* Snackbar for error messages */}
-      <Snackbar
-        open={Boolean(error)}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-      >
-        <Alert onClose={handleCloseSnackbar} severity="error">
-          {error}
-        </Alert>
-      </Snackbar>
     </div>
   );
 }
