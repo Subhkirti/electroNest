@@ -5,7 +5,7 @@ const tableName = "users";
 const app = require("../app");
 
 // Checked and created users table if it does not exist
-const checkTableQuery =  `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
+const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
 
 connection.query(checkTableQuery, [tableName], (err, results) => {
   if (err) {
@@ -44,9 +44,10 @@ app.post("/register", (req, res) => {
           .json({ status: 400, message: "Error checking user" });
       }
       if (result.length > 0) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "User already exists. So, Please choose login option." });
+        return res.status(400).json({
+          status: 400,
+          message: "User already exists. So, Please choose login option.",
+        });
       }
 
       // Hash password before saving
@@ -69,7 +70,7 @@ app.post("/register", (req, res) => {
             }
 
             // Generated token after user is created
-            const userId = result.insertId; // Get the newly created user ID
+            const userId = result.insertId; 
             const token = generateToken(userId);
 
             // Update user with token
@@ -81,14 +82,35 @@ app.post("/register", (req, res) => {
                   return res
                     .status(500)
                     .json({ status: 500, message: "Error saving token" });
+                } else {
+                  // give user details
+                  connection.query(
+                    `SELECT * FROM ${tableName} WHERE id = ?`,
+                    [userId],
+                    (err, result) => {
+                      if (err) {
+                        return res
+                          .status(400)
+                          .json({
+                            status: 400,
+                            message: "Error checking user",
+                          });
+                      }
+                      if (!result.length) {
+                        return res.status(400).json({
+                          status: 400,
+                          message: "Failed to register",
+                        });
+                      }
+                      // Respond with success and token
+                      res.status(200).json({
+                        status: 200,
+                        message: "User created successfully",
+                        data: result[0],
+                      });
+                    }
+                  );
                 }
-
-                // Respond with success and token
-                res.status(200).json({
-                  status: 200,
-                  message: "User created successfully",
-                  data: { token },
-                });
               }
             );
           }
@@ -111,7 +133,9 @@ app.post("/signin", (req, res) => {
           .json({ status: 500, message: `Error during login ${err}` });
       }
       if (result.length === 0) {
-        return res.status(400).json({ status: 400, message: "Incorrect email-Id or password" });
+        return res
+          .status(400)
+          .json({ status: 400, message: "Incorrect email-Id or password" });
       }
 
       // Compared hashed password
@@ -136,32 +160,6 @@ app.post("/signin", (req, res) => {
           data: { ...user, token },
         });
       });
-    }
-  );
-});
-
-// User profile API to get user details
-app.get("/user/profile", (req, res) => {
-  const userToken = req.headers.authorization?.split(" ")[1]; //[Bearer, Token]
-  if (!userToken) {
-    return res.status(400).json({ status: 400, message: "Token not found." });
-  }
-  const userId = getUserIdFromToken(userToken);
-  connection.query(
-    `SELECT * FROM ${tableName} WHERE id = ?`,
-    [userId],
-    (err, result) => {
-      if (err) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "Error checking user" });
-      }
-      if (!result.length) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "User profile not found." });
-      }
-      return res.status(200).json({ status: 200, data: result });
     }
   );
 });
