@@ -7,7 +7,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Avatar, Button, Menu, MenuItem } from "@mui/material";
+import { Avatar, Button, Menu, MenuItem, Tooltip } from "@mui/material";
 import { deepPurple } from "@mui/material/colors";
 import navigation from "../../../../assets/productsData/navigation";
 import AppIcons from "../../../../common/appIcons";
@@ -16,8 +16,7 @@ import AppStrings from "../../../../common/appStrings";
 import { getCurrentUser } from "../../utils/localStorageUtils";
 import { useDispatch } from "react-redux";
 import AppRoutes from "../../../../common/appRoutes";
-import { User } from "../../types/userTypes";
-import { logout } from "../../store/customer/auth/action";
+import { logout } from "../../../../store/customer/auth/action";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -393,21 +392,26 @@ export default function Navbar() {
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
                   {user && (
                     <div>
-                      <Avatar
-                        className="text-white"
-                        onClick={handleUserClick}
-                        aria-controls={open ? "basic-menu" : undefined}
-                        aria-haspopup="true"
-                        aria-expanded={open ? "true" : undefined}
-                        sx={{
-                          bgcolor: deepPurple[500],
-                          color: "white",
-                          cursor: "pointer",
-                        }}
+                      <Tooltip
+                        arrow={true}
+                        title={`${user.name}`}
+                        placement="top"
                       >
-                        
-                        {user?.avatarText}
-                      </Avatar>
+                        <Avatar
+                          className="text-white"
+                          onClick={handleUserClick}
+                          aria-controls={open ? "basic-menu" : undefined}
+                          aria-haspopup="true"
+                          aria-expanded={open ? "true" : undefined}
+                          sx={{
+                            bgcolor: deepPurple[500],
+                            color: "white",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {user?.avatarText}
+                        </Avatar>
+                      </Tooltip>
                       {/* <Button
                         id="basic-button"
                         aria-controls={open ? "basic-menu" : undefined}

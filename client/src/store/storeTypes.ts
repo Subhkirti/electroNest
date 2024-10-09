@@ -1,4 +1,4 @@
-import { User } from "../types/userTypes";
+import { User } from "../modules/customer/types/userTypes";
 
 interface AuthState {
   user: User | null;

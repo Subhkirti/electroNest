@@ -13,9 +13,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { passwordRegEx } from "../../../../common/constants";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
-import { RootState } from "../../store/storeTypes";
 import Loader from "../common/loader";
-import { login } from "../../store/customer/auth/action";
+import { RootState } from "../../../../store/storeTypes";
+import { login } from "../../../../store/customer/auth/action";
 
 function LoginForm() {
   const navigate = useNavigate();

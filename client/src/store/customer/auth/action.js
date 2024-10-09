@@ -1,60 +1,52 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 import ActionTypes from "./actionTypes";
-import ApiUrls from "../../../../../common/apiUrls";
-import { userMap } from "../../../mappers/userMapper";
-import AppRoutes from "../../../../../common/appRoutes";
-import { setCurrentUser } from "../../../utils/localStorageUtils";
+import ApiUrls from "../../../common/apiUrls";
+import { userMap } from "../../../modules/customer/mappers/userMapper";
+import { setCurrentUser } from "../../../modules/customer/utils/localStorageUtils";
+import AppRoutes from "../../../common/appRoutes";
 
 // register user actions
-const registerRequest = () => ({ type: ActionTypes.REGISTER_REQUEST });
-const registerSuccess = (user) => ({
-  type: ActionTypes.REGISTER_SUCCESS,
-  payload: user,
-});
-const registerFailure = (err) => ({
-  type: ActionTypes.REGISTER_FAILURE,
-  payload: err,
-});
-
 const register = (userReqBody) => async (dispatch) => {
-  dispatch(registerRequest());
+  dispatch({ type: ActionTypes.REGISTER_REQUEST });
   try {
     const res = await axios.post(ApiUrls.registerUser, userReqBody);
     const user = res?.data?.data && userMap(res.data.data);
     if (user) {
       setCurrentUser(user);
-      dispatch(registerSuccess(user));
+      dispatch({
+        type: ActionTypes.REGISTER_SUCCESS,
+        payload: user,
+      });
       window.location = AppRoutes.home;
     }
   } catch ({ response }) {
     toast.error(response?.data?.message);
-    dispatch(registerFailure(response?.data?.message));
+    dispatch({
+      type: ActionTypes.REGISTER_FAILURE,
+      payload: response?.data?.message,
+    });
   }
 };
 
 // login actions
-const loginRequest = () => ({ type: ActionTypes.LOGIN_REQUEST });
-const loginSuccess = (user) => ({
-  type: ActionTypes.LOGIN_SUCCESS,
-  payload: user,
-});
-const loginFailure = (err) => ({
-  type: ActionTypes.LOGIN_FAILURE,
-  payload: err,
-});
-
 const login = (userReqBody) => async (dispatch) => {
-  dispatch(loginRequest());
+  dispatch({ type: ActionTypes.LOGIN_REQUEST });
   try {
     const res = await axios.post(ApiUrls.login, userReqBody);
     const user = res?.data?.data && userMap(res.data.data);
     setCurrentUser(user);
-    dispatch(loginSuccess(user));
+    dispatch({
+      type: ActionTypes.LOGIN_SUCCESS,
+      payload: user,
+    });
     window.location = AppRoutes.home;
   } catch ({ response }) {
     toast.error(response?.data?.message);
-    dispatch(loginFailure(response?.data?.message));
+    dispatch({
+      type: ActionTypes.LOGIN_FAILURE,
+      payload: response?.data?.message,
+    });
   }
 };
 
