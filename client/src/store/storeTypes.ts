@@ -1,3 +1,4 @@
+import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { User } from "../modules/customer/types/userTypes";
 
 interface AuthState {
@@ -23,4 +24,15 @@ interface RootAction {
   payload?: any;
 }
 
-export type { RootState, RootAction, AuthState, ProductState };
+type AppDispatch = ThunkDispatch<RootState, unknown, RootAction>;
+
+type ActionDispatch = (arg0: RootAction) => void;
+
+export type {
+  RootState,
+  RootAction,
+  AppDispatch,
+  ActionDispatch,
+  AuthState,
+  ProductState,
+};

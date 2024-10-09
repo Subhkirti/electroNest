@@ -14,12 +14,12 @@ import { passwordRegEx } from "../../../../common/constants";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
 import Loader from "../common/loader";
-import { RootState } from "../../../../store/storeTypes";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { register } from "../../../../store/customer/auth/action";
 
 function RegisterForm() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const auth = useSelector((state: RootState) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -43,7 +43,7 @@ function RegisterForm() {
       email: data.get("email"),
       password: password,
     };
-    dispatch(register(formData) as any);
+    dispatch(register(formData));
   }
 
   return (

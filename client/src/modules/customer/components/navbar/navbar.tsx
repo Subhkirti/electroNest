@@ -17,6 +17,7 @@ import { getCurrentUser } from "../../utils/localStorageUtils";
 import { useDispatch } from "react-redux";
 import AppRoutes from "../../../../common/appRoutes";
 import { logout } from "../../../../store/customer/auth/action";
+import { AppDispatch } from "../../../../store/storeTypes";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -24,7 +25,7 @@ function classNames(...classes: string[]) {
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [openAuthModal, setOpenAuthModal] = useState(false);
@@ -46,7 +47,7 @@ export default function Navbar() {
 
   const handleAuth = () => {
     if (user) {
-      dispatch(logout() as any);
+      dispatch(logout());
     } else {
       setOpenAuthModal(true);
     }
