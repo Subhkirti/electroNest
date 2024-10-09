@@ -5,6 +5,10 @@ const ApiUrls = {
   login: apiBaseUrl + "/signin",
   findProducts: apiBaseUrl + "/products",
   findProductsById: apiBaseUrl + "/products/id",
+  addItemToCart: apiBaseUrl + "/cart/add",
+  removeItemToCart: apiBaseUrl + "/cart/remove",
+  updateItemToCart: apiBaseUrl + "/cart/update",
+
 
 };
 
