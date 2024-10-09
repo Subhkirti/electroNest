@@ -1,10 +1,10 @@
 import axios from "axios";
-import ApiUrls from "../../../../common/apiUrls";
-import { setCurrentUser } from "../../utils/localStorageUtils";
-import ActionTypes from "./actionTypes";
 import { toast } from "react-toastify";
-import AppRoutes from "../../../../common/appRoutes";
-import { userMap } from "../../mappers/userMapper";
+import ActionTypes from "./actionTypes";
+import ApiUrls from "../../../../../common/apiUrls";
+import { userMap } from "../../../mappers/userMapper";
+import AppRoutes from "../../../../../common/appRoutes";
+import { setCurrentUser } from "../../../utils/localStorageUtils";
 
 // register user actions
 const registerRequest = () => ({ type: ActionTypes.REGISTER_REQUEST });

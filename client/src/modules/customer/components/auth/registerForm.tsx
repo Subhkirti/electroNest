@@ -11,11 +11,11 @@ import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
 import { useDispatch, useSelector } from "react-redux";
 import { passwordRegEx } from "../../../../common/constants";
-import { register } from "../../store/auth/action";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
 import { RootState } from "../../store/storeTypes";
 import Loader from "../common/loader";
+import { register } from "../../store/customer/auth/action";
 
 function RegisterForm() {
   const navigate = useNavigate();

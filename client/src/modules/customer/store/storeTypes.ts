@@ -6,8 +6,16 @@ interface AuthState {
   error: string | null;
 }
 
+interface ProductState {
+  products: [];
+  product: {};
+  isLoading: boolean;
+  error: string | null;
+}
+
 interface RootState {
   auth: AuthState;
+  product: ProductState;
 }
 
 interface RootAction {
@@ -15,4 +23,4 @@ interface RootAction {
   payload?: any;
 }
 
-export type { RootState, AuthState, RootAction };
+export type { RootState, RootAction, AuthState, ProductState };

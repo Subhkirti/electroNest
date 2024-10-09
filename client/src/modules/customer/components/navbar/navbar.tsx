@@ -15,9 +15,9 @@ import AuthModal from "../auth/authModal";
 import AppStrings from "../../../../common/appStrings";
 import { getCurrentUser } from "../../utils/localStorageUtils";
 import { useDispatch } from "react-redux";
-import { logout } from "../../store/auth/action";
 import AppRoutes from "../../../../common/appRoutes";
 import { User } from "../../types/userTypes";
+import { logout } from "../../store/customer/auth/action";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");

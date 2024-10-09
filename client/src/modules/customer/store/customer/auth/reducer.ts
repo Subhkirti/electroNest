@@ -1,4 +1,4 @@
-import { AuthState, RootAction } from "../storeTypes";
+import { AuthState, RootAction } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
 
 const initState: AuthState = {
