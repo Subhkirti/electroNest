@@ -405,6 +405,7 @@ export default function Navbar() {
                           cursor: "pointer",
                         }}
                       >
+                        
                         {user?.avatarText}
                       </Avatar>
                       {/* <Button
