@@ -4,12 +4,13 @@ const ApiUrls = {
   registerUser: apiBaseUrl + "/register",
   login: apiBaseUrl + "/signin",
   findProducts: apiBaseUrl + "/products",
-  findProductsById: apiBaseUrl + "/products/id",
+  findProductsById: apiBaseUrl + "/products/",
+  getCart: apiBaseUrl + "/cart",
   addItemToCart: apiBaseUrl + "/cart/add",
-  removeItemToCart: apiBaseUrl + "/cart/remove",
-  updateItemToCart: apiBaseUrl + "/cart/update",
-
-
+  cartItems: apiBaseUrl + "/cart_items/",
+  getOrderHistory: apiBaseUrl + "/orders/",
+  getOrder: apiBaseUrl + "/order?id=",
+  createOrder: apiBaseUrl + "/order",
 };
 
 export default ApiUrls;

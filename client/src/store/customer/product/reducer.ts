@@ -3,7 +3,7 @@ import ActionTypes from "./actionTypes";
 
 const initState: ProductState = {
   products: [],
-  product: {},
+  product: null,
   isLoading: false,
   error: null,
 };
