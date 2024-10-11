@@ -2,11 +2,12 @@ interface ProductReqBody {
   pageNumber: number;
   pageSize: number;
   colors: string;
-  sizes: string;
-  minPrice: string;
-  maxPrice: string;
-  minDiscount: string;
+  minPrice: number;
+  maxPrice: number;
+  discount: string;
   category: string;
-  stock: string;
+  stock: string | null;
   sort: string;
 }
+
+export type { ProductReqBody };

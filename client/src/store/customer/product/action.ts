@@ -1,18 +1,17 @@
 import axios from "axios";
 import ActionTypes from "./actionTypes";
-import { toast } from "react-toastify";
 import ApiUrls from "../../../common/apiUrls";
 import { ActionDispatch } from "../../storeTypes";
 import { handleCatchError } from "../../../modules/customer/utils/apiUtils";
+import { ProductReqBody } from "../../../modules/customer/types/productTypes";
 
 const findProducts =
   (reqData: ProductReqBody) => async (dispatch: ActionDispatch) => {
     const {
       colors,
-      sizes,
       minPrice,
       maxPrice,
-      minDiscount,
+      discount,
       category,
       stock,
       sort,
@@ -24,7 +23,7 @@ const findProducts =
 
     try {
       const res = await axios.get(
-        `${ApiUrls.findProducts}/color=${colors}&size=${sizes}&minPrice=${minPrice}&maxPrice=${maxPrice}&minDiscount=${minDiscount}&category=${category}&stock=${stock}&sort=${sort}&pageNumber=${pageNumber}&pageSize=${pageSize}`
+        `${ApiUrls.findProducts}/color=${colors}&minPrice=${minPrice}&maxPrice=${maxPrice}&minDiscount=${discount}&category=${category}&stock=${stock}&sort=${sort}&pageNumber=${pageNumber}&pageSize=${pageSize}`
       );
 
       dispatch({

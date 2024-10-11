@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogBackdrop,
@@ -22,7 +22,11 @@ import {
 import watches from "../../../../assets/productsData/watches";
 import ProductCard from "./productCard";
 import { productFilters, sortOptions } from "../../utils/productUtils";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../../../store/storeTypes";
+import { findProducts } from "../../../../store/customer/product/action";
+import { ProductReqBody } from "../../types/productTypes";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -32,6 +36,41 @@ export default function Product() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const params = useParams();
+  const queryString = decodeURIComponent(location.search);
+  const searchParams = new URLSearchParams(queryString);
+  const colorValue = searchParams.get("color");
+  const priceValue = searchParams.get("price");
+  const discountValue = searchParams.get("discount");
+  const sortValue = searchParams.get("sort");
+  const pageNumber = searchParams.get("page");
+  const stockValue = searchParams.get("stock");
+
+  useEffect(() => {
+    const [minPrice, maxPrice] =
+      priceValue === null ? [0, 0] : priceValue.split("-").map(Number);
+    const reqData: ProductReqBody = {
+      category: params.levelThree || "",
+      colors: colorValue || "",
+      minPrice,
+      maxPrice,
+      discount: discountValue || "",
+      sort: sortValue || "low_to_high",
+      pageNumber: pageNumber ? parseInt(pageNumber) - 1 : 0,
+      pageSize: 10,
+      stock: stockValue,
+    };
+    dispatch(findProducts(reqData));
+  }, [
+    params.levelThree,
+    colorValue,
+    priceValue,
+    discountValue,
+    sortValue,
+    pageNumber,
+    stockValue,
+  ]);
 
   function handleOnSearchFilter(value: string, sectionId: string) {
     const searchParams = new URLSearchParams(location.search);
