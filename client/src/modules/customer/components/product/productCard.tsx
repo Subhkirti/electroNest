@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import "../../../../assets/styles/productCard.css";
 
 function ProductCard({ product }: { product: any }) {
   const navigate = useNavigate();

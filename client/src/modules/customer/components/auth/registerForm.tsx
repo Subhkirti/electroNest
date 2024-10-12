@@ -6,28 +6,22 @@ import {
   InputAdornment,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
 import { useDispatch, useSelector } from "react-redux";
 import { passwordRegEx } from "../../../../common/constants";
-import { getCurrentUser } from "../../utils/localStorageUtils";
-import { getUserProfile, register } from "../../store/auth/action";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
-import { RootState } from "../../store/storeTypes";
 import Loader from "../common/loader";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
+import { register } from "../../../../store/customer/auth/action";
 
 function RegisterForm() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const token = getCurrentUser()?.token;
+  const dispatch = useDispatch<AppDispatch>();
   const auth = useSelector((state: RootState) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    return token && dispatch(getUserProfile() as any);
-  }, [token]);
 
   function handleOnSubmit(e: {
     preventDefault: () => void;
@@ -49,7 +43,7 @@ function RegisterForm() {
       email: data.get("email"),
       password: password,
     };
-    dispatch(register(formData) as any);
+    dispatch(register(formData));
   }
 
   return (

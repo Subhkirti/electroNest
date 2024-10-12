@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import AliceCarousel from "react-alice-carousel";
-import HomeSectionCard from "../homeSectionCard/homeSectionCard";
+import HomeSectionCard from "../home/homeSectionCard";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 function HomeSectionCarousel({

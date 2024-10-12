@@ -1,7 +1,7 @@
 import { Box, Grid, LinearProgress, Rating } from "@mui/material";
 import ProductReviewCard from "./productReviewCard";
 import phones from "../../../../assets/productsData/phones";
-import HomeSectionCard from "../homeSectionCard/homeSectionCard";
+import HomeSectionCard from "../home/homeSectionCard";
 import { useNavigate } from "react-router-dom";
 
 const product = {

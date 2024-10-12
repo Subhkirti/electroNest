@@ -3,32 +3,7 @@ const connection = require("../connection");
 const { generateToken, getUserIdFromToken } = require("./jwtService");
 const tableName = "users";
 const app = require("../app");
-
-// Checked and created users table if it does not exist
-const checkTableQuery =  `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
-
-connection.query(checkTableQuery, [tableName], (err, results) => {
-  if (err) {
-    console.error("Error checking table existence:", results?.[0]?.count);
-    return;
-  }
-
-  // If the table does not exist, create it
-  if (results && results?.length && results[0].count === 0) {
-    // Table creation query
-    const createQuery = `CREATE TABLE ${tableName} (id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255), email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255), token VARCHAR(255) UNIQUE, role VARCHAR(255) DEFAULT 'customer', mobile VARCHAR(10), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`;
-
-    connection.query(createQuery, (err) => {
-      if (err) {
-        console.error(`Error creating ${tableName} table: ${err}`);
-      } else {
-        console.log("Table created successfully.");
-      }
-    });
-  } else {
-    console.log("Table already exists.");
-  }
-});
+checkTableExistence();
 
 // Register(signup) API for new users
 app.post("/register", (req, res) => {
@@ -44,9 +19,10 @@ app.post("/register", (req, res) => {
           .json({ status: 400, message: "Error checking user" });
       }
       if (result.length > 0) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "User already exists. So, Please choose login option." });
+        return res.status(400).json({
+          status: 400,
+          message: "User already exists. So, Please choose login option.",
+        });
       }
 
       // Hash password before saving
@@ -69,7 +45,7 @@ app.post("/register", (req, res) => {
             }
 
             // Generated token after user is created
-            const userId = result.insertId; // Get the newly created user ID
+            const userId = result.insertId;
             const token = generateToken(userId);
 
             // Update user with token
@@ -81,14 +57,33 @@ app.post("/register", (req, res) => {
                   return res
                     .status(500)
                     .json({ status: 500, message: "Error saving token" });
+                } else {
+                  // give user details
+                  connection.query(
+                    `SELECT * FROM ${tableName} WHERE id = ?`,
+                    [userId],
+                    (err, result) => {
+                      if (err) {
+                        return res.status(400).json({
+                          status: 400,
+                          message: "Error checking user",
+                        });
+                      }
+                      if (!result.length) {
+                        return res.status(400).json({
+                          status: 400,
+                          message: "Failed to register",
+                        });
+                      }
+                      // Respond with success and token
+                      res.status(200).json({
+                        status: 200,
+                        message: "User created successfully",
+                        data: result[0],
+                      });
+                    }
+                  );
                 }
-
-                // Respond with success and token
-                res.status(200).json({
-                  status: 200,
-                  message: "User created successfully",
-                  data: { token },
-                });
               }
             );
           }
@@ -111,7 +106,9 @@ app.post("/signin", (req, res) => {
           .json({ status: 500, message: `Error during login ${err}` });
       }
       if (result.length === 0) {
-        return res.status(400).json({ status: 400, message: "Incorrect email-Id or password" });
+        return res
+          .status(400)
+          .json({ status: 400, message: "Incorrect email-Id or password" });
       }
 
       // Compared hashed password
@@ -140,32 +137,6 @@ app.post("/signin", (req, res) => {
   );
 });
 
-// User profile API to get user details
-app.get("/user/profile", (req, res) => {
-  const userToken = req.headers.authorization?.split(" ")[1]; //[Bearer, Token]
-  if (!userToken) {
-    return res.status(400).json({ status: 400, message: "Token not found." });
-  }
-  const userId = getUserIdFromToken(userToken);
-  connection.query(
-    `SELECT * FROM ${tableName} WHERE id = ?`,
-    [userId],
-    (err, result) => {
-      if (err) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "Error checking user" });
-      }
-      if (!result.length) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "User profile not found." });
-      }
-      return res.status(200).json({ status: 200, data: result });
-    }
-  );
-});
-
 // All users API
 app.get("/users", (req, res) => {
   connection.query(`SELECT * FROM ${tableName}`, (err, result) => {
@@ -177,3 +148,31 @@ app.get("/users", (req, res) => {
     return res.status(200).json({ status: 200, data: result });
   });
 });
+
+function checkTableExistence() {
+  // Checked and created users table if it does not exist
+  const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
+
+  connection.query(checkTableQuery, [tableName], (err, results) => {
+    if (err) {
+      console.error("Error checking table existence:", results?.[0]?.count);
+      return;
+    }
+
+    // If the table does not exist, create it
+    if (results && results?.length && results[0].count === 0) {
+      // Table creation query
+      const createQuery = `CREATE TABLE ${tableName} (id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255), email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255), token VARCHAR(255) UNIQUE, role VARCHAR(255) DEFAULT 'customer', mobile VARCHAR(10), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`;
+
+      connection.query(createQuery, (err) => {
+        if (err) {
+          console.error(`Error creating ${tableName} table: ${err}`);
+        } else {
+          console.log("Table created successfully.");
+        }
+      });
+    } else {
+      console.log("Table already exists.");
+    }
+  });
+}

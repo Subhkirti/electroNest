@@ -6,7 +6,7 @@ import { ThemeProvider } from "@mui/material";
 import theme from "./modules/customer/utils/theme";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
-import store from "./modules/customer/store/store";
+import store from "./store/store";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

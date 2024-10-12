@@ -6,28 +6,22 @@ import {
   InputAdornment,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
 import { useDispatch, useSelector } from "react-redux";
 import { passwordRegEx } from "../../../../common/constants";
-import { getUserProfile, login } from "../../store/auth/action";
-import { getCurrentUser } from "../../utils/localStorageUtils";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
-import { RootState } from "../../store/storeTypes";
 import Loader from "../common/loader";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
+import { login } from "../../../../store/customer/auth/action";
 
 function LoginForm() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const token = getCurrentUser()?.token;
+  const dispatch = useDispatch<AppDispatch>();
   const auth = useSelector((state: RootState) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    return token && dispatch(getUserProfile() as any);
-  }, [token]);
 
   function handleOnSubmit(e: {
     preventDefault: () => void;
@@ -47,8 +41,8 @@ function LoginForm() {
       email: data.get("email"),
       password: password,
     };
-    dispatch(login(formData) as any);
-    // Reset error if the password is valid
+    // Calling login api
+    dispatch(login(formData));
   }
 
   return (
