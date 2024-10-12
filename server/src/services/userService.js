@@ -3,32 +3,7 @@ const connection = require("../connection");
 const { generateToken, getUserIdFromToken } = require("./jwtService");
 const tableName = "users";
 const app = require("../app");
-
-// Checked and created users table if it does not exist
-const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
-
-connection.query(checkTableQuery, [tableName], (err, results) => {
-  if (err) {
-    console.error("Error checking table existence:", results?.[0]?.count);
-    return;
-  }
-
-  // If the table does not exist, create it
-  if (results && results?.length && results[0].count === 0) {
-    // Table creation query
-    const createQuery = `CREATE TABLE ${tableName} (id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255), email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255), token VARCHAR(255) UNIQUE, role VARCHAR(255) DEFAULT 'customer', mobile VARCHAR(10), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`;
-
-    connection.query(createQuery, (err) => {
-      if (err) {
-        console.error(`Error creating ${tableName} table: ${err}`);
-      } else {
-        console.log("Table created successfully.");
-      }
-    });
-  } else {
-    console.log("Table already exists.");
-  }
-});
+checkTableExistence();
 
 // Register(signup) API for new users
 app.post("/register", (req, res) => {
@@ -70,7 +45,7 @@ app.post("/register", (req, res) => {
             }
 
             // Generated token after user is created
-            const userId = result.insertId; 
+            const userId = result.insertId;
             const token = generateToken(userId);
 
             // Update user with token
@@ -89,12 +64,10 @@ app.post("/register", (req, res) => {
                     [userId],
                     (err, result) => {
                       if (err) {
-                        return res
-                          .status(400)
-                          .json({
-                            status: 400,
-                            message: "Error checking user",
-                          });
+                        return res.status(400).json({
+                          status: 400,
+                          message: "Error checking user",
+                        });
                       }
                       if (!result.length) {
                         return res.status(400).json({
@@ -175,3 +148,31 @@ app.get("/users", (req, res) => {
     return res.status(200).json({ status: 200, data: result });
   });
 });
+
+function checkTableExistence() {
+  // Checked and created users table if it does not exist
+  const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
+
+  connection.query(checkTableQuery, [tableName], (err, results) => {
+    if (err) {
+      console.error("Error checking table existence:", results?.[0]?.count);
+      return;
+    }
+
+    // If the table does not exist, create it
+    if (results && results?.length && results[0].count === 0) {
+      // Table creation query
+      const createQuery = `CREATE TABLE ${tableName} (id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255), email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255), token VARCHAR(255) UNIQUE, role VARCHAR(255) DEFAULT 'customer', mobile VARCHAR(10), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`;
+
+      connection.query(createQuery, (err) => {
+        if (err) {
+          console.error(`Error creating ${tableName} table: ${err}`);
+        } else {
+          console.log("Table created successfully.");
+        }
+      });
+    } else {
+      console.log("Table already exists.");
+    }
+  });
+}

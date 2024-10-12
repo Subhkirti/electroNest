@@ -13,12 +13,13 @@ if (result.error) {
 
 require("./connection");
 require("./services/userService");
+require("./services/productsService");
 
 
 const PORT = process.env.PORT;
 
 app.get("/", (req, res) => {
-  res.status(200).send("Welcome to electroNest apis,");
+  res.status(200).json({ message: "Welcome to electroNest apis," });
 });
 
 app.listen(PORT, () => {
