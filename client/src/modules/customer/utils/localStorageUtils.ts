@@ -1,4 +1,4 @@
-import store from "../store/store";
+import store from "../../../store/store";
 import { User } from "../types/userTypes";
 
 const userKey = "user";

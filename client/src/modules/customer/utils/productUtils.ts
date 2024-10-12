@@ -41,14 +41,23 @@ const productFilters = [
     options: [
       { value: "in_stock", label: "In Stock" },
       { value: "out_of_stock", label: "Out Of Stock" },
-  
     ],
   },
 ];
 
 const sortOptions = [
-  { name: "Price: Low to High", href: "#", current: false },
-  { name: "Price: High to Low", href: "#", current: false },
+  {
+    name: "Price: Low to High",
+    href: "#",
+    current: false,
+    value: "low_to_high",
+  },
+  {
+    name: "Price: High to Low",
+    href: "#",
+    current: false,
+    value: "high_to_low",
+  },
 ];
 
 export { productFilters, sortOptions };
