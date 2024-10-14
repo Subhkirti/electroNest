@@ -168,11 +168,11 @@ function checkTableExistence() {
         if (err) {
           console.error(`Error creating ${tableName} table: ${err}`);
         } else {
-          console.log("Table created successfully.");
+          console.log(`${tableName} table created successfully.`);
         }
       });
     } else {
-      console.log("Table already exists.");
+      console.log(`${tableName} table already exists.`);
     }
   });
 }

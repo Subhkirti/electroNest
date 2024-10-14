@@ -1,8 +1,9 @@
 import { Route, Routes } from "react-router-dom";
-import "./App.css";
 import CustomerRoutes from "./routes/customer/customerRoutes";
 import { Suspense } from "react";
 import ErrorBoundary from "./routes/errorBoudnary";
+import AdminRoutes from "./routes/admin/adminRoutes";
+import "./App.css";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <ErrorBoundary>
         <Routes>
           <Route path="/*" element={<CustomerRoutes />}></Route>
+          <Route path="/admin/*" element={<AdminRoutes />}></Route>
         </Routes>
       </ErrorBoundary>
     </Suspense>
