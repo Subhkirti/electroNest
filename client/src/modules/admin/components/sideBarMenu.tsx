@@ -11,13 +11,14 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import { adminMenuItems } from "../utils/menu";
+import { useLocation, useNavigate } from "react-router-dom";
+import { adminMenuItems } from "../utils/menuUtil";
 
 function SideBarMenu({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const theme = useTheme();
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
+  const location = useLocation();
 
   const drawer = (
     <Box className="overflow-auto flex flex-col justify-between">
@@ -25,18 +26,21 @@ function SideBarMenu({ children }: { children: React.ReactNode }) {
 
       <List>
         {adminMenuItems.map((menuItem, index) => {
+          const activeItem = location?.pathname === menuItem.path;
           return (
             <ListItem
               key={index}
               disablePadding
               onClick={() => navigate(menuItem.path)}
+              className={
+                activeItem ? "bg-lightpurple cursor-pointer" : "cursor-pointer"
+              }
             >
-              <ListItemButton alignItems="flex-start">
-                <ListItemIcon>{menuItem.icon}</ListItemIcon>
-              </ListItemButton>
-              <ListItemText className="cursor-pointer">
-                {menuItem.name}
-              </ListItemText>
+              <ListItemIcon className="py-4 px-6">
+                {<menuItem.icon className={"text-slate-50"} />}
+              </ListItemIcon>
+
+              <ListItemText>{menuItem.name}</ListItemText>
             </ListItem>
           );
         })}
@@ -50,17 +54,17 @@ function SideBarMenu({ children }: { children: React.ReactNode }) {
         <CssBaseline />
 
         <Drawer
-          variant="permanent"
+          variant={isLargeScreen ? "permanent" : "temporary"}
           sx={{
-            width: 440,
+            width: "16%",
             flexShrink: 1,
           }}
-          classes={{ paper: "w-[20%]" }}
+          classes={{ paper: "drawer-paper" }}
         >
           {drawer}
         </Drawer>
 
-        <div className="w-full">{children}</div>
+        <div className="w-full p-10 pr-0">{children}</div>
       </Box>
     </div>
   );

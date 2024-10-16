@@ -109,9 +109,9 @@ app.post("/product/categories/sections/items", (req, res) => {
 });
 
 /* Set products list */
-app.set("/products", (req, res) => {
+app.set("/product/add", (req, res) => {
   connection.query(
-    `INSERT INTO ${tableName} (product_name,  price, stock_quantity, category_id) VALUES (?,?,?,?)`,
+    `INSERT INTO ${tableName} (product_name, description, price, discount_price, discount_percentage, stock_quantity, brand, color, size, product_image, category_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
     (err, result) => {
       if (err) {
         return res
@@ -287,7 +287,23 @@ function createProductsTable() {
     /* If the table does not exist, create it */
     if (results && results.length && results[0].count === 0) {
       /* Table creation query */
-      const createQuery = `CREATE TABLE ${tableName} (product_id INT AUTO_INCREMENT PRIMARY KEY, product_name VARCHAR(255) NOT NULL, price DECIMAL(10, 2) NOT NULL, stock_quantity INT DEFAULT 0, category_id VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (category_id) REFERENCES ${productCategoriesTableName}(category_id))`;
+      const createQuery = `CREATE TABLE ${tableName} (
+        product_id INT AUTO_INCREMENT PRIMARY KEY,
+        product_name VARCHAR(255) NOT NULL,
+        description TEXT,
+        price DECIMAL(10, 2) NOT NULL,
+        discount_price DECIMAL(10, 2),
+        discount_percentage DECIMAL(5, 2),
+        quantity INT DEFAULT 0,
+        brand VARCHAR(255),
+        color VARCHAR(50),
+        size VARCHAR(50),
+        product_image VARCHAR(255),
+        category_id VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (category_id) REFERENCES ${productCategoriesTableName}(category_id)
+    )`;
 
       connection.query(createQuery, (err) => {
         if (err) {

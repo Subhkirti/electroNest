@@ -1,17 +1,23 @@
 import { Grid } from "@mui/material";
-import React from "react";
 import Achievement from "./achievement";
+import MonthlyOverview from "./monthlyOverview";
 
-function Dashboard() {
+export default function Dashboard() {
   return (
-    <div>
-      <Grid container spacing={2}>
+    <div >
+      <Grid spacing={2} container>
         <Grid item xs={12} md={4}>
           <Achievement />
+        </Grid>
+
+        <Grid item xs={12} md={8}>
+          <MonthlyOverview />
+        </Grid>
+        <Grid item xs={12} md={12}>
         </Grid>
       </Grid>
     </div>
   );
 }
 
-export default Dashboard;
+

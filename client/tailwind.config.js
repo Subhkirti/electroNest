@@ -6,9 +6,11 @@ module.exports = {
         primary: "#4f45e4",
         secondary: "#16a349",
         light: "#f9faff",
+        lightpurple: "#9f5eff",
+        darkpurple: "#090925",
+        purple: "#000015",
       },
     },
   },
   plugins: [],
 };
-

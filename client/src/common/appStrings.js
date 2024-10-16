@@ -10,6 +10,7 @@ const AppStrings = {
   shopWith: "Shop with ElectroNest",
   congratulations: "Congratulations",
   viewSales: "View Sales",
+  monthlyOverview: "Monthly Overview",
 
   /* errors */
   passwordError:

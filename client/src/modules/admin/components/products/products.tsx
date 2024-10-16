@@ -1,5 +1,7 @@
+import ProductsTable from "./productsTable";
+
 function Products() {
-  return <div>Products</div>;
+  return <ProductsTable />;
 }
 
 export default Products;

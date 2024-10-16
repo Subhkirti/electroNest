@@ -8,7 +8,7 @@ function AdminRoutes() {
   return (
     <div>
       <ToastContainer />
-      <div className="container">
+      <div className="admin-container">
         <Routes>
           {adminMainRoutes.map((route) => (
             <Route

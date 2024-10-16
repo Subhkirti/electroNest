@@ -1,28 +1,30 @@
-import { Button, Card, CardContent, Typography } from "@mui/material";
-import React from "react";
+import { Box, Button, Card, CardContent, CardHeader } from "@mui/material";
 import AppStrings from "../../../../common/appStrings";
 import AppIcons from "../../../../common/appIcons";
 
-function Achievement() {
+export default function Achievement() {
   return (
-    <Card className="positive" sx={{ bgcolor: "#2c2c54", color: "white" }}>
-      <CardContent>
-        <Typography
-          variant="h6"
-          sx={{ letterSpacing: ".25px", display: "flex" }}
-        >
-          {AppStrings.shopWith}
-        </Typography>
-        <p className="text-md font-normal">{AppStrings.congratulations}</p>
-        <p className="my-2 text-xl font-semibold">420.8k</p>
+    <Card className="relative admin-card">
+      <CardHeader title={AppStrings.shopWith}></CardHeader>
+      <CardContent sx={{ mt: -3 }}>
+        <Box className="flex items-end justify-between w-full">
+          <Box>
+            <p className="text-md font-normal">{AppStrings.congratulations}</p>
+            <p className="my-2 text-xl font-medium text-lightpurple">420.8k</p>
 
-        <Button size="small" variant="contained">
-          {AppStrings.viewSales}
-        </Button>
-        <img src={AppIcons.imgTrophy} width={"600"} alt="trophy" />
+            <Button
+              size="medium"
+              variant="contained"
+              sx={{ backgroundColor: "#9f5eff" }}
+            >
+              {AppStrings.viewSales}
+            </Button>
+          </Box>
+          <Box>
+            <img src={AppIcons.imgTrophy} width={100} alt="trophy" />
+          </Box>
+        </Box>
       </CardContent>
     </Card>
   );
 }
-
-export default Achievement;
