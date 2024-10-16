@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import adminMainRoutes from "./mainRoutes";
-import NotFound from "../../common/notFound";
+import NotFound from "../../common/components/notFound";
 import SideBarMenu from "../../modules/admin/components/sideBarMenu";
 
 function AdminRoutes() {

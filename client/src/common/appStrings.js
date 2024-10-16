@@ -11,6 +11,7 @@ const AppStrings = {
   congratulations: "Congratulations",
   viewSales: "View Sales",
   monthlyOverview: "Monthly Overview",
+  addProduct: "Add product",
 
   /* errors */
   passwordError:

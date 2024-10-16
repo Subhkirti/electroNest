@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../../modules/customer/components/navbar/navbar";
 import Footer from "../../modules/customer/components/footer/footer";
 import customerMainRoutes from "./mainRoutes";
-import NotFound from "../../common/notFound";
+import NotFound from "../../common/components/notFound";
 
 function CustomerRoutes() {
   const homePaths = [AppRoutes.home, AppRoutes.login, AppRoutes.register];

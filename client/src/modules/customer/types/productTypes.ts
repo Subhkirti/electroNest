@@ -1,4 +1,4 @@
-interface ProductReqBody {
+interface ProductSearchReqBody {
   pageNumber: number;
   pageSize: number;
   colors: string;
@@ -10,4 +10,18 @@ interface ProductReqBody {
   sort: string;
 }
 
-export type { ProductReqBody };
+type ProductReqBody = {
+  imageUrl: string;
+  brand: string;
+  title: string;
+  description: string;
+  price: number;
+  quantity: number;
+  disPercentage: number | null;
+  disPrice: number | null;
+  topLevelCategory: string;
+  secondLevelCategory: string;
+  thirdLevelCategory: string;
+};
+
+export type { ProductSearchReqBody, ProductReqBody };

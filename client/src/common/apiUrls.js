@@ -5,6 +5,7 @@ const ApiUrls = {
   login: apiBaseUrl + "/signin",
   findProducts: apiBaseUrl + "/products",
   findProductsById: apiBaseUrl + "/products/",
+  addProduct: apiBaseUrl + "/products/add",
   getCart: apiBaseUrl + "/cart",
   addItemToCart: apiBaseUrl + "/cart/add",
   cartItems: apiBaseUrl + "/cart_items/",
