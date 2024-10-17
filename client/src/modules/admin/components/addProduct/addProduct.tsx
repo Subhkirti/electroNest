@@ -12,14 +12,17 @@ import {
   getTopLevelCategories,
 } from "../../../../store/customer/product/action";
 import { ProductReqBody } from "../../../customer/types/productTypes";
+import { toast } from "react-toastify";
 
 const initState = {
   imageUrl: "",
   brand: "",
   title: "",
   description: "",
-  price: 0,
-  quantity: 0,
+  price: null,
+  quantity: null,
+  color: null,
+  size: null,
   disPercentage: null,
   disPrice: null,
   topLevelCategory: "",
@@ -30,16 +33,34 @@ const initState = {
 function AddProduct() {
   const dispatch = useDispatch<AppDispatch>();
   const [product, setProduct] = useState<ProductReqBody>(initState);
-  const { topLevelCategories, secondLevelCategories, thirdLevelCategories } =
-    useSelector((state: RootState) => state.product);
+  const {
+    topLevelCategories,
+    secondLevelCategories,
+    thirdLevelCategories,
+    product: productRes,
+  } = useSelector((state: RootState) => state.product);
 
   useEffect(() => {
+    loadCategories();
+    if (productRes && productRes.productId) {
+      toast.success("Product added successfully");
+      setProduct(initState);
+    }
+  }, [
+    product,
+    product.disPercentage,
+    product.disPrice,
+    product.size,
+    productRes?.productId,
+  ]);
+
+  function loadCategories() {
     if (!topLevelCategories.length) dispatch(getTopLevelCategories());
     if (product.topLevelCategory)
       dispatch(getSecondLevelCategories(product.topLevelCategory));
     if (product.topLevelCategory && product.secondLevelCategory)
       dispatch(getThirdLevelCategories(product.secondLevelCategory));
-  }, [product.topLevelCategory, product.secondLevelCategory]);
+  }
 
   function handleOnChange(value: string, fieldId: string) {
     setProduct({ ...product, [fieldId]: value });
@@ -48,7 +69,6 @@ function AddProduct() {
   function handleOnAddProduct(e: { preventDefault: () => void }) {
     e.preventDefault();
     dispatch(addProduct(product));
-    console.log("product:", product);
   }
 
   return (
@@ -58,6 +78,8 @@ function AddProduct() {
           <InputField
             label={"Image url"}
             id={productStateIds.imageUrl}
+            required={true}
+            value={product.imageUrl}
             onChange={handleOnChange}
           />
         </Grid>
@@ -66,6 +88,7 @@ function AddProduct() {
             label={"Brand"}
             required={true}
             id={productStateIds.brand}
+            value={product.brand}
             onChange={handleOnChange}
             maxLength={40}
           />
@@ -75,6 +98,7 @@ function AddProduct() {
             label={"Title"}
             required={true}
             id={productStateIds.title}
+            value={product.title}
             onChange={handleOnChange}
             maxLength={70}
           />
@@ -85,6 +109,7 @@ function AddProduct() {
             required={true}
             type="number"
             id={productStateIds.price}
+            value={product.price}
             onChange={handleOnChange}
           />
         </Grid>
@@ -93,14 +118,16 @@ function AddProduct() {
             label={"Discount Price (₹)"}
             type="number"
             id={productStateIds.disPrice}
+            value={product.disPrice}
             onChange={handleOnChange}
           />
         </Grid>
         <Grid item xs={6} lg={4}>
           <InputField
-            label={"Discount Percentage"}
+            label={"Discount Percentage (%)"}
             type="number"
             id={productStateIds.disPercentage}
+            value={product.disPercentage}
             onChange={handleOnChange}
           />
         </Grid>
@@ -110,6 +137,7 @@ function AddProduct() {
             label={"Top Level Category"}
             required={true}
             type="dropdown"
+            value={product.topLevelCategory}
             dropdownOptions={topLevelCategories}
             dropdownKeys={{ labelKey: "categoryName", valueKey: "categoryId" }}
             id={productStateIds.topLevelCategory}
@@ -121,6 +149,7 @@ function AddProduct() {
             label={"Second Level Category"}
             required={true}
             type="dropdown"
+            value={product.secondLevelCategory}
             dropdownOptions={secondLevelCategories}
             dropdownKeys={{ labelKey: "sectionName", valueKey: "sectionId" }}
             id={productStateIds.secondLevelCategory}
@@ -132,6 +161,7 @@ function AddProduct() {
             label={"Third Level Category"}
             required={true}
             type="dropdown"
+            value={product.thirdLevelCategory}
             dropdownOptions={thirdLevelCategories}
             dropdownKeys={{ labelKey: "itemName", valueKey: "itemId" }}
             id={productStateIds.thirdLevelCategory}
@@ -143,6 +173,7 @@ function AddProduct() {
           <InputField
             label={"Description"}
             required={true}
+            value={product.description}
             id={productStateIds.description}
             onChange={handleOnChange}
           />
@@ -153,6 +184,7 @@ function AddProduct() {
             label={"Quantity"}
             type="number"
             required={true}
+            value={product.quantity}
             id={productStateIds.quantity}
             onChange={handleOnChange}
           />
@@ -163,6 +195,7 @@ function AddProduct() {
             label={"Color"}
             required={true}
             type="dropdown"
+            value={product.color}
             dropdownOptions={productColors}
             id={productStateIds.color}
             onChange={handleOnChange}
@@ -171,8 +204,9 @@ function AddProduct() {
 
         <Grid item xs={12} lg={4}>
           <InputField
-            label={"Size (w x h)"}
+            label={"Size in Inches (w x d x h) "}
             required={true}
+            value={product.size}
             id={productStateIds.size}
             onChange={handleOnChange}
           />

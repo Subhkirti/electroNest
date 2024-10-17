@@ -1,5 +1,5 @@
 import { MenuItem, TextField } from "@mui/material";
-import {  useState } from "react";
+import { useState } from "react";
 
 type DropdownListItem = { label: string; value: any };
 
@@ -10,7 +10,7 @@ interface InputFieldState {
   placeholder?: string;
   required?: boolean;
   maxLength?: number;
-  defaultValue?: string;
+  value: any;
   onChange: (elementValue: string, id: string) => void;
   dropdownOptions?: DropdownListItem[];
   dropdownKeys?: DropdownKeys;
@@ -21,7 +21,7 @@ export default function InputField({
   id,
   label,
   type = "text",
-  defaultValue,
+  value,
   onChange,
   placeholder,
   required = false,
@@ -29,24 +29,20 @@ export default function InputField({
   dropdownOptions,
   dropdownKeys,
 }: InputFieldState) {
-  const [value, setValue] = useState<string>();
-
   return (
     <TextField
       select={type === "dropdown" && dropdownOptions ? true : false}
       label={label}
       type={maxLength ? "text" : type}
-      value={defaultValue || value}
+      value={value}
       onChange={(e) => {
         const elementValue = e.target.value;
         if (type === "number" && maxLength) {
           const checkDigitRegex = /^[0-9]*$/;
           if (checkDigitRegex.test(elementValue)) {
-            setValue(elementValue);
             onChange(elementValue, id);
           }
         } else {
-          setValue(elementValue);
           onChange(elementValue, id);
         }
       }}

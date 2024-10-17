@@ -110,7 +110,6 @@ app.post("/product/categories/sections/items", (req, res) => {
 
 /* Set products list */
 app.post("/product/add", (req, res) => {
-  console.log("req:", req.body);
   const {
     imageUrl,
     brand,
@@ -148,8 +147,31 @@ app.post("/product/add", (req, res) => {
         return res
           .status(400)
           .json({ status: 400, message: "Error while getting products" });
+      } else {
+        const productId = result.insertId;
+        console.log('productId:', productId)
+        // give product details
+        connection.query(
+          `SELECT * FROM ${tableName} WHERE product_id = ?`,
+          [productId],
+          (err, result) => {
+            if (err) {
+              console.log('err:', err)
+              return res.status(400).json({
+                status: 400,
+                message: "Error checking product",
+              });
+            }
+            if (!result.length) {
+              return res.status(400).json({
+                status: 400,
+                message: "Failed to get product",
+              });
+            }
+            return res.status(200).json({ status: 200, data: result[0] });
+          }
+        );
       }
-      return res.status(200).json({ status: 200, data: result });
     }
   );
 });

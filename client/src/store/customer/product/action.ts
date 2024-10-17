@@ -11,6 +11,7 @@ import {
   ProductSearchReqBody,
 } from "../../../modules/customer/types/productTypes";
 import {
+  productMap,
   secondLevelCategoriesMap,
   thirdLevelCategoriesMap,
   topLevelCategoriesMap,
@@ -149,9 +150,10 @@ const addProduct =
 
     try {
       const res = await axios.post(ApiUrls.addProduct, reqData, headersConfig);
+
       dispatch({
         type: ActionTypes.ADD_PRODUCT_SUCCESS,
-        payload: res?.data?.data,
+        payload: res?.data?.data ? productMap(res?.data?.data) : {},
       });
     } catch (error) {
       handleCatchError({

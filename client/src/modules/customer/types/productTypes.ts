@@ -15,8 +15,10 @@ interface ProductReqBody {
   brand: string;
   title: string;
   description: string;
-  price: number;
-  quantity: number;
+  price: number | null;
+  size: string | null;
+  color: string | null;
+  quantity: number | null;
   disPercentage: number | null;
   disPrice: number | null;
   topLevelCategory: string;
@@ -43,10 +45,31 @@ interface ThirdLevelCategories {
   sectionId: string; //parent key
   createdAt: Date;
 }
+
+interface Product {
+  productId: number;
+  productName: string;
+  description: string;
+  price: Float32Array;
+  discountPrice: Float32Array;
+  discountPercentage: Float32Array;
+  quantity: number;
+  brand: string;
+  color: string;
+  size: string;
+  productImage: string;
+  categoryId: string;
+  sectionId: string;
+  itemId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export type {
   ProductSearchReqBody,
   ProductReqBody,
   TopLevelCategories,
   SecondLevelCategories,
   ThirdLevelCategories,
+  Product,
 };
