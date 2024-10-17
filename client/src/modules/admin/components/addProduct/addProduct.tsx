@@ -13,9 +13,11 @@ import {
 } from "../../../../store/customer/product/action";
 import { ProductReqBody } from "../../../customer/types/productTypes";
 import { toast } from "react-toastify";
+import Loader from "../../../../common/components/loader";
 
 const initState = {
-  imageUrl: "",
+  thumbnail: null,
+  images: [],
   brand: "",
   title: "",
   description: "",
@@ -37,6 +39,7 @@ function AddProduct() {
     topLevelCategories,
     secondLevelCategories,
     thirdLevelCategories,
+    isLoading,
     product: productRes,
   } = useSelector((state: RootState) => state.product);
 
@@ -66,7 +69,7 @@ function AddProduct() {
     setProduct({ ...product, [fieldId]: value });
   }
 
-  function handleOnAddProduct(e: { preventDefault: () => void }) {
+  async function handleOnAddProduct(e: { preventDefault: () => void }) {
     e.preventDefault();
     dispatch(addProduct(product));
   }
@@ -74,13 +77,14 @@ function AddProduct() {
   return (
     <form onSubmit={handleOnAddProduct}>
       <Grid container spacing={2} justifyContent={"center"}>
-        <Grid item xs={12} lg={12}>
+        <Grid item xs={12} lg={6}>
           <InputField
-            label={"Image url"}
-            id={productStateIds.imageUrl}
+            label={"Title"}
             required={true}
-            value={product.imageUrl}
+            id={productStateIds.title}
+            value={product.title}
             onChange={handleOnChange}
+            maxLength={70}
           />
         </Grid>
         <Grid item xs={12} lg={6}>
@@ -93,14 +97,26 @@ function AddProduct() {
             maxLength={40}
           />
         </Grid>
-        <Grid item xs={12} lg={6}>
+
+        <Grid item xs={12} lg={12}>
           <InputField
-            label={"Title"}
+            label={"Description"}
             required={true}
-            id={productStateIds.title}
-            value={product.title}
+            value={product.description}
+            id={productStateIds.description}
             onChange={handleOnChange}
-            maxLength={70}
+          />
+        </Grid>
+
+        <Grid item xs={12} lg={12}>
+          <InputField
+            label={"Thumbnail"}
+            id={productStateIds.thumbnail}
+            required={true}
+            type="file"
+            acceptFile="image/*"
+            value={product.thumbnail}
+            onChange={handleOnChange}
           />
         </Grid>
         <Grid item xs={12} lg={4}>
@@ -169,16 +185,6 @@ function AddProduct() {
           />
         </Grid>
 
-        <Grid item xs={12} lg={12}>
-          <InputField
-            label={"Description"}
-            required={true}
-            value={product.description}
-            id={productStateIds.description}
-            onChange={handleOnChange}
-          />
-        </Grid>
-
         <Grid item xs={12} lg={4}>
           <InputField
             label={"Quantity"}
@@ -212,8 +218,12 @@ function AddProduct() {
           />
         </Grid>
 
-        <Button type="submit" variant="contained" sx={{ mt: 4 }}>
-          {AppStrings.addProduct}
+        <Button
+          type="submit"
+          variant="contained"
+          sx={{ mt: 4, minWidth: "300px" }}
+        >
+          {isLoading ? <Loader /> : AppStrings.addProduct}
         </Button>
       </Grid>
     </form>

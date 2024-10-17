@@ -1,5 +1,6 @@
 const productStateIds = {
-  imageUrl: "imageUrl",
+  thumbnail: "thumbnail",
+  images: "images",
   brand: "brand",
   title: "title",
   color: "color",

@@ -16,6 +16,8 @@ import {
   thirdLevelCategoriesMap,
   topLevelCategoriesMap,
 } from "../../../modules/customer/mappers/productsMapper";
+import { toast } from "react-toastify";
+import AppStrings from "../../../common/appStrings";
 
 const findProducts =
   (reqData: ProductSearchReqBody) => async (dispatch: ActionDispatch) => {
@@ -163,10 +165,29 @@ const addProduct =
     }
   };
 
+const uploadFile = async (filePath: File | null) => {
+  try {
+    const formData = new FormData();
+    filePath && formData.append("file", filePath);
+
+    const res = await axios.post(ApiUrls.uploadFile, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res?.data;
+  } catch (error: any) {
+    toast.error(
+      error?.response?.data?.message || AppStrings.somethingWentWrong
+    );
+  }
+};
+
 export {
   findProducts,
   findProductsById,
   addProduct,
+  uploadFile,
   getTopLevelCategories,
   getSecondLevelCategories,
   getThirdLevelCategories,

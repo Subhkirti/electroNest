@@ -16,6 +16,7 @@ const AppStrings = {
   /* errors */
   passwordError:
     "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.",
+  somethingWentWrong: "Something went wrong",
 };
 
 export default AppStrings;
