@@ -58,7 +58,8 @@ interface Product {
   brand: string;
   color: string;
   size: string;
-  productImage: string;
+  thumbnail: string;
+  images: string[];
   categoryId: string;
   sectionId: string;
   itemId: string;

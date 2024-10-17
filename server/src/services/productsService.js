@@ -6,7 +6,6 @@ const thirdLevelCateTableName = "third_level_categories";
 
 const app = require("../app");
 createProductCateSectionItemsTable();
-
 app.post("/product/categories/sections/items", (req, res) => {
   const { categories } = req.body;
 
@@ -111,7 +110,8 @@ app.post("/product/categories/sections/items", (req, res) => {
 /* Set products list */
 app.post("/product/add", (req, res) => {
   const {
-    imageUrl,
+    thumbnail,
+    images,
     brand,
     title,
     color,
@@ -125,8 +125,9 @@ app.post("/product/add", (req, res) => {
     secondLevelCategory,
     thirdLevelCategory,
   } = req.body;
+
   connection.query(
-    `INSERT INTO ${tableName} (product_name, description, price, discount_price, discount_percentage, quantity, brand, color, size, product_image, category_id, section_id, item_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    `INSERT INTO ${tableName} (product_name, description, price, discount_price, discount_percentage, quantity, brand, color, size, thumbnail, images, category_id, section_id, item_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       title,
       description,
@@ -137,7 +138,8 @@ app.post("/product/add", (req, res) => {
       brand,
       color,
       size,
-      imageUrl,
+      JSON.stringify(thumbnail),
+      JSON.stringify(images),
       topLevelCategory,
       secondLevelCategory,
       thirdLevelCategory,
@@ -146,17 +148,15 @@ app.post("/product/add", (req, res) => {
       if (err) {
         return res
           .status(400)
-          .json({ status: 400, message: "Error while getting products" });
+          .json({ status: 400, message: "Error while adding product" });
       } else {
         const productId = result.insertId;
-        console.log('productId:', productId)
         // give product details
         connection.query(
           `SELECT * FROM ${tableName} WHERE product_id = ?`,
           [productId],
           (err, result) => {
             if (err) {
-              console.log('err:', err)
               return res.status(400).json({
                 status: 400,
                 message: "Error checking product",
@@ -387,7 +387,8 @@ function createProductsTable() {
         brand VARCHAR(255),
         color VARCHAR(50),
         size VARCHAR(50),
-        product_image VARCHAR(255),
+        thumbnail TEXT,
+        images TEXT,
         category_id VARCHAR(255) NOT NULL,
         section_id VARCHAR(255) NOT NULL,
         item_id VARCHAR(255) NOT NULL,

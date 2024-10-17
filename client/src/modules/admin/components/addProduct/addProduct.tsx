@@ -44,18 +44,15 @@ function AddProduct() {
   } = useSelector((state: RootState) => state.product);
 
   useEffect(() => {
-    loadCategories();
-    if (productRes && productRes.productId) {
-      toast.success("Product added successfully");
-      setProduct(initState);
-    }
-  }, [
-    product,
-    product.disPercentage,
-    product.disPrice,
-    product.size,
-    productRes?.productId,
-  ]);
+    const timer = setTimeout(() => {
+      loadCategories();
+      if (productRes && productRes.productId) {
+        toast.success("Product added successfully");
+        setProduct(initState);
+      }
+    }, 10);
+    return () => clearTimeout(timer);
+  }, [product, productRes]);
 
   function loadCategories() {
     if (!topLevelCategories.length) dispatch(getTopLevelCategories());
@@ -65,7 +62,7 @@ function AddProduct() {
       dispatch(getThirdLevelCategories(product.secondLevelCategory));
   }
 
-  function handleOnChange(value: string, fieldId: string) {
+  function handleOnChange(value: any, fieldId: string) {
     setProduct({ ...product, [fieldId]: value });
   }
 
@@ -218,6 +215,18 @@ function AddProduct() {
           />
         </Grid>
 
+        <Grid item xs={12} lg={12}>
+          <InputField
+            label={"Product Images"}
+            id={productStateIds.images}
+            required={true}
+            value={product.images}
+            type="file"
+            acceptFile="image/*"
+            multiple
+            onChange={handleOnChange}
+          />
+        </Grid>
         <Button
           type="submit"
           variant="contained"

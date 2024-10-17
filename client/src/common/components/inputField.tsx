@@ -9,7 +9,7 @@ interface InputFieldState {
   id: string;
   label: string;
   value: any;
-  onChange: (elementValue: string, id: string) => void;
+  onChange: (elementValue: any, id: string) => void;
   dropdownOptions?: DropdownListItem[];
   dropdownKeys?: DropdownKeys;
   acceptFile?: string;
@@ -17,6 +17,7 @@ interface InputFieldState {
   required?: boolean;
   maxLength?: number;
   type?: "text" | "number" | "email" | "password" | "dropdown" | "file";
+  multiple?: boolean; // Include this property
 }
 
 export default function InputField({
@@ -31,23 +32,31 @@ export default function InputField({
   maxLength,
   dropdownOptions,
   dropdownKeys,
+  multiple, // Destructure this property
 }: InputFieldState) {
-  
-  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const elementValue = e.target.value;
 
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (type === "file" && e.target.files) {
-      const file = e.target.files[0];
-      if (file) {
+      const files = Array.from(e.target.files);
+      const fileUrls: string[] = [];
+
+      for (const file of files) {
         const res = await uploadFile(file);
-        onChange(res?.location, id);
+        if (res?.location) {
+          fileUrls.push(res.location);
+        }
       }
+
+      onChange(fileUrls, id); // Send array of URLs
     } else if (type === "number" && maxLength) {
       const checkDigitRegex = /^[0-9]*$/;
+      const elementValue = e.target.value;
+
       if (checkDigitRegex.test(elementValue)) {
         onChange(elementValue, id);
       }
     } else {
+      const elementValue = e.target.value;
       onChange(elementValue, id);
     }
   };
@@ -65,7 +74,7 @@ export default function InputField({
       fullWidth
       variant="outlined"
       margin="normal"
-      inputProps={type === "file" ? { accept: acceptFile } : {}}
+      inputProps={type === "file" ? { accept: acceptFile, multiple } : {}} // Use multiple here
       sx={{
         "& .MuiOutlinedInput-root": {
           "& fieldset": {
