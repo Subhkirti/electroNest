@@ -2,10 +2,15 @@ import { Button, Grid } from "@mui/material";
 import { useEffect, useState } from "react";
 import InputField from "../../../../common/components/inputField";
 import AppStrings from "../../../../common/appStrings";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../../../store/storeTypes";
-import { productStateIds } from "../../utils/productUtil";
-import { addProduct } from "../../../../store/customer/product/action";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
+import { productColors, productStateIds } from "../../utils/productUtil";
+import {
+  addProduct,
+  getSecondLevelCategories,
+  getThirdLevelCategories,
+  getTopLevelCategories,
+} from "../../../../store/customer/product/action";
 import { ProductReqBody } from "../../../customer/types/productTypes";
 
 const initState = {
@@ -25,13 +30,16 @@ const initState = {
 function AddProduct() {
   const dispatch = useDispatch<AppDispatch>();
   const [product, setProduct] = useState<ProductReqBody>(initState);
-  const [topCategories, setTopCategories] = useState();
-  const [secondCategories, setSecondCategories] = useState();
-  const [thirdCategories, setThirdCategories] = useState();
+  const { topLevelCategories, secondLevelCategories, thirdLevelCategories } =
+    useSelector((state: RootState) => state.product);
 
   useEffect(() => {
-    // setTopCategories();
-  }, []);
+    if (!topLevelCategories.length) dispatch(getTopLevelCategories());
+    if (product.topLevelCategory)
+      dispatch(getSecondLevelCategories(product.topLevelCategory));
+    if (product.topLevelCategory && product.secondLevelCategory)
+      dispatch(getThirdLevelCategories(product.secondLevelCategory));
+  }, [product.topLevelCategory, product.secondLevelCategory]);
 
   function handleOnChange(value: string, fieldId: string) {
     setProduct({ ...product, [fieldId]: value });
@@ -40,6 +48,7 @@ function AddProduct() {
   function handleOnAddProduct(e: { preventDefault: () => void }) {
     e.preventDefault();
     dispatch(addProduct(product));
+    console.log("product:", product);
   }
 
   return (
@@ -101,7 +110,8 @@ function AddProduct() {
             label={"Top Level Category"}
             required={true}
             type="dropdown"
-            menuOptions={topCategories}
+            dropdownOptions={topLevelCategories}
+            dropdownKeys={{ labelKey: "categoryName", valueKey: "categoryId" }}
             id={productStateIds.topLevelCategory}
             onChange={handleOnChange}
           />
@@ -111,7 +121,8 @@ function AddProduct() {
             label={"Second Level Category"}
             required={true}
             type="dropdown"
-            menuOptions={secondCategories}
+            dropdownOptions={secondLevelCategories}
+            dropdownKeys={{ labelKey: "sectionName", valueKey: "sectionId" }}
             id={productStateIds.secondLevelCategory}
             onChange={handleOnChange}
           />
@@ -121,7 +132,8 @@ function AddProduct() {
             label={"Third Level Category"}
             required={true}
             type="dropdown"
-            menuOptions={thirdCategories}
+            dropdownOptions={thirdLevelCategories}
+            dropdownKeys={{ labelKey: "itemName", valueKey: "itemId" }}
             id={productStateIds.thirdLevelCategory}
             onChange={handleOnChange}
           />
@@ -136,12 +148,32 @@ function AddProduct() {
           />
         </Grid>
 
-        <Grid item xs={12} lg={12}>
+        <Grid item xs={12} lg={4}>
           <InputField
             label={"Quantity"}
             type="number"
             required={true}
             id={productStateIds.quantity}
+            onChange={handleOnChange}
+          />
+        </Grid>
+
+        <Grid item xs={12} lg={4}>
+          <InputField
+            label={"Color"}
+            required={true}
+            type="dropdown"
+            dropdownOptions={productColors}
+            id={productStateIds.color}
+            onChange={handleOnChange}
+          />
+        </Grid>
+
+        <Grid item xs={12} lg={4}>
+          <InputField
+            label={"Size (w x h)"}
+            required={true}
+            id={productStateIds.size}
             onChange={handleOnChange}
           />
         </Grid>

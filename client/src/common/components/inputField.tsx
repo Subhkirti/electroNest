@@ -1,11 +1,9 @@
 import { MenuItem, TextField } from "@mui/material";
-import { useState } from "react";
+import {  useState } from "react";
 
-interface MenuOptions {
-  value: string;
-  label: string;
-}
+type DropdownListItem = { label: string; value: any };
 
+type DropdownKeys = { labelKey: string; valueKey: string };
 interface InputFieldState {
   id: string;
   label: string;
@@ -14,7 +12,8 @@ interface InputFieldState {
   maxLength?: number;
   defaultValue?: string;
   onChange: (elementValue: string, id: string) => void;
-  menuOptions?: MenuOptions[];
+  dropdownOptions?: DropdownListItem[];
+  dropdownKeys?: DropdownKeys;
   type?: "text" | "number" | "email" | "password" | "dropdown";
 }
 
@@ -27,13 +26,14 @@ export default function InputField({
   placeholder,
   required = false,
   maxLength,
-  menuOptions,
+  dropdownOptions,
+  dropdownKeys,
 }: InputFieldState) {
   const [value, setValue] = useState<string>();
 
   return (
     <TextField
-      select={type === "dropdown" && menuOptions ? true : false}
+      select={type === "dropdown" && dropdownOptions ? true : false}
       label={label}
       type={maxLength ? "text" : type}
       value={defaultValue || value}
@@ -49,10 +49,6 @@ export default function InputField({
           setValue(elementValue);
           onChange(elementValue, id);
         }
-      }}
-      inputProps={{
-        maxLength: maxLength,
-        style: { color: "#fff" },
       }}
       placeholder={placeholder}
       required={required}
@@ -72,10 +68,15 @@ export default function InputField({
           },
         },
         "& .MuiInputLabel-root": {
+          opacity: 0.6,
           color: "#fff",
           "&.Mui-focused": {
             color: "#9f5eff",
+            opacity: 1,
           },
+        },
+        "& .MuiInputBase-input": {
+          color: "#fff",
         },
         "& .MuiInputBase-input::placeholder": {
           color: "#fff",
@@ -83,13 +84,19 @@ export default function InputField({
         },
       }}
     >
-      {menuOptions &&
-        menuOptions.length > 0 &&
-        menuOptions.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
-            {option.label}
-          </MenuItem>
-        ))}
+      {dropdownOptions &&
+        dropdownOptions.length > 0 &&
+        dropdownOptions.map((option) => {
+          const labelKey = dropdownKeys?.labelKey as keyof DropdownListItem;
+          const valueKey = dropdownKeys?.valueKey as keyof DropdownListItem;
+          const itemLabel = labelKey ? option[labelKey] : option?.label;
+          const itemValue = valueKey ? option[valueKey] : option?.value;
+          return (
+            <MenuItem key={itemValue} value={itemValue}>
+              {itemLabel}
+            </MenuItem>
+          );
+        })}
     </TextField>
   );
 }

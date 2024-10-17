@@ -10,6 +10,11 @@ import {
   ProductReqBody,
   ProductSearchReqBody,
 } from "../../../modules/customer/types/productTypes";
+import {
+  secondLevelCategoriesMap,
+  thirdLevelCategoriesMap,
+  topLevelCategoriesMap,
+} from "../../../modules/customer/mappers/productsMapper";
 
 const findProducts =
   (reqData: ProductSearchReqBody) => async (dispatch: ActionDispatch) => {
@@ -41,6 +46,77 @@ const findProducts =
       handleCatchError({
         error,
         actionType: ActionTypes.FIND_PRODUCTS_FAILURE,
+      });
+    }
+  };
+
+const getTopLevelCategories = () => async (dispatch: ActionDispatch) => {
+  dispatch({ type: ActionTypes.GET_TOP_LEVEL_CATEGORIES_REQUEST });
+
+  try {
+    const res = await axios.get(ApiUrls.getTopLevelCategories, headersConfig);
+
+    dispatch({
+      type: ActionTypes.GET_TOP_LEVEL_CATEGORIES_SUCCESS,
+      payload:
+        res?.data?.data?.length > 0
+          ? res?.data?.data.map(topLevelCategoriesMap)
+          : [],
+    });
+  } catch (error) {
+    handleCatchError({
+      error,
+      actionType: ActionTypes.GET_TOP_LEVEL_CATEGORIES_FAILURE,
+    });
+  }
+};
+
+const getSecondLevelCategories =
+  (categoryId: string) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.GET_SECOND_LEVEL_CATEGORIES_REQUEST });
+
+    try {
+      const res = await axios.get(
+        `${ApiUrls.getSecondLevelCategories}?categoryId=${categoryId}`,
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.GET_SECOND_LEVEL_CATEGORIES_SUCCESS,
+        payload:
+          res?.data?.data?.length > 0
+            ? res?.data?.data.map(secondLevelCategoriesMap)
+            : [],
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_SECOND_LEVEL_CATEGORIES_FAILURE,
+      });
+    }
+  };
+
+const getThirdLevelCategories =
+  (sectionId: string) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.GET_THIRD_LEVEL_CATEGORIES_REQUEST });
+
+    try {
+      const res = await axios.get(
+        `${ApiUrls.getThirdLevelCategories}?sectionId=${sectionId}`,
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.GET_THIRD_LEVEL_CATEGORIES_SUCCESS,
+        payload:
+          res?.data?.data?.length > 0
+            ? res?.data?.data.map(thirdLevelCategoriesMap)
+            : [],
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_THIRD_LEVEL_CATEGORIES_FAILURE,
       });
     }
   };
@@ -85,4 +161,11 @@ const addProduct =
     }
   };
 
-export { findProducts, findProductsById, addProduct };
+export {
+  findProducts,
+  findProductsById,
+  addProduct,
+  getTopLevelCategories,
+  getSecondLevelCategories,
+  getThirdLevelCategories,
+};

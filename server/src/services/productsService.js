@@ -1,8 +1,8 @@
 const connection = require("../connection");
 const tableName = "products";
-const productCategoriesTableName = "product_categories";
-const productCategorySectionsTableName = "product_category_sections";
-const productCategorySectionItemsTableName = "product_category_section_items";
+const topLevelCateTableName = "top_level_categories";
+const secondLevelCateTableName = "second_level_categories";
+const thirdLevelCateTableName = "third_level_categories";
 
 const app = require("../app");
 createProductCateSectionItemsTable();
@@ -109,9 +109,40 @@ app.post("/product/categories/sections/items", (req, res) => {
 });
 
 /* Set products list */
-app.set("/product/add", (req, res) => {
+app.post("/product/add", (req, res) => {
+  console.log("req:", req.body);
+  const {
+    imageUrl,
+    brand,
+    title,
+    color,
+    size,
+    description,
+    price,
+    quantity,
+    disPercentage,
+    disPrice,
+    topLevelCategory,
+    secondLevelCategory,
+    thirdLevelCategory,
+  } = req.body;
   connection.query(
-    `INSERT INTO ${tableName} (product_name, description, price, discount_price, discount_percentage, stock_quantity, brand, color, size, product_image, category_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
+    `INSERT INTO ${tableName} (product_name, description, price, discount_price, discount_percentage, quantity, brand, color, size, product_image, category_id, section_id, item_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    [
+      title,
+      description,
+      price,
+      disPrice,
+      disPercentage,
+      quantity,
+      brand,
+      color,
+      size,
+      imageUrl,
+      topLevelCategory,
+      secondLevelCategory,
+      thirdLevelCategory,
+    ],
     (err, result) => {
       if (err) {
         return res
@@ -135,13 +166,59 @@ app.get("/products", (req, res) => {
   });
 });
 
+/* Get top level categories list */
+app.get("/top-level-categories", (req, res) => {
+  connection.query(`SELECT * FROM ${topLevelCateTableName}`, (err, result) => {
+    if (err) {
+      return res
+        .status(400)
+        .json({ status: 400, message: "Error while getting products" });
+    }
+    return res.status(200).json({ status: 200, data: result });
+  });
+});
+
+/* Get second level categories list */
+app.get("/second-level-categories", (req, res) => {
+  const categoryId = req.query?.categoryId;
+  connection.query(
+    `SELECT * FROM ${secondLevelCateTableName} WHERE category_id = ?`,
+    [categoryId],
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while getting products" });
+      }
+      return res.status(200).json({ status: 200, data: result });
+    }
+  );
+});
+
+/* Get third level categories list */
+app.get("/third-level-categories", (req, res) => {
+  const sectionId = req.query?.sectionId;
+  connection.query(
+    `SELECT * FROM ${thirdLevelCateTableName} WHERE section_id = ?`,
+    [sectionId],
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while getting products" });
+      }
+      return res.status(200).json({ status: 200, data: result });
+    }
+  );
+});
+
 /* Create tables section starts here */
 function createProductCateSectionItemsTable() {
   const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
 
   connection.query(
     checkTableQuery,
-    [productCategorySectionItemsTableName],
+    [thirdLevelCateTableName],
     (err, results) => {
       if (err) {
         console.error("Error checking table existence:", err);
@@ -152,33 +229,31 @@ function createProductCateSectionItemsTable() {
       if (results && results.length && results[0].count === 0) {
         /* Table creation query */
         const createItemsQuery = `
-          CREATE TABLE ${productCategorySectionItemsTableName} (
+          CREATE TABLE ${thirdLevelCateTableName} (
             item_id VARCHAR(255) NOT NULL PRIMARY KEY,
             item_name VARCHAR(255) NOT NULL,
             section_id VARCHAR(255) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (section_id) REFERENCES ${productCategorySectionsTableName}(section_id)
+            FOREIGN KEY (section_id) REFERENCES ${secondLevelCateTableName}(section_id)
           )
         `;
 
         connection.query(createItemsQuery, (err) => {
           if (err) {
             console.error(
-              `Error creating ${productCategorySectionItemsTableName} table: ${err}`
+              `Error creating ${thirdLevelCateTableName} table: ${err}`
             );
           } else {
             console.log(
-              `${productCategorySectionItemsTableName} Table created successfully.`
+              `${thirdLevelCateTableName} Table created successfully.`
             );
             /* Now that the items table is created, we can create sections table */
             createProductCateSectionsTable();
           }
         });
       } else {
-        console.log(
-          `${productCategorySectionItemsTableName} Table already exists.`
-        );
+        console.log(`${thirdLevelCateTableName} Table already exists.`);
         createProductCateSectionsTable();
       }
     }
@@ -190,7 +265,7 @@ function createProductCateSectionsTable() {
 
   connection.query(
     checkTableQuery,
-    [productCategorySectionsTableName],
+    [secondLevelCateTableName],
     (err, results) => {
       if (err) {
         console.error("Error checking table existence:", err);
@@ -201,33 +276,31 @@ function createProductCateSectionsTable() {
       if (results && results.length && results[0].count === 0) {
         /* Table creation query */
         const createSectionsQuery = `
-        CREATE TABLE ${productCategorySectionsTableName} (
+        CREATE TABLE ${secondLevelCateTableName} (
           section_id VARCHAR(255) NOT NULL PRIMARY KEY,
           section_name VARCHAR(255) NOT NULL,
           category_id VARCHAR(255) NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          FOREIGN KEY (category_id) REFERENCES ${productCategoriesTableName}(category_id)
+          FOREIGN KEY (category_id) REFERENCES ${topLevelCateTableName}(category_id)
         )
       `;
 
         connection.query(createSectionsQuery, (err) => {
           if (err) {
             console.error(
-              `Error creating ${productCategorySectionsTableName} table: ${err}`
+              `Error creating ${secondLevelCateTableName} table: ${err}`
             );
           } else {
             console.log(
-              `${productCategorySectionsTableName} Table created successfully.`
+              `${secondLevelCateTableName} Table created successfully.`
             );
             /* Now that the sections table is created, we can create categories table */
             createProductCateTable();
           }
         });
       } else {
-        console.log(
-          `${productCategorySectionsTableName} Table already exists.`
-        );
+        console.log(`${secondLevelCateTableName} Table already exists.`);
         /* If sections already exist, check/create categories table */
         createProductCateTable();
       }
@@ -239,40 +312,34 @@ function createProductCateTable() {
   const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
 
   /* Checked and created product_categories table if it does not exist */
-  connection.query(
-    checkTableQuery,
-    [productCategoriesTableName],
-    (err, results) => {
-      if (err) {
-        console.error("Error checking table existence:", results?.[0]?.count);
-        return;
-      }
-
-      /* If the table does not exist, create it */
-      if (results && results.length && results[0].count === 0) {
-        /* Table creation query */
-        const createCategoriesQuery = `CREATE TABLE ${productCategoriesTableName} (category_id VARCHAR(255) NOT NULL PRIMARY KEY, category_name VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)`;
-
-        connection.query(createCategoriesQuery, (err) => {
-          if (err) {
-            console.error(
-              `Error creating ${productCategoriesTableName} table: ${err}`
-            );
-          } else {
-            console.log(
-              `${productCategoriesTableName} Table created successfully.`
-            );
-            /* Now that the categories table is created, we can create products table */
-            createProductsTable();
-          }
-        });
-      } else {
-        console.log(`${productCategoriesTableName} Table already exists.`);
-        /* If categories already exist, check/create products table */
-        createProductsTable();
-      }
+  connection.query(checkTableQuery, [topLevelCateTableName], (err, results) => {
+    if (err) {
+      console.error("Error checking table existence:", results?.[0]?.count);
+      return;
     }
-  );
+
+    /* If the table does not exist, create it */
+    if (results && results.length && results[0].count === 0) {
+      /* Table creation query */
+      const createCategoriesQuery = `CREATE TABLE ${topLevelCateTableName} (category_id VARCHAR(255) NOT NULL PRIMARY KEY, category_name VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)`;
+
+      connection.query(createCategoriesQuery, (err) => {
+        if (err) {
+          console.error(
+            `Error creating ${topLevelCateTableName} table: ${err}`
+          );
+        } else {
+          console.log(`${topLevelCateTableName} Table created successfully.`);
+          /* Now that the categories table is created, we can create products table */
+          createProductsTable();
+        }
+      });
+    } else {
+      console.log(`${topLevelCateTableName} Table already exists.`);
+      /* If categories already exist, check/create products table */
+      createProductsTable();
+    }
+  });
 }
 
 function createProductsTable() {
@@ -300,9 +367,11 @@ function createProductsTable() {
         size VARCHAR(50),
         product_image VARCHAR(255),
         category_id VARCHAR(255) NOT NULL,
+        section_id VARCHAR(255) NOT NULL,
+        item_id VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (category_id) REFERENCES ${productCategoriesTableName}(category_id)
+        FOREIGN KEY (category_id) REFERENCES ${topLevelCateTableName}(category_id)
     )`;
 
       connection.query(createQuery, (err) => {

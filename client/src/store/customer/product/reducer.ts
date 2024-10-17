@@ -2,6 +2,9 @@ import { ProductState, RootAction } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
 
 const initState: ProductState = {
+  topLevelCategories: [],
+  secondLevelCategories: [],
+  thirdLevelCategories: [],
   products: [],
   product: null,
   isLoading: false,
@@ -16,6 +19,9 @@ function productReducer(
     case ActionTypes.FIND_PRODUCTS_REQUEST:
     case ActionTypes.FIND_PRODUCT_BY_ID_REQUEST:
     case ActionTypes.ADD_PRODUCT_REQUEST:
+    case ActionTypes.GET_TOP_LEVEL_CATEGORIES_REQUEST:
+    case ActionTypes.GET_SECOND_LEVEL_CATEGORIES_REQUEST:
+    case ActionTypes.GET_THIRD_LEVEL_CATEGORIES_REQUEST:
       return { ...state, isLoading: true, error: null };
     case ActionTypes.FIND_PRODUCTS_SUCCESS:
       return {
@@ -42,9 +48,33 @@ function productReducer(
             : action?.payload,
         product: action?.payload,
       };
+    case ActionTypes.GET_TOP_LEVEL_CATEGORIES_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        topLevelCategories: action.payload,
+      };
+    case ActionTypes.GET_SECOND_LEVEL_CATEGORIES_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        secondLevelCategories: action.payload,
+      };
+    case ActionTypes.GET_THIRD_LEVEL_CATEGORIES_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        thirdLevelCategories: action.payload,
+      };
     case ActionTypes.FIND_PRODUCTS_FAILURE:
     case ActionTypes.FIND_PRODUCT_BY_ID_FAILURE:
     case ActionTypes.ADD_PRODUCT_FAILURE:
+    case ActionTypes.GET_TOP_LEVEL_CATEGORIES_FAILURE:
+    case ActionTypes.GET_SECOND_LEVEL_CATEGORIES_FAILURE:
+    case ActionTypes.GET_THIRD_LEVEL_CATEGORIES_FAILURE:
       return { ...state, isLoading: false, error: action?.payload };
     default:
       return state;

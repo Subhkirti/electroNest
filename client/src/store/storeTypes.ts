@@ -24,6 +24,9 @@ interface AuthState {
 }
 
 interface ProductState {
+  topLevelCategories: [];
+  secondLevelCategories: [];
+  thirdLevelCategories: [];
   products: [];
   product: {} | null;
   isLoading: boolean;

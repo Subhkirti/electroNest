@@ -10,7 +10,7 @@ interface ProductSearchReqBody {
   sort: string;
 }
 
-type ProductReqBody = {
+interface ProductReqBody {
   imageUrl: string;
   brand: string;
   title: string;
@@ -22,6 +22,31 @@ type ProductReqBody = {
   topLevelCategory: string;
   secondLevelCategory: string;
   thirdLevelCategory: string;
-};
+}
 
-export type { ProductSearchReqBody, ProductReqBody };
+interface TopLevelCategories {
+  categoryId: string;
+  categoryName: string;
+  createdAt: Date;
+}
+
+interface SecondLevelCategories {
+  sectionId: string;
+  sectionName: string;
+  categoryId: string; //parent key
+  createdAt: Date;
+}
+
+interface ThirdLevelCategories {
+  itemId: string;
+  itemName: string;
+  sectionId: string; //parent key
+  createdAt: Date;
+}
+export type {
+  ProductSearchReqBody,
+  ProductReqBody,
+  TopLevelCategories,
+  SecondLevelCategories,
+  ThirdLevelCategories,
+};
