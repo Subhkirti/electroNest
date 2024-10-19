@@ -3,8 +3,8 @@ import { apiBaseUrl } from "./constants";
 const ApiUrls = {
   registerUser: apiBaseUrl + "/register",
   login: apiBaseUrl + "/signin",
-  findProducts: apiBaseUrl + "/products",
-  findProductsById: apiBaseUrl + "/products/",
+  findProducts: apiBaseUrl + "/product-details?",
+  getProducts: apiBaseUrl + "/products?",
   addProduct: apiBaseUrl + "/product/add",
   getCart: apiBaseUrl + "/cart",
   addItemToCart: apiBaseUrl + "/cart/add",

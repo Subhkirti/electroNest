@@ -8,6 +8,10 @@
   --purple01: #2c2c54;
   --white: #fff;
   --light-purple: #9f5eff;
+  --yellow: #eab500;
+  --green: #21d266;
+  --red: #e05240;
+  --blue: #0ebaeb;
 }
 body {
   font-family: "Montserrat", sans-serif;
@@ -24,13 +28,6 @@ input:-webkit-autofill:focus {
   max-width: 1500px;
   margin: 0px auto;
   padding: 0px 3rem;
-}
-.admin-container {
-  max-width: 1500px;
-  margin: 0px auto;
-  padding: 0px 3rem;
-  background-color: var(--purple);
-  min-height: 100vh;
 }
 
 .loader {
@@ -67,6 +64,14 @@ input:-webkit-autofill:focus {
 }
 
 /* admin classes */
+.admin-container {
+  max-width: 1500px;
+  margin: 0px auto;
+  padding: 0px 3rem;
+  background-color: var(--purple);
+  min-height: 100vh;
+}
+
 .admin-card {
   background-color: var(--purple01) !important;
   color: var(--white) !important;

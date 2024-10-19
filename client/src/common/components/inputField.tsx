@@ -1,5 +1,6 @@
 import { MenuItem, TextField } from "@mui/material";
 import { uploadFile } from "../../store/customer/product/action";
+import AppColors from "../appColors";
 
 type DropdownListItem = { label: string; value: any };
 
@@ -9,7 +10,7 @@ interface InputFieldState {
   id: string;
   label: string;
   value: any;
-  onChange: (elementValue: any, id: string) => void;
+  onChange?: (elementValue: any, id: string) => void;
   dropdownOptions?: DropdownListItem[];
   dropdownKeys?: DropdownKeys;
   acceptFile?: string;
@@ -17,7 +18,8 @@ interface InputFieldState {
   required?: boolean;
   maxLength?: number;
   type?: "text" | "number" | "email" | "password" | "dropdown" | "file";
-  multiple?: boolean; // Include this property
+  multiple?: boolean;
+  readOnly?: boolean;
 }
 
 export default function InputField({
@@ -26,6 +28,7 @@ export default function InputField({
   type = "text",
   value,
   onChange,
+  readOnly = false,
   placeholder,
   required = false,
   acceptFile,
@@ -34,7 +37,6 @@ export default function InputField({
   dropdownKeys,
   multiple, // Destructure this property
 }: InputFieldState) {
-
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (type === "file" && e.target.files) {
       const files = Array.from(e.target.files);
@@ -47,17 +49,17 @@ export default function InputField({
         }
       }
 
-      onChange(fileUrls, id); // Send array of URLs
+      onChange && onChange(fileUrls, id);
     } else if (type === "number" && maxLength) {
       const checkDigitRegex = /^[0-9]*$/;
       const elementValue = e.target.value;
 
       if (checkDigitRegex.test(elementValue)) {
-        onChange(elementValue, id);
+        onChange && onChange(elementValue, id);
       }
     } else {
       const elementValue = e.target.value;
-      onChange(elementValue, id);
+      onChange && onChange(elementValue, id);
     }
   };
 
@@ -68,38 +70,46 @@ export default function InputField({
       type={maxLength ? "text" : type}
       value={type === "file" ? undefined : value}
       focused={type === "file" ? true : undefined}
-      onChange={handleChange}
+      onChange={readOnly ? undefined : handleChange}
       placeholder={placeholder}
       required={required}
       fullWidth
       variant="outlined"
       margin="normal"
-      inputProps={type === "file" ? { accept: acceptFile, multiple } : {}} // Use multiple here
+      inputProps={type === "file" ? { accept: acceptFile, multiple } : {}}
+      slotProps={{
+        inputLabel: {
+          shrink: readOnly ? true : undefined,
+        },
+        input: {
+          readOnly: readOnly,
+        },
+      }}
       sx={{
         "& .MuiOutlinedInput-root": {
           "& fieldset": {
-            borderColor: "#9f5eff",
+            borderColor: AppColors.lightPurple,
           },
           "&:hover fieldset": {
-            borderColor: "#9f5eff",
+            borderColor: AppColors.lightPurple,
           },
           "&.Mui-focused fieldset": {
-            borderColor: "#9f5eff",
+            borderColor: AppColors.lightPurple,
           },
         },
         "& .MuiInputLabel-root": {
           opacity: 0.6,
-          color: "#fff",
+          color: AppColors.white,
           "&.Mui-focused": {
-            color: type === "file" ? "#fff" : "#9f5eff",
+            color: type === "file" ? AppColors.white : AppColors.lightPurple,
             opacity: type === "file" ? 0.6 : 1,
           },
         },
         "& .MuiInputBase-input": {
-          color: "#fff",
+          color: AppColors.white,
         },
         "& .MuiInputBase-input::placeholder": {
-          color: "#fff",
+          color: AppColors.white,
           opacity: 0.5,
         },
       }}

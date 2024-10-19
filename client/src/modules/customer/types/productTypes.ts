@@ -11,8 +11,8 @@ interface ProductSearchReqBody {
 }
 
 interface ProductReqBody {
-  thumbnail: File | null;
-  images: File[];
+  thumbnail: File | string;
+  images: File[]| string[];
   brand: string;
   title: string;
   description: string;

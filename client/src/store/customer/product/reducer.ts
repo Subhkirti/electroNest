@@ -9,6 +9,7 @@ const initState: ProductState = {
   product: null,
   isLoading: false,
   error: null,
+  totalProductCount: 100,
 };
 
 function productReducer(
@@ -22,6 +23,7 @@ function productReducer(
     case ActionTypes.GET_TOP_LEVEL_CATEGORIES_REQUEST:
     case ActionTypes.GET_SECOND_LEVEL_CATEGORIES_REQUEST:
     case ActionTypes.GET_THIRD_LEVEL_CATEGORIES_REQUEST:
+    case ActionTypes.GET_PRODUCTS_REQUEST:
       return { ...state, isLoading: true, error: null };
     case ActionTypes.FIND_PRODUCTS_SUCCESS:
       return {
@@ -69,12 +71,26 @@ function productReducer(
         error: null,
         thirdLevelCategories: action.payload,
       };
+
+    case ActionTypes.GET_PRODUCTS_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        products:
+          action.payload.data?.length > 0
+            ? action.payload.pageNumber === 1
+              ? action.payload.data
+              : [...state.products, ...action.payload.data]
+            : state.products,
+      };
     case ActionTypes.FIND_PRODUCTS_FAILURE:
     case ActionTypes.FIND_PRODUCT_BY_ID_FAILURE:
     case ActionTypes.ADD_PRODUCT_FAILURE:
     case ActionTypes.GET_TOP_LEVEL_CATEGORIES_FAILURE:
     case ActionTypes.GET_SECOND_LEVEL_CATEGORIES_FAILURE:
     case ActionTypes.GET_THIRD_LEVEL_CATEGORIES_FAILURE:
+    case ActionTypes.GET_PRODUCTS_FAILURE:
       return { ...state, isLoading: false, error: action?.payload };
     default:
       return state;

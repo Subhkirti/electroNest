@@ -32,6 +32,7 @@ interface ProductState {
   product: Product | null;
   isLoading: boolean;
   error: string | null;
+  totalProductCount: number;
 }
 
 interface CartState {

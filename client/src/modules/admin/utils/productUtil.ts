@@ -33,4 +33,47 @@ const productColors = [
   { label: "Magenta", value: "magenta" },
 ];
 
-export { productStateIds, productColors };
+const productsHeader = [
+  "Id",
+  "Thumbnail",
+  "Name",
+  "Description",
+  "Brand",
+  "Price",
+  "Created At",
+  "Actions",
+];
+
+function formattedDateTime(dateString: Date) {
+  const date = dateString ? new Date(dateString) : new Date();
+  const readableDate = date.toLocaleString(); // format sample, "10/17/2024, 3:57:31 PM"
+  return readableDate;
+}
+
+function textTruncate(str: string, maxLength: number) {
+  if (str.length <= maxLength) {
+    return str;
+  }
+  return str.slice(0, maxLength - 3) + "...";
+}
+
+function formatAmount(amount: Float32Array | string) {
+  return (
+    "₹ " +
+    Number(amount).toLocaleString("en-IN", {
+      style: "decimal",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })
+  );
+}
+
+
+export {
+  productStateIds,
+  productColors,
+  productsHeader,
+  formattedDateTime,
+  textTruncate,
+  formatAmount,
+};

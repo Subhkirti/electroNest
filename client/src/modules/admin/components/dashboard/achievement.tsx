@@ -1,6 +1,7 @@
 import { Box, Button, Card, CardContent, CardHeader } from "@mui/material";
 import AppStrings from "../../../../common/appStrings";
 import AppIcons from "../../../../common/appIcons";
+import AppColors from "../../../../common/appColors";
 
 export default function Achievement() {
   return (
@@ -15,7 +16,7 @@ export default function Achievement() {
             <Button
               size="medium"
               variant="contained"
-              sx={{ backgroundColor: "#9f5eff" }}
+              sx={{ backgroundColor: AppColors.lightPurple }}
             >
               {AppStrings.viewSales}
             </Button>

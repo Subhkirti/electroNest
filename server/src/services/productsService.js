@@ -176,16 +176,45 @@ app.post("/product/add", (req, res) => {
   );
 });
 
+/* Get product details by id */
+app.get("/product-details", (req, res) => {
+  const { id } = req.query;
+  if (!id) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Product Id not found in request" });
+  }
+  connection.query(
+    `SELECT * FROM ${tableName} WHERE product_id =?`,
+    [id],
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while getting products" });
+      }
+      return res.status(200).json({ status: 200, data: result });
+    }
+  );
+});
+
 /* Get products list */
 app.get("/products", (req, res) => {
-  connection.query(`SELECT * FROM ${tableName}`, (err, result) => {
-    if (err) {
-      return res
-        .status(400)
-        .json({ status: 400, message: "Error while getting products" });
+  const { pageNumber, pageSize } = req.query;
+  const limit = parseInt(pageSize);
+  const offset = (parseInt(pageNumber) - 1) * limit;
+  connection.query(
+    `SELECT * FROM ${tableName} LIMIT ? OFFSET ?`,
+    [limit, offset],
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while getting products" });
+      }
+      return res.status(200).json({ status: 200, data: result });
     }
-    return res.status(200).json({ status: 200, data: result });
-  });
+  );
 });
 
 /* Get top level categories list */

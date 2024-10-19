@@ -1,4 +1,6 @@
 import {
+  Avatar,
+  Box,
   Paper,
   Table,
   TableBody,
@@ -6,56 +8,159 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
 } from "@mui/material";
-
-function createData(
-  name: string,
-  calories: number,
-  fat: number,
-  carbs: number,
-  protein: number
-) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
-  createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
-  createData("Eclair", 262, 16.0, 24, 6.0),
-  createData("Cupcake", 305, 3.7, 67, 4.3),
-  createData("Gingerbread", 356, 16.0, 49, 3.9),
-];
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
+import { getProducts } from "../../../../store/customer/product/action";
+import {
+  formatAmount,
+  formattedDateTime,
+  productsHeader,
+  textTruncate,
+} from "../../utils/productUtil";
+import ActionButton from "../../../../common/components/actionButton";
+import { Delete, Edit, Visibility } from "@mui/icons-material";
+import AppColors from "../../../../common/appColors";
+import { pageSizes } from "../../../../common/constants";
+import { useNavigate } from "react-router-dom";
+import AdminAppRoutes from "../../../../common/adminRoutes";
 
 export default function ProductsTable() {
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const [pageNumber, setPageNumber] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const { products, totalProductCount } = useSelector(
+    (state: RootState) => state.product
+  );
+
+  useEffect(() => {
+    dispatch(getProducts(pageNumber + 1, pageSize));
+  }, [dispatch, pageNumber, pageSize]);
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPageNumber(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setPageSize(parseInt(event.target.value, 10));
+    setPageNumber(0);
+  };
+
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Dessert (100g serving)</TableCell>
-            <TableCell align="right">Calories</TableCell>
-            <TableCell align="right">Fat&nbsp;(g)</TableCell>
-            <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-            <TableCell align="right">Protein&nbsp;(g)</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
+    <Paper className="bg-darkpurple">
+      <TableContainer>
+        <Table aria-label="simple table">
+          <TableHead>
             <TableRow
-              key={row.name}
-              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              sx={{ "td , th": { borderBottom: "0.5px solid #9f5eff" } }}
             >
-              <TableCell component="th" scope="row">
-                {row.name}
-              </TableCell>
-              <TableCell align="right">{row.calories}</TableCell>
-              <TableCell align="right">{row.fat}</TableCell>
-              <TableCell align="right">{row.carbs}</TableCell>
-              <TableCell align="right">{row.protein}</TableCell>
+              {productsHeader.map((header, index) => {
+                const align =
+                  index === productsHeader.length - 1 ? "center" : "left";
+                return (
+                  <TableCell
+                    sx={{ color: AppColors.white }}
+                    align={align}
+                    key={index}
+                  >
+                    {header}
+                  </TableCell>
+                );
+              })}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+
+          <TableBody>
+            {products.map((product) => (
+              <TableRow
+                key={product.productId}
+                sx={{ "td , th": { borderBottom: "0.5px solid #9f5eff57" } }}
+              >
+                <StyledTableCell>{product.productId}</StyledTableCell>
+                <StyledTableCell>
+                  <Avatar
+                    src={product?.thumbnail?.[0]}
+                    alt={"product-image"}
+                    variant="rounded"
+                    sx={{ width: 54, height: 54 }}
+                  />
+                </StyledTableCell>
+                <StyledTableCell>{product.productName}</StyledTableCell>
+                <StyledTableCell className="whitespace-pre-wrap">
+                  {textTruncate(product.description, 120)}
+                </StyledTableCell>
+                <StyledTableCell>{product.brand}</StyledTableCell>
+                <StyledTableCell className="whitespace-nowrap">
+                  {formatAmount(product.price)}
+                </StyledTableCell>
+                <StyledTableCell>
+                  {formattedDateTime(product.createdAt)}
+                </StyledTableCell>
+                <TableCell align="center" sx={{ color: AppColors.lightWhite }}>
+                  <Box className="flex items-center justify-between space-x-2">
+                    <ActionButton
+                      startIcon={Visibility}
+                      onClick={() => {
+                        navigate(
+                          AdminAppRoutes.viewProduct + product?.productId
+                        );
+                      }}
+                      text={"View"}
+                    />
+                    <ActionButton
+                      startIcon={Edit}
+                      onClick={() => {}}
+                      text={"Edit"}
+                    />
+                    <ActionButton
+                      startIcon={Delete}
+                      onClick={() => {}}
+                      text={"Delete"}
+                    />
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <TablePagination
+        rowsPerPageOptions={pageSizes}
+        component="div"
+        count={totalProductCount}
+        rowsPerPage={pageSize}
+        page={pageNumber}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        sx={{
+          backgroundColor: AppColors.darkPurple,
+          color: AppColors.lightWhite,
+        }}
+      />
+    </Paper>
+  );
+}
+
+function StyledTableCell({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <TableCell
+      align="left"
+      sx={{ color: AppColors.lightWhite }}
+      className={className}
+    >
+      {children}
+    </TableCell>
   );
 }

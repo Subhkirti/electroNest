@@ -19,40 +19,6 @@ import {
 import { toast } from "react-toastify";
 import AppStrings from "../../../common/appStrings";
 
-const findProducts =
-  (reqData: ProductSearchReqBody) => async (dispatch: ActionDispatch) => {
-    const {
-      colors,
-      minPrice,
-      maxPrice,
-      discount,
-      category,
-      stock,
-      sort,
-      pageNumber,
-      pageSize,
-    } = reqData;
-
-    dispatch({ type: ActionTypes.FIND_PRODUCTS_REQUEST });
-
-    try {
-      const res = await axios.get(
-        `${ApiUrls.findProducts}/color=${colors}&minPrice=${minPrice}&maxPrice=${maxPrice}&minDiscount=${discount}&category=${category}&stock=${stock}&sort=${sort}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
-        headersConfig
-      );
-
-      dispatch({
-        type: ActionTypes.FIND_PRODUCTS_SUCCESS,
-        payload: res?.data?.data,
-      });
-    } catch (error) {
-      handleCatchError({
-        error,
-        actionType: ActionTypes.FIND_PRODUCTS_FAILURE,
-      });
-    }
-  };
-
 const getTopLevelCategories = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_TOP_LEVEL_CATEGORIES_REQUEST });
 
@@ -124,19 +90,76 @@ const getThirdLevelCategories =
     }
   };
 
+const getProducts =
+  (pageNumber: number, pageSize: number) =>
+  async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.GET_PRODUCTS_REQUEST });
+
+    try {
+      const res = await axios.get(
+        `${ApiUrls.getProducts}pageNumber=${pageNumber}&pageSize=${
+          pageSize || 10
+        }`
+      );
+
+      dispatch({
+        type: ActionTypes.GET_PRODUCTS_SUCCESS,
+        payload: {
+          pageNumber,
+          data:
+            res?.data?.data?.length > 0 ? res.data.data.map(productMap) : [],
+        },
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_PRODUCTS_FAILURE,
+      });
+    }
+  };
+const findProducts =
+  (reqData: ProductSearchReqBody) => async (dispatch: ActionDispatch) => {
+    const {
+      colors,
+      minPrice,
+      maxPrice,
+      discount,
+      category,
+      stock,
+      sort,
+      pageNumber,
+      pageSize,
+    } = reqData;
+
+    dispatch({ type: ActionTypes.FIND_PRODUCTS_REQUEST });
+
+    try {
+      const res = await axios.get(
+        `${ApiUrls.findProducts}color=${colors}&minPrice=${minPrice}&maxPrice=${maxPrice}&minDiscount=${discount}&category=${category}&stock=${stock}&sort=${sort}&pageNumber=${pageNumber}&pageSize=${pageSize}`
+      );
+
+      dispatch({
+        type: ActionTypes.FIND_PRODUCTS_SUCCESS,
+        payload: res?.data?.data,
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.FIND_PRODUCTS_FAILURE,
+      });
+    }
+  };
 const findProductsById =
   (productId: number) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.FIND_PRODUCT_BY_ID_REQUEST });
 
     try {
-      const res = await axios.get(
-        `${ApiUrls.findProductsById}/${productId}`,
-        headersConfig
-      );
+      const res = await axios.get(`${ApiUrls.findProducts}id=${productId}`);
 
       dispatch({
         type: ActionTypes.FIND_PRODUCT_BY_ID_SUCCESS,
-        payload: res?.data?.data,
+        payload:
+          res?.data?.data?.length > 0 ? productMap(res?.data?.data[0]) : {},
       });
     } catch (error) {
       handleCatchError({
@@ -157,6 +180,7 @@ const addProduct =
         type: ActionTypes.ADD_PRODUCT_SUCCESS,
         payload: res?.data?.data ? productMap(res?.data?.data) : {},
       });
+      res?.data?.data && toast.success("Product added successfully");
     } catch (error) {
       handleCatchError({
         error,
@@ -184,6 +208,7 @@ const uploadFile = async (filePath: File | null) => {
 };
 
 export {
+  getProducts,
   findProducts,
   findProductsById,
   addProduct,

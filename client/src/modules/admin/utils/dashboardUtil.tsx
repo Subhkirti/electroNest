@@ -6,6 +6,7 @@ import {
 } from "@mui/icons-material";
 import { SvgIconTypeMap } from "@mui/material";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
+import AppColors from "../../../common/appColors";
 
 interface SalesDataItem {
   stats: string;
@@ -18,27 +19,27 @@ const salesData: SalesDataItem[] = [
   {
     stats: "245K",
     title: "Sales",
-    color: "#eab500",
+    color: AppColors.yellow,
     icon: TrendingUp,
   },
 
   {
     stats: "12.5K",
     title: "Customers",
-    color: "#21d266",
+    color: AppColors.green,
     icon: AccountCircle,
   },
 
   {
     stats: "15.45K",
     title: "Products",
-    color: "#e05240",
+    color: AppColors.red,
     icon: SettingsCell,
   },
   {
     stats: "88K",
     title: "Revenue",
-    color: "#0ebaeb",
+    color: AppColors.blue,
     icon: AttachMoney,
   },
 ];
