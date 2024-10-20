@@ -1,6 +1,5 @@
-import { SvgIconProps, SvgIconTypeMap } from "@mui/material";
+import { SvgIconTypeMap } from "@mui/material";
 import {
-  AddShoppingCart,
   Category,
   Dashboard,
   Groups,
@@ -14,6 +13,7 @@ interface AdminMenuItem {
   path: string;
   icon: OverridableComponent<SvgIconTypeMap<{}, "svg">>;
 }
+
 const adminMenuItems: AdminMenuItem[] = [
   {
     name: "Dashboard",
@@ -34,11 +34,6 @@ const adminMenuItems: AdminMenuItem[] = [
     name: "Orders",
     path: AdminAppRoutes.orders,
     icon: LocalShipping,
-  },
-  {
-    name: "Add Product",
-    path: AdminAppRoutes.addProduct,
-    icon: AddShoppingCart,
   },
 ];
 

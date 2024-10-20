@@ -26,10 +26,19 @@ function ProductFields({
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      !topLevelCategories.length && loadCategories();
+      (!topLevelCategories.length ||
+        !secondLevelCategories?.length ||
+        !thirdLevelCategories.length) &&
+        loadCategories();
     }, 10);
     return () => clearTimeout(timer);
-  }, [topLevelCategories.length]);
+  }, [
+    topLevelCategories.length,
+    secondLevelCategories?.length,
+    thirdLevelCategories.length,
+    product.topLevelCategory,
+    product.secondLevelCategory
+  ]);
 
   function loadCategories() {
     if (!topLevelCategories.length) dispatch(getTopLevelCategories());

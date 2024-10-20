@@ -7,10 +7,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { ProductReqBody } from "../../../customer/types/productTypes";
 import Loader from "../../../../common/components/loader";
 import { useLocation } from "react-router-dom";
+import {
+  resetHeader,
+  setHeader,
+} from "../../../../store/customer/header/action";
 
 function ViewProduct() {
   const initState = {
-    thumbnail: '',
+    thumbnail: "",
     images: [],
     brand: "",
     title: "",
@@ -35,6 +39,13 @@ function ViewProduct() {
   );
 
   useEffect(() => {
+    dispatch(
+      setHeader({
+        title: product.title,
+        showBackIcon: true,
+      })
+    );
+
     dispatch(findProductsById(productId));
     productRes &&
       setProduct({
@@ -53,7 +64,10 @@ function ViewProduct() {
         secondLevelCategory: productRes.sectionId,
         thirdLevelCategory: productRes.itemId,
       });
-  }, [productRes?.productId]);
+    return () => {
+      dispatch(resetHeader());
+    };
+  }, [productRes?.productId, product.title]);
 
   return (
     <Grid container spacing={2} justifyContent={"center"}>

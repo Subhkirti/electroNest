@@ -32,7 +32,7 @@ export default function ProductsTable() {
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
-  const { products, totalProductCount } = useSelector(
+  const { products, totalCount } = useSelector(
     (state: RootState) => state.product
   );
 
@@ -52,7 +52,7 @@ export default function ProductsTable() {
   };
 
   return (
-    <Paper className="bg-darkpurple">
+    <Paper className="bg-purple">
       <TableContainer>
         <Table aria-label="simple table">
           <TableHead>
@@ -133,13 +133,12 @@ export default function ProductsTable() {
       <TablePagination
         rowsPerPageOptions={pageSizes}
         component="div"
-        count={totalProductCount}
+        count={totalCount}
         rowsPerPage={pageSize}
         page={pageNumber}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         sx={{
-          backgroundColor: AppColors.darkPurple,
           color: AppColors.lightWhite,
         }}
       />

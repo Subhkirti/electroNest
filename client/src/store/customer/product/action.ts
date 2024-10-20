@@ -108,6 +108,7 @@ const getProducts =
           pageNumber,
           data:
             res?.data?.data?.length > 0 ? res.data.data.map(productMap) : [],
+          totalCount: res?.data?.totalCount,
         },
       });
     } catch (error) {
@@ -140,7 +141,11 @@ const findProducts =
 
       dispatch({
         type: ActionTypes.FIND_PRODUCTS_SUCCESS,
-        payload: res?.data?.data,
+        payload: {
+          data:
+            res?.data?.data?.length > 0 ? res.data.data.map(productMap) : [],
+          totalCount: res?.data?.totalCount,
+        },
       });
     } catch (error) {
       handleCatchError({

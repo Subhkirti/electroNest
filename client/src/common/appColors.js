@@ -5,6 +5,7 @@ const AppColors = {
   lightPurple: "#9f5eff",
   darkPurple: "#090925",
   purple: "#000015",
+  purple01: "#2c2c54",
   white: "#fff",
   lightWhite: "rgb(203 213 225)",
   yellow: "#eab500",

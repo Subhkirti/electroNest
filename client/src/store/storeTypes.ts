@@ -1,12 +1,15 @@
 import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { User } from "../modules/customer/types/userTypes";
 import { Product } from "../modules/customer/types/productTypes";
+import { SvgIconTypeMap } from "@mui/material";
+import { OverridableComponent } from "@mui/material/OverridableComponent";
 
 interface RootState {
   auth: AuthState;
   product: ProductState;
   cart: CartState;
   order: OrderState;
+  header: HeaderState
 }
 
 interface RootAction {
@@ -32,7 +35,7 @@ interface ProductState {
   product: Product | null;
   isLoading: boolean;
   error: string | null;
-  totalProductCount: number;
+  totalCount: number;
 }
 
 interface CartState {
@@ -49,6 +52,18 @@ interface OrderState {
   error: string | null;
 }
 
+interface HeaderButtons {
+  icon?:  OverridableComponent<SvgIconTypeMap<{}, "svg">>;
+  onClick: () => void;
+  text: string;
+}
+
+interface HeaderState {
+  title: string;
+  showBackIcon?: boolean;
+  buttons?: HeaderButtons[];
+}
+
 export type {
   RootState,
   RootAction,
@@ -58,4 +73,5 @@ export type {
   ProductState,
   CartState,
   OrderState,
+  HeaderState
 };

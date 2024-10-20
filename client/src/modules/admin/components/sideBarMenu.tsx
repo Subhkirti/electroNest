@@ -4,26 +4,30 @@ import {
   Drawer,
   List,
   ListItem,
-  ListItemButton,
   ListItemIcon,
   ListItemText,
   Toolbar,
+  Tooltip,
+  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { adminMenuItems } from "../utils/menuUtil";
+import AppIcons from "../../../common/appIcons";
+import packageJson from "../../../../package.json";
+import { ArrowLeft, ArrowRight, BorderLeft } from "@mui/icons-material";
+import { useState } from "react";
 
-function SideBarMenu({ children }: { children: React.ReactNode }) {
+function SideBarMenu({ openDrawer }: { openDrawer: boolean }) {
   const navigate = useNavigate();
   const theme = useTheme();
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
   const location = useLocation();
+  const currentVersion = packageJson.version;
 
   const drawer = (
     <Box className="overflow-auto flex flex-col justify-between">
-      {isLargeScreen && <Toolbar></Toolbar>}
-
       <List>
         {adminMenuItems.map((menuItem, index) => {
           const activeItem = location?.pathname === menuItem.path;
@@ -44,6 +48,16 @@ function SideBarMenu({ children }: { children: React.ReactNode }) {
             </ListItem>
           );
         })}
+        <ListItemIcon style={{ width: "100%" }} className="fixed bottom-0 ">
+          <Box style={{ left: openDrawer ? "50px" : "20px" }}>
+            <img src={AppIcons.imgLogo} width={"100px"} alt="mm logo" />
+            <Typography sx={{ fontSize: "10px" }} className=" text-lightpurple">
+              {openDrawer
+                ? `Current version: ${currentVersion}`
+                : `v${currentVersion}`}
+            </Typography>
+          </Box>
+        </ListItemIcon>
       </List>
     </Box>
   );
@@ -52,9 +66,9 @@ function SideBarMenu({ children }: { children: React.ReactNode }) {
     <div>
       <Box sx={{ display: isLargeScreen ? "flex" : "block" }}>
         <CssBaseline />
-
         <Drawer
-          variant={isLargeScreen ? "permanent" : "temporary"}
+          open={openDrawer}
+          variant="persistent"
           sx={{
             width: "16%",
             flexShrink: 1,
@@ -63,8 +77,6 @@ function SideBarMenu({ children }: { children: React.ReactNode }) {
         >
           {drawer}
         </Drawer>
-
-        <div className="w-full p-10 pr-0">{children}</div>
       </Box>
     </div>
   );

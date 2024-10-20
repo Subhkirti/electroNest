@@ -203,16 +203,36 @@ app.get("/products", (req, res) => {
   const { pageNumber, pageSize } = req.query;
   const limit = parseInt(pageSize);
   const offset = (parseInt(pageNumber) - 1) * limit;
+
+  /* Count query */
   connection.query(
-    `SELECT * FROM ${tableName} LIMIT ? OFFSET ?`,
-    [limit, offset],
-    (err, result) => {
+    `SELECT COUNT(*) as totalCount FROM ${tableName}`,
+    (err, countResult) => {
       if (err) {
         return res
           .status(400)
-          .json({ status: 400, message: "Error while getting products" });
+          .json({ status: 400, message: "Error while counting products" });
       }
-      return res.status(200).json({ status: 200, data: result });
+
+      const totalCount = countResult[0].totalCount;
+      /* Get Products query */
+      connection.query(
+        `SELECT * FROM ${tableName} LIMIT ? OFFSET ?`,
+        [limit, offset],
+        (err, result) => {
+          if (err) {
+            return res
+              .status(400)
+              .json({ status: 400, message: "Error while getting products" });
+          }
+
+          return res.status(200).json({
+            status: 200,
+            data: result,
+            totalCount: totalCount,
+          });
+        }
+      );
     }
   );
 });

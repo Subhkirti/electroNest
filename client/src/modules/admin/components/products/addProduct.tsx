@@ -7,6 +7,10 @@ import { addProduct } from "../../../../store/customer/product/action";
 import { ProductReqBody } from "../../../customer/types/productTypes";
 import Loader from "../../../../common/components/loader";
 import ProductFields from "./productFields";
+import {
+  resetHeader,
+  setHeader,
+} from "../../../../store/customer/header/action";
 
 const initState = {
   thumbnail: "",
@@ -33,12 +37,25 @@ function AddProduct() {
   );
 
   useEffect(() => {
+    // set header props
+    dispatch(
+      setHeader({
+        title: AppStrings.addProduct,
+        showBackIcon: true,
+      })
+    );
+
+    // set product details after submission
     const timer = setTimeout(() => {
       if (productRes && productRes.productId) {
         setProduct(initState);
       }
     }, 10);
-    return () => clearTimeout(timer);
+
+    return () => {
+      clearTimeout(timer);
+      dispatch(resetHeader());
+    };
   }, [product, productRes?.productId]);
 
   function handleOnChange(value: any, fieldId: string) {

@@ -9,7 +9,7 @@ const initState: ProductState = {
   product: null,
   isLoading: false,
   error: null,
-  totalProductCount: 100,
+  totalCount: 0,
 };
 
 function productReducer(
@@ -30,7 +30,8 @@ function productReducer(
         ...state,
         isLoading: false,
         error: null,
-        products: action?.payload,
+        products: action?.payload?.data,
+        totalCount: action?.payload?.totalCount,
       };
     case ActionTypes.FIND_PRODUCT_BY_ID_SUCCESS:
       return {
@@ -49,6 +50,7 @@ function productReducer(
             ? [...state?.products, action?.payload]
             : action?.payload,
         product: action?.payload,
+        totalCount: state.totalCount + 1,
       };
     case ActionTypes.GET_TOP_LEVEL_CATEGORIES_SUCCESS:
       return {
@@ -83,6 +85,7 @@ function productReducer(
               ? action.payload.data
               : [...state.products, ...action.payload.data]
             : state.products,
+        totalCount: action.payload.totalCount,
       };
     case ActionTypes.FIND_PRODUCTS_FAILURE:
     case ActionTypes.FIND_PRODUCT_BY_ID_FAILURE:
