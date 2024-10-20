@@ -194,6 +194,29 @@ const addProduct =
     }
   };
 
+const deleteProduct =
+  (productId: number) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.DELETE_PRODUCT_REQUEST });
+
+    try {
+      const res = await axios.delete(
+        `${ApiUrls.deleteProduct}id=${productId}`,
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.DELETE_PRODUCT_SUCCESS,
+        payload: productId,
+      });
+      res?.data?.data && toast.success("Product Deleted Successfully");
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.DELETE_PRODUCT_FAILURE,
+      });
+    }
+  };
+
 const uploadFile = async (filePath: File | null) => {
   try {
     const formData = new FormData();
@@ -217,6 +240,7 @@ export {
   findProducts,
   findProductsById,
   addProduct,
+  deleteProduct,
   uploadFile,
   getTopLevelCategories,
   getSecondLevelCategories,

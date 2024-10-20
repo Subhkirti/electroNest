@@ -24,6 +24,7 @@ function productReducer(
     case ActionTypes.GET_SECOND_LEVEL_CATEGORIES_REQUEST:
     case ActionTypes.GET_THIRD_LEVEL_CATEGORIES_REQUEST:
     case ActionTypes.GET_PRODUCTS_REQUEST:
+    case ActionTypes.DELETE_PRODUCT_REQUEST:
       return { ...state, isLoading: true, error: null };
     case ActionTypes.FIND_PRODUCTS_SUCCESS:
       return {
@@ -87,6 +88,17 @@ function productReducer(
             : state.products,
         totalCount: action.payload.totalCount,
       };
+    case ActionTypes.DELETE_PRODUCT_SUCCESS:
+      const filteredProducts = state.products.filter(
+        (product) => product.productId !== action?.payload
+      );
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        products: filteredProducts,
+        totalCount: state.totalCount - 1,
+      };
     case ActionTypes.FIND_PRODUCTS_FAILURE:
     case ActionTypes.FIND_PRODUCT_BY_ID_FAILURE:
     case ActionTypes.ADD_PRODUCT_FAILURE:
@@ -94,6 +106,7 @@ function productReducer(
     case ActionTypes.GET_SECOND_LEVEL_CATEGORIES_FAILURE:
     case ActionTypes.GET_THIRD_LEVEL_CATEGORIES_FAILURE:
     case ActionTypes.GET_PRODUCTS_FAILURE:
+    case ActionTypes.DELETE_PRODUCT_FAILURE:
       return { ...state, isLoading: false, error: action?.payload };
     default:
       return state;

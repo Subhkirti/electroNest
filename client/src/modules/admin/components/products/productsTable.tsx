@@ -13,7 +13,10 @@ import {
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
-import { getProducts } from "../../../../store/customer/product/action";
+import {
+  deleteProduct,
+  getProducts,
+} from "../../../../store/customer/product/action";
 import {
   formatAmount,
   formattedDateTime,
@@ -119,7 +122,9 @@ export default function ProductsTable() {
                     />
                     <ActionButton
                       startIcon={Delete}
-                      onClick={() => {}}
+                      onClick={() => {
+                        dispatch(deleteProduct(product?.productId));
+                      }}
                       text={"Delete"}
                     />
                   </Box>

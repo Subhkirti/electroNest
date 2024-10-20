@@ -176,6 +176,31 @@ app.post("/product/add", (req, res) => {
   );
 });
 
+/* delete product */
+app.delete("/product/delete", (req, res) => {
+  const { id } = req.query;
+  if (!id) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Product Id not found in request" });
+  }
+  connection.query(
+    `DELETE FROM ${tableName} WHERE product_id = ?`,
+    [parseInt(id)],
+    (err) => {
+      console.log("err:", err);
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while getting products" });
+      }
+      return res
+        .status(200)
+        .json({ status: 200, data: "Product deleted successfully" });
+    }
+  );
+});
+
 /* Get product details by id */
 app.get("/product-details", (req, res) => {
   const { id } = req.query;
@@ -469,95 +494,3 @@ function generateSlug(name) {
         .replace(/^-+|-+$/g, "")
     : ""; // Remove leading and trailing hyphens
 }
-
-/*
-reqBody format:::===>
-  {
-  "categories": [
-    {
-      "name": "Televisions & accessories",
-      "sections": [
-        {
-          "name": "LED TVs",
-          "items": [
-            { "name": "All LED Tvs" },
-            { "name": "QLED" },
-            { "name": "OLED TVs" },
-            { "name": "4K Ultra HD TVs" },
-            { "name": "8K Ultra HD TVs" }
-          ]
-        },
-        {
-          "name": "TV accessories ",
-          "items": [
-            { "name": "All TV Accessories" },
-            { "name": "V Wall Mount & Stands" },
-            { "name": "Cables & Connectors" },
-            { "name": "Remotes & IR Blasters" }
-          ]
-        },
-        {
-          "name": "Projectors",
-          "items": [
-            {
-              "name": "Short Throw Projectors"
-            },
-            {
-              "name": "Ultra Short Throw Projectors"
-            },
-            { "name": "Full HD Projectors" },
-            { "name": "Ultra HD 4K Projectors" }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Home Appliances",
-
-      "sections": [
-        {
-          "name": "Washing Machines & Dryers",
-          "items": [
-            {
-              "name": "Front Load Washing Machines"
-            },
-            {
-              "name": "Top Load Washing Machines"
-            },
-            {
-              "name": "Semi Automatic Washing Machines"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Phones Wearables",
-      "sections": [
-        {
-          "name": "Mobile Phones",
-          "items": [
-            { "name": "Android Phones" },
-            { "name": "iPhones" },
-            {
-              "name": "Flip and Fold Mobile Phones"
-            },
-            { "name": "Gaming Mobile Phones" }
-          ]
-        },
-        {
-          "name": "Headphones & Earphones",
-          "items": [
-            { "name": "Bluetooth Earphones" },
-            { "name": "Bluetooth Headphones" },
-            { "name": "Truly Wireless Earbuds" },
-            { "name": "Bluetooth" },
-            { "name": "Headphones" }
-          ]
-        }
-      ]
-    }
-  ]
-}
-
-*/
