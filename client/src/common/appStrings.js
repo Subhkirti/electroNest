@@ -12,7 +12,9 @@ const AppStrings = {
   congratulations: "Congratulations",
   viewSales: "View Sales",
   monthlyOverview: "Monthly Overview",
-  addProduct: "Add product",
+  addProduct: "Add Product",
+  editProduct: "Edit Product",
+
   dashboard: "Dashboard",
   welcomeToDashboard: "Welcome to the Admin Dashboard",
 

@@ -6,6 +6,9 @@ const AddProducts = lazy(() =>
 const ViewProduct = lazy(() =>
   import("../../modules/admin/components/products/viewProduct")
 );
+const EditProduct = lazy(() =>
+  import("../../modules/admin/components/products/editProduct")
+);
 const Products = lazy(() =>
   import("../../modules/admin/components/products/products")
 );
@@ -24,6 +27,10 @@ const authRoutes = [
   {
     path: "/products/view/:id",
     component: ViewProduct,
+  },
+  {
+    path: "/products/edit/:id",
+    component: EditProduct,
   },
   {
     path: "/products",

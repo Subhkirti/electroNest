@@ -79,7 +79,7 @@ export default function InputField({
       inputProps={type === "file" ? { accept: acceptFile, multiple } : {}}
       slotProps={{
         inputLabel: {
-          shrink: readOnly ? true : undefined,
+          shrink: value ? true : readOnly ? true : undefined,
         },
         input: {
           readOnly: readOnly,

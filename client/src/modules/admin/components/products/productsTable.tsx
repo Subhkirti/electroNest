@@ -117,7 +117,11 @@ export default function ProductsTable() {
                     />
                     <ActionButton
                       startIcon={Edit}
-                      onClick={() => {}}
+                      onClick={() => {
+                        navigate(
+                          AdminAppRoutes.editProduct + product?.productId
+                        );
+                      }}
                       text={"Edit"}
                     />
                     <ActionButton
