@@ -14,6 +14,7 @@ const AppStrings = {
   monthlyOverview: "Monthly Overview",
   addProduct: "Add product",
   dashboard: "Dashboard",
+  welcomeToDashboard: "Welcome to the Admin Dashboard",
 
   /* errors */
   passwordError:

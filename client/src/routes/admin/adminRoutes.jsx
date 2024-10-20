@@ -13,8 +13,8 @@ function AdminRoutes() {
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
   const [openDrawer, setOpenDrawer] = useState(isLargeScreen ? true : false);
   const [openTooltip, setOpenTooltip] = useState(false);
-  const menuLeftSpace = openDrawer ? "16%" : "0";
-  
+  const menuLeftSpace = openDrawer ? "14%" : "0";
+
   return (
     <div>
       <ToastContainer />
@@ -28,14 +28,10 @@ function AdminRoutes() {
               path={route.path}
               element={
                 <div
-                  className={`w-full p-10 pr-0 `}
-                  style={{ paddingLeft: menuLeftSpace }}
+                  className="py-10 pl-10"
+                  style={{ marginLeft: menuLeftSpace }}
                 >
-                  {
-                    <Collapse in={true} orientation="horizontal">
-                      <route.component />
-                    </Collapse>
-                  }
+                  {<route.component />}
                 </div>
               }
             />

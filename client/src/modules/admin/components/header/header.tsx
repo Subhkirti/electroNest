@@ -12,8 +12,8 @@ function Header({ leftSpace }: { leftSpace: any }) {
   return (
     <>
       <Box
-        className="bg-darkpurple flex items-center justify-between  text-white absolute top-0
-        right-0 p-6 py-3"
+        className="bg-darkpurple flex items-center justify-between  text-white fixed top-0
+        right-0 px-10 py-3"
         style={{ left: leftSpace }}
         zIndex={999}
       >

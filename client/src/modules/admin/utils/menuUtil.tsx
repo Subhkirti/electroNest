@@ -4,36 +4,52 @@ import {
   Dashboard,
   Groups,
   LocalShipping,
+  Logout,
 } from "@mui/icons-material";
 import AdminAppRoutes from "../../../common/adminRoutes";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
+import { getCurrentUser } from "../../customer/utils/localStorageUtils";
 
 interface AdminMenuItem {
   name: string;
   path: string;
   icon: OverridableComponent<SvgIconTypeMap<{}, "svg">>;
+  isLogout?: boolean;
+  active: boolean;
 }
 
+const user = getCurrentUser();
 const adminMenuItems: AdminMenuItem[] = [
   {
     name: "Dashboard",
     path: AdminAppRoutes.dashboard,
     icon: Dashboard,
+    active: true,
   },
   {
     name: "Products",
     path: AdminAppRoutes.products,
     icon: Category,
+    active: true,
   },
   {
     name: "Customers",
     path: AdminAppRoutes.customers,
     icon: Groups,
+    active: true,
   },
   {
     name: "Orders",
     path: AdminAppRoutes.orders,
     icon: LocalShipping,
+    active: true,
+  },
+  {
+    name: "Logout",
+    path: AdminAppRoutes.orders,
+    icon: Logout,
+    isLogout: true,
+    active: user ? true : false,
   },
 ];
 
