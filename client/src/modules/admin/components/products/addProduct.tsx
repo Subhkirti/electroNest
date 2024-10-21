@@ -11,27 +11,13 @@ import {
   resetHeader,
   setHeader,
 } from "../../../../store/customer/header/action";
-
-const initState = {
-  thumbnail: "",
-  images: [],
-  brand: "",
-  title: "",
-  description: "",
-  price: null,
-  quantity: null,
-  color: null,
-  size: null,
-  disPercentage: null,
-  disPrice: null,
-  topLevelCategory: "",
-  secondLevelCategory: "",
-  thirdLevelCategory: "",
-};
+import { productInitState } from "../../utils/productUtil";
+import { useNavigate } from "react-router-dom";
 
 function AddProduct() {
   const dispatch = useDispatch<AppDispatch>();
-  const [product, setProduct] = useState<ProductReqBody>(initState);
+  const navigate = useNavigate();
+  const [product, setProduct] = useState<ProductReqBody>(productInitState);
   const { isLoading, product: productRes } = useSelector(
     (state: RootState) => state.product
   );
@@ -48,7 +34,7 @@ function AddProduct() {
     // set product details after submission
     const timer = setTimeout(() => {
       if (productRes && productRes.productId) {
-        setProduct(initState);
+        setProduct(productInitState);
       }
     }, 10);
 
@@ -64,7 +50,7 @@ function AddProduct() {
 
   async function handleOnAddProduct(e: { preventDefault: () => void }) {
     e.preventDefault();
-    dispatch(addProduct(product));
+    dispatch(addProduct(product, navigate));
   }
 
   return (

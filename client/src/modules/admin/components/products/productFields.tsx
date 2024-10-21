@@ -37,7 +37,7 @@ function ProductFields({
     secondLevelCategories?.length,
     thirdLevelCategories.length,
     product.topLevelCategory,
-    product.secondLevelCategory
+    product.secondLevelCategory,
   ]);
 
   function loadCategories() {
@@ -98,13 +98,13 @@ function ProductFields({
               />
             </div>
             {product.images?.length > 0 ? (
-              <div className="flex space-x-4 items-center">
+              <div className="flex space-x-4 items-center lg:max-w-[600px] sm:max-w-[300px] overflow-x-scroll">
                 {product.images?.map((image: string | File) => {
                   return (
                     <Avatar
                       src={image.toString()}
                       variant="rounded"
-                      alt="product-images"
+                      alt="Product-images"
                       className="border border-slate-400 p-4 rounded-md"
                       sx={{ width: 100, height: 100 }}
                     />

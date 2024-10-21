@@ -16,7 +16,7 @@ const ApiUrls = {
   getTopLevelCategories: apiBaseUrl + "/top-level-categories",
   getSecondLevelCategories: apiBaseUrl + "/second-level-categories",
   getThirdLevelCategories: apiBaseUrl + "/third-level-categories",
-  uploadFile: "https://api.escuelajs.co/api/v1/files/upload",
+  uploadFile: "https://v2.convertapi.com/upload",
 };
 
 export default ApiUrls;

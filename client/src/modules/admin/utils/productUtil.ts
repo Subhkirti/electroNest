@@ -32,6 +32,22 @@ const productColors = [
   { label: "Cyan", value: "cyan" },
   { label: "Magenta", value: "magenta" },
 ];
+const productInitState = {
+  thumbnail: "",
+  images: [],
+  brand: "",
+  title: "",
+  description: "",
+  price: null,
+  quantity: null,
+  color: null,
+  size: null,
+  disPercentage: null,
+  disPrice: null,
+  topLevelCategory: "",
+  secondLevelCategory: "",
+  thirdLevelCategory: "",
+};
 
 const productsHeader = [
   "Id",
@@ -70,6 +86,7 @@ function formatAmount(amount: Float32Array | string) {
 
 
 export {
+  productInitState,
   productStateIds,
   productColors,
   productsHeader,

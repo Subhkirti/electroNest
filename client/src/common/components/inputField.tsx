@@ -44,8 +44,8 @@ export default function InputField({
 
       for (const file of files) {
         const res = await uploadFile(file);
-        if (res?.location) {
-          fileUrls.push(res.location);
+        if (res?.Url) {
+          fileUrls.push(res.Url);
         }
       }
 

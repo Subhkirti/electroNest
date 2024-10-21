@@ -18,6 +18,8 @@ import {
 } from "../../../modules/customer/mappers/productsMapper";
 import { toast } from "react-toastify";
 import AppStrings from "../../../common/appStrings";
+import AdminAppRoutes from "../../../common/adminRoutes";
+import { NavigateFunction } from "react-router-dom";
 
 const getTopLevelCategories = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_TOP_LEVEL_CATEGORIES_REQUEST });
@@ -166,6 +168,8 @@ const findProductsById =
         payload:
           res?.data?.data?.length > 0 ? productMap(res?.data?.data[0]) : {},
       });
+      res?.data?.data?.length === 0 &&
+        toast.info(`Product details not found for id ${productId}`);
     } catch (error) {
       handleCatchError({
         error,
@@ -175,7 +179,7 @@ const findProductsById =
   };
 
 const addProduct =
-  (reqData: ProductReqBody) => async (dispatch: ActionDispatch) => {
+  (reqData: ProductReqBody, navigate: NavigateFunction) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.ADD_PRODUCT_REQUEST });
 
     try {
@@ -185,7 +189,11 @@ const addProduct =
         type: ActionTypes.ADD_PRODUCT_SUCCESS,
         payload: res?.data?.data ? productMap(res?.data?.data) : {},
       });
-      res?.data?.data && toast.success("Product added successfully");
+      if (res?.data?.data){
+        toast.success("Product added successfully");
+        navigate(AdminAppRoutes.products)
+      }
+  
     } catch (error) {
       handleCatchError({
         error,
@@ -220,7 +228,7 @@ const deleteProduct =
 const uploadFile = async (filePath: File | null) => {
   try {
     const formData = new FormData();
-    filePath && formData.append("file", filePath);
+    filePath && formData.append("filename", filePath);
 
     const res = await axios.post(ApiUrls.uploadFile, formData, {
       headers: {

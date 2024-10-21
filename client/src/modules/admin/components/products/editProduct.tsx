@@ -15,29 +15,15 @@ import {
   setHeader,
 } from "../../../../store/customer/header/action";
 import { useLocation } from "react-router-dom";
+import { productInitState } from "../../utils/productUtil";
 
-const initState = {
-  thumbnail: "",
-  images: [],
-  brand: "",
-  title: "",
-  description: "",
-  price: null,
-  quantity: null,
-  color: null,
-  size: null,
-  disPercentage: null,
-  disPrice: null,
-  topLevelCategory: "",
-  secondLevelCategory: "",
-  thirdLevelCategory: "",
-};
+
 
 function EditProduct() {
   const location = useLocation();
   const productId = parseInt(location?.pathname.split("/")?.[4]);
   const dispatch = useDispatch<AppDispatch>();
-  const [product, setProduct] = useState<ProductReqBody>(initState);
+  const [product, setProduct] = useState<ProductReqBody>(productInitState);
   const { isLoading, product: productRes } = useSelector(
     (state: RootState) => state.product
   );
@@ -83,13 +69,13 @@ function EditProduct() {
     setProduct({ ...product, [fieldId]: value });
   }
 
-  async function handleOnAddProduct(e: { preventDefault: () => void }) {
+  async function handleOnEditProduct(e: { preventDefault: () => void }) {
     e.preventDefault();
-    dispatch(addProduct(product));
+    // dispatch(addProduct(product));
   }
 
   return (
-    <form onSubmit={handleOnAddProduct}>
+    <form onSubmit={handleOnEditProduct}>
       <Grid container spacing={2} justifyContent={"center"}>
         <ProductFields product={product} handleOnChange={handleOnChange} />
 
