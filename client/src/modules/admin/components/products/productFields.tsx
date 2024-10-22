@@ -1,4 +1,4 @@
-import { Avatar, Grid, Typography } from "@mui/material";
+import { Avatar, Grid, InputLabel, Typography } from "@mui/material";
 import InputField from "../../../../common/components/inputField";
 import { productColors, productStateIds } from "../../utils/productUtil";
 import { ProductReqBody } from "../../../customer/types/productTypes";
@@ -11,6 +11,7 @@ import {
   getTopLevelCategories,
 } from "../../../../store/customer/product/action";
 import { HighlightOff } from "@mui/icons-material";
+import RichTextEditor from "../../../../common/components/richTextEditor";
 
 function ProductFields({
   isViewProductPage,
@@ -79,13 +80,13 @@ function ProductFields({
       </Grid>
 
       <Grid item xs={12} lg={12}>
-        <InputField
-          label={"Description"}
-          readOnly={isViewProductPage}
-          required={true}
+        <InputLabel className="text-white opacity-60 my-2">
+          {"Description"}
+        </InputLabel>
+        <RichTextEditor
           value={product.description}
-          id={productStateIds.description}
           onChange={handleOnChange}
+          id={productStateIds.description}
         />
       </Grid>
 

@@ -9,6 +9,7 @@ import {
   TableHead,
   TableRow,
   TablePagination,
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,6 +22,7 @@ import {
   formatAmount,
   formattedDateTime,
   productsHeader,
+  stripHtml,
   textTruncate,
 } from "../../utils/productUtil";
 import ActionButton from "../../../../common/components/actionButton";
@@ -79,65 +81,73 @@ export default function ProductsTable() {
           </TableHead>
 
           <TableBody>
-            {products.map((product) => (
-              <TableRow
-                key={product.productId}
-                sx={{ "td , th": { borderBottom: "0.5px solid #9f5eff57" } }}
-              >
-                <StyledTableCell>{product.productId}</StyledTableCell>
-                <StyledTableCell>
-                  <Avatar
-                    src={product?.thumbnail?.[0]}
-                    alt={"product-image"}
-                    variant="rounded"
-                    sx={{ width: 54, height: 54 }}
-                  />
-                </StyledTableCell>
-                <StyledTableCell>{product.productName}</StyledTableCell>
-                <StyledTableCell className="whitespace-pre-wrap">
-                  {textTruncate(product.description, 120)}
-                </StyledTableCell>
-                <StyledTableCell>{product.brand}</StyledTableCell>
-                <StyledTableCell className="whitespace-nowrap">
-                  {formatAmount(product.price)}
-                </StyledTableCell>
-                <StyledTableCell>
-                  {formattedDateTime(product.createdAt)}
-                </StyledTableCell>
-                <StyledTableCell>
-                  {formattedDateTime(product.updatedAt)}
-                </StyledTableCell>
-                <TableCell align="center" sx={{ color: AppColors.lightWhite }}>
-                  <Box className="flex items-center justify-between space-x-2">
-                    <ActionButton
-                      startIcon={Visibility}
-                      onClick={() => {
-                        navigate(
-                          AdminAppRoutes.viewProduct + product?.productId
-                        );
-                      }}
-                      text={"View"}
+            {products &&
+              products.map((product) => (
+                <TableRow
+                  key={product.productId}
+                  sx={{ "td , th": { borderBottom: "0.5px solid #9f5eff57" } }}
+                >
+                  <StyledTableCell>{product.productId}</StyledTableCell>
+                  <StyledTableCell>
+                    <Avatar
+                      src={product?.thumbnail?.[0]}
+                      alt={"product-image"}
+                      variant="rounded"
+                      sx={{ width: 54, height: 54 }}
                     />
-                    <ActionButton
-                      startIcon={Edit}
-                      onClick={() => {
-                        navigate(
-                          AdminAppRoutes.editProduct + product?.productId
-                        );
+                  </StyledTableCell>
+                  <StyledTableCell>{product.productName}</StyledTableCell>
+                  <StyledTableCell className="whitespace-pre-wrap">
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: textTruncate(product?.description, 300),
                       }}
-                      text={"Edit"}
-                    />
-                    <ActionButton
-                      startIcon={Delete}
-                      onClick={() => {
-                        dispatch(deleteProduct(product?.productId));
-                      }}
-                      text={"Delete"}
-                    />
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
+                    ></div>
+                  </StyledTableCell>
+                  <StyledTableCell>{product.brand}</StyledTableCell>
+                  <StyledTableCell className="whitespace-nowrap">
+                    {formatAmount(product.price)}
+                  </StyledTableCell>
+                  <StyledTableCell>
+                    {formattedDateTime(product.createdAt)}
+                  </StyledTableCell>
+                  <StyledTableCell>
+                    {formattedDateTime(product.updatedAt)}
+                  </StyledTableCell>
+                  <TableCell
+                    align="center"
+                    sx={{ color: AppColors.lightWhite }}
+                  >
+                    <Box className="flex items-center justify-between space-x-2">
+                      <ActionButton
+                        startIcon={Visibility}
+                        onClick={() => {
+                          navigate(
+                            AdminAppRoutes.viewProduct + product?.productId
+                          );
+                        }}
+                        text={"View"}
+                      />
+                      <ActionButton
+                        startIcon={Edit}
+                        onClick={() => {
+                          navigate(
+                            AdminAppRoutes.editProduct + product?.productId
+                          );
+                        }}
+                        text={"Edit"}
+                      />
+                      <ActionButton
+                        startIcon={Delete}
+                        onClick={() => {
+                          dispatch(deleteProduct(product?.productId));
+                        }}
+                        text={"Delete"}
+                      />
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>

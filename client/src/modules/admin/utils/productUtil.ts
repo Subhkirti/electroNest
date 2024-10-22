@@ -67,12 +67,17 @@ function formattedDateTime(dateString: Date) {
   return readableDate;
 }
 
-function textTruncate(str: string, maxLength: number) {
-  if (str.length <= maxLength) {
-    return str;
-  }
-  return str.slice(0, maxLength - 3) + "...";
-}
+const stripHtml = (html: string) => {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = html;
+  return tempDiv.textContent || tempDiv.innerText || "";
+};
+
+// Function to truncate text
+const textTruncate = (text: string, length: number) => {
+  if (text.length <= length) return text;
+  return text.substring(0, length) + "...";
+};
 
 function formatAmount(amount: Float32Array | string) {
   return (
@@ -85,7 +90,6 @@ function formatAmount(amount: Float32Array | string) {
   );
 }
 
-
 export {
   productInitState,
   productStateIds,
@@ -94,4 +98,5 @@ export {
   formattedDateTime,
   textTruncate,
   formatAmount,
+  stripHtml
 };
