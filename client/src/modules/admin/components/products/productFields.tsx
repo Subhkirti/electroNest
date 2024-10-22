@@ -4,12 +4,13 @@ import { productColors, productStateIds } from "../../utils/productUtil";
 import { ProductReqBody } from "../../../customer/types/productTypes";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   getSecondLevelCategories,
   getThirdLevelCategories,
   getTopLevelCategories,
 } from "../../../../store/customer/product/action";
+import { Close } from "@mui/icons-material";
 
 function ProductFields({
   isViewProductPage,
@@ -25,6 +26,7 @@ function ProductFields({
   const dispatch = useDispatch<AppDispatch>();
   const { topLevelCategories, secondLevelCategories, thirdLevelCategories } =
     useSelector((state: RootState) => state.product);
+  const [thumbnailImg, setThumbnailImg] = useState<string | File>("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -32,7 +34,9 @@ function ProductFields({
         !secondLevelCategories?.length ||
         !thirdLevelCategories.length) &&
         loadCategories();
+      setThumbnailImg(product?.thumbnail);
     }, 10);
+
     return () => clearTimeout(timer);
   }, [
     topLevelCategories.length,
@@ -202,16 +206,22 @@ function ProductFields({
   function thumbnail() {
     return (
       <Grid item xs={12} lg={12}>
-        {isViewProductPage ? (
+        {isViewProductPage || (isEditProductPage && thumbnailImg) ? (
           <div className="flex border-lightpurple justify-between border rounded-md p-6">
             <div>
               <Typography className="text-white">Thumbnail:</Typography>
-              <img
-                width={200}
-                height={200}
-                className="mt-4"
-                src={product?.thumbnail?.toString()}
-              />
+              <div className="relative">
+                <Close
+                  onClick={() => setThumbnailImg("")}
+                  className="text-slate-300 absolute top-[-10px] right-[-10px] cursor-pointer"
+                />
+                <img
+                  width={200}
+                  height={200}
+                  className="mt-4"
+                  src={thumbnailImg?.toString()}
+                />
+              </div>
             </div>
           </div>
         ) : (
@@ -222,7 +232,7 @@ function ProductFields({
             required={true}
             type="file"
             acceptFile="image/*"
-            value={product?.thumbnail || ""}
+            value={thumbnailImg || ""}
             onChange={handleOnChange}
           />
         )}

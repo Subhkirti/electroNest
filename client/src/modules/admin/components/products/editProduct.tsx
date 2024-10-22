@@ -38,33 +38,37 @@ function EditProduct() {
       })
     );
 
-    // fetch product details
     const timer = setTimeout(() => {
+      // Fetch product details
       dispatch(findProductsById(productId));
-      productRes &&
-        setProduct({
-          thumbnail: productRes?.thumbnail?.[0],
-          images: productRes?.images,
-          brand: productRes.brand,
-          title: productRes.productName,
-          description: productRes.description,
-          price: Number(productRes.price),
-          quantity: productRes.quantity,
-          color: productRes.color,
-          size: productRes.size,
-          disPercentage: Number(productRes.discountPercentage),
-          disPrice: Number(productRes.discountPrice),
-          topLevelCategory: productRes.categoryId,
-          secondLevelCategory: productRes.sectionId,
-          thirdLevelCategory: productRes.itemId,
-        });
     }, 10);
 
     return () => {
       clearTimeout(timer);
       dispatch(resetHeader());
     };
-  }, [productRes?.productId, product?.title]);
+  }, [product.title, productId]);
+
+  useEffect(() => {
+    if (!isLoading && productRes) {
+      setProduct({
+        thumbnail: productRes?.thumbnail?.[0] || "",
+        images: productRes?.images || [],
+        brand: productRes.brand || "",
+        title: productRes.productName || "",
+        description: productRes.description || "",
+        price: Number(productRes.price) || 0,
+        quantity: productRes.quantity || 0,
+        color: productRes.color || null,
+        size: productRes.size || null,
+        disPercentage: Number(productRes.discountPercentage) || 0,
+        disPrice: Number(productRes.discountPrice) || 0,
+        topLevelCategory: productRes.categoryId || "",
+        secondLevelCategory: productRes.sectionId || "",
+        thirdLevelCategory: productRes.itemId || "",
+      });
+    }
+  }, [isLoading, productRes?.productName]);
 
   function handleOnChange(value: any, fieldId: string) {
     setProduct({ ...product, [fieldId]: value });
