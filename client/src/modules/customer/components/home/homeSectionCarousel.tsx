@@ -17,8 +17,8 @@ function HomeSectionCarousel({
   };
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
-  const items = productsList.map((product) => (
-    <HomeSectionCard product={product} />
+  const items = productsList.map((product, index) => (
+    <HomeSectionCard product={product} key={index} />
   ));
 
   function slidePrev() {

@@ -12,7 +12,7 @@ import { getCurrentUser } from "../../customer/utils/localStorageUtils";
 
 interface AdminMenuItem {
   name: string;
-  path: string;
+  path: string | null;
   icon: OverridableComponent<SvgIconTypeMap<{}, "svg">>;
   isLogout?: boolean;
   active: boolean;
@@ -46,7 +46,7 @@ const adminMenuItems: AdminMenuItem[] = [
   },
   {
     name: "Logout",
-    path: AdminAppRoutes.orders,
+    path: null,
     icon: Logout,
     isLogout: true,
     active: user ? true : false,

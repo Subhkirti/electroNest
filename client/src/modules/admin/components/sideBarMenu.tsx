@@ -2,8 +2,8 @@ import {
   Avatar,
   Box,
   CssBaseline,
-  Divider,
   Drawer,
+  IconButton,
   List,
   ListItem,
   ListItemIcon,
@@ -21,8 +21,16 @@ import AdminAppRoutes from "../../../common/adminRoutes";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../store/storeTypes";
 import { logout } from "../../../store/customer/auth/action";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
 
-function SideBarMenu({ openDrawer }: { openDrawer: boolean }) {
+function SideBarMenu({
+  openDrawer,
+  setOpenDrawer,
+}: {
+  openDrawer: boolean;
+  setOpenDrawer: (value: boolean) => void;
+}) {
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
@@ -31,13 +39,17 @@ function SideBarMenu({ openDrawer }: { openDrawer: boolean }) {
   const location = useLocation();
   const currentVersion = packageJson.version;
 
+  const toggleDrawer = () => {
+    setOpenDrawer(!openDrawer);
+  };
+
   const drawer = (
     <Box className="overflow-auto flex flex-col justify-between">
       <List>
-        {/* user details section */}
+        {/* User details section */}
         <Link
           to={AdminAppRoutes.dashboard}
-          className="flex flex-col items-center mb-6 space-y-3"
+          className="flex flex-col items-center my-6 space-y-3"
         >
           <Avatar
             src={AppIcons.imgAdminProfile}
@@ -50,7 +62,7 @@ function SideBarMenu({ openDrawer }: { openDrawer: boolean }) {
           <hr className="bg-lightpurple w-full h-[0.3px] opacity-40 border-none" />
         </Link>
 
-        {/* menu lists */}
+        {/* Menu lists */}
         {adminMenuItems.map((menuItem, index) => {
           const activeItem = location?.pathname === menuItem.path;
           return (
@@ -61,7 +73,7 @@ function SideBarMenu({ openDrawer }: { openDrawer: boolean }) {
                 onClick={
                   menuItem?.isLogout
                     ? () => dispatch(logout())
-                    : () => navigate(menuItem.path)
+                    : () => navigate(menuItem.path || '/')
                 }
                 className={
                   activeItem
@@ -79,10 +91,10 @@ function SideBarMenu({ openDrawer }: { openDrawer: boolean }) {
           );
         })}
 
-        {/* footer section */}
+        {/* Footer section */}
         <Box className="flex justify-center">
           <Box
-            className="flex flex-col items-center fixed bottom-6 "
+            className="flex flex-col items-center fixed bottom-6"
             style={{ left: openDrawer ? "50px" : "20px" }}
           >
             <img src={AppIcons.imgLogo} width={"140px"} alt="company logo" />
@@ -99,14 +111,26 @@ function SideBarMenu({ openDrawer }: { openDrawer: boolean }) {
 
   return (
     <div>
+      <IconButton
+        onClick={toggleDrawer}
+        sx={{ position: "fixed", top: 12, left: 16, zIndex: 9999 }}
+      >
+        {openDrawer ? (
+          <CloseIcon className={"text-lightpurple opacity-60"} />
+        ) : (
+          <MenuIcon className={"text-lightpurple opacity-60"} />
+        )}
+      </IconButton>
       <Box sx={{ display: isLargeScreen ? "flex" : "block" }}>
-        <CssBaseline />
         <Drawer
           open={openDrawer}
-          variant="persistent"
+          onClose={toggleDrawer}
+          variant={isLargeScreen ? "persistent" : "temporary"}
           sx={{
-            width: "16%",
             flexShrink: 1,
+            "& .MuiDrawer-paper": {
+              width: "240px",
+            },
           }}
           classes={{ paper: "drawer-paper" }}
         >

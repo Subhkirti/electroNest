@@ -82,9 +82,7 @@ function productReducer(
         error: null,
         products:
           action.payload.data?.length > 0
-            ? action.payload.pageNumber === 1
-              ? action.payload.data
-              : [...state.products, ...action.payload.data]
+            ? action.payload.data
             : state.products,
         totalCount: action.payload.totalCount,
       };

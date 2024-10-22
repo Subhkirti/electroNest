@@ -12,5 +12,6 @@ const AppColors = {
   green: "#21d266",
   red: "#e05240",
   blue: "#0ebaeb",
+  black: "#000",
 };
 export default AppColors;

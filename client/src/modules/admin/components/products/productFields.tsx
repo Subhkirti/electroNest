@@ -99,9 +99,10 @@ function ProductFields({
             </div>
             {product.images?.length > 0 ? (
               <div className="flex space-x-4 items-center lg:max-w-[600px] sm:max-w-[300px] overflow-x-scroll">
-                {product.images?.map((image: string | File) => {
+                {product.images?.map((image: string | File, index) => {
                   return (
                     <Avatar
+                      key={index}
                       src={image.toString()}
                       variant="rounded"
                       alt="Product-images"
