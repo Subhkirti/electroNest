@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import {
   addProduct,
+  editProduct,
   findProductsById,
 } from "../../../../store/customer/product/action";
 import { ProductReqBody } from "../../../customer/types/productTypes";
@@ -14,30 +15,21 @@ import {
   resetHeader,
   setHeader,
 } from "../../../../store/customer/header/action";
-import { Link, useLocation } from "react-router-dom";
-import { productInitState } from "../../utils/productUtil";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { productInitState, productStateIds } from "../../utils/productUtil";
 import AdminAppRoutes from "../../../../common/adminRoutes";
 
 function EditProduct() {
   const location = useLocation();
   const productId = parseInt(location?.pathname.split("/")?.[4]);
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<ProductReqBody>(productInitState);
   const { isLoading, product: productRes } = useSelector(
     (state: RootState) => state.product
   );
 
   useEffect(() => {
-    // set header props
-    dispatch(
-      setHeader({
-        title: product?.title
-          ? "Edit " + product.title
-          : AppStrings.editProduct,
-        showBackIcon: true,
-      })
-    );
-
     const timer = setTimeout(() => {
       // Fetch product details
       dispatch(findProductsById(productId));
@@ -47,9 +39,19 @@ function EditProduct() {
       clearTimeout(timer);
       dispatch(resetHeader());
     };
-  }, [product.title, productId]);
+  }, [productId]);
 
   useEffect(() => {
+    // set header props
+    dispatch(
+      setHeader({
+        title: productRes?.productName
+          ? "Edit " + productRes.productName
+          : AppStrings.editProduct,
+        showBackIcon: true,
+      })
+    );
+
     if (!isLoading && productRes) {
       setProduct({
         thumbnail: productRes?.thumbnail?.[0] || "",
@@ -71,12 +73,20 @@ function EditProduct() {
   }, [isLoading, productRes?.productName]);
 
   function handleOnChange(value: any, fieldId: string) {
-    setProduct({ ...product, [fieldId]: value });
+    if (fieldId === productStateIds.images) {
+      const previousImages = product.images || [];
+      setProduct({
+        ...product,
+        images: [...previousImages, ...value],
+      });
+    } else {
+      setProduct({ ...product, [fieldId]: value });
+    }
   }
 
   async function handleOnEditProduct(e: { preventDefault: () => void }) {
     e.preventDefault();
-    // dispatch(addProduct(product));
+    dispatch(editProduct(productId, product, navigate));
   }
 
   return (
@@ -86,6 +96,7 @@ function EditProduct() {
           product={product}
           isEditProductPage={true}
           handleOnChange={handleOnChange}
+          setProduct={setProduct}
         />
 
         <div className="flex space-x-4 mt-8 items-center">

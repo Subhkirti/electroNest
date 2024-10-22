@@ -57,6 +57,7 @@ const productsHeader = [
   "Brand",
   "Price",
   "Created At",
+  "Updated At",
   "Actions",
 ];
 

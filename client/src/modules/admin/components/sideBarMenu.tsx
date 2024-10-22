@@ -64,7 +64,8 @@ function SideBarMenu({
 
         {/* Menu lists */}
         {adminMenuItems.map((menuItem, index) => {
-          const activeItem = location?.pathname === menuItem.path;
+          const activeItem = location?.pathname === menuItem?.path;
+
           return (
             menuItem.active && (
               <ListItem
@@ -73,7 +74,7 @@ function SideBarMenu({
                 onClick={
                   menuItem?.isLogout
                     ? () => dispatch(logout())
-                    : () => navigate(menuItem.path || '/')
+                    : () => navigate(menuItem.path || "/")
                 }
                 className={
                   activeItem

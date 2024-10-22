@@ -4,37 +4,37 @@ import { productColors, productStateIds } from "../../utils/productUtil";
 import { ProductReqBody } from "../../../customer/types/productTypes";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   getSecondLevelCategories,
   getThirdLevelCategories,
   getTopLevelCategories,
 } from "../../../../store/customer/product/action";
-import { Close } from "@mui/icons-material";
+import { HighlightOff } from "@mui/icons-material";
 
 function ProductFields({
   isViewProductPage,
   isEditProductPage,
   product,
   handleOnChange,
+  setProduct,
 }: {
   isViewProductPage?: boolean;
   isEditProductPage?: boolean;
   product: ProductReqBody;
+  setProduct?: (value: any) => void;
   handleOnChange?: (elementValue: any, id: string) => void;
 }) {
   const dispatch = useDispatch<AppDispatch>();
   const { topLevelCategories, secondLevelCategories, thirdLevelCategories } =
     useSelector((state: RootState) => state.product);
-  const [thumbnailImg, setThumbnailImg] = useState<string | File>("");
-
+  const thumbnailImg = product?.thumbnail;
   useEffect(() => {
     const timer = setTimeout(() => {
       (!topLevelCategories.length ||
         !secondLevelCategories?.length ||
         !thirdLevelCategories.length) &&
         loadCategories();
-      setThumbnailImg(product?.thumbnail);
     }, 10);
 
     return () => clearTimeout(timer);
@@ -211,10 +211,14 @@ function ProductFields({
             <div>
               <Typography className="text-white">Thumbnail:</Typography>
               <div className="relative">
-                <Close
-                  onClick={() => setThumbnailImg("")}
-                  className="text-slate-300 absolute top-[-10px] right-[-10px] cursor-pointer"
-                />
+                {isEditProductPage && (
+                  <HighlightOff
+                    onClick={() =>
+                      setProduct && setProduct({ ...product, thumbnail: "" })
+                    }
+                    className="text-slate-300 z-10  absolute top-[-10px] right-[-10px] cursor-pointer"
+                  />
+                )}
                 <img
                   width={200}
                   height={200}
@@ -243,32 +247,67 @@ function ProductFields({
   function productImages() {
     return (
       <Grid item xs={12} lg={12}>
-        {isViewProductPage ? (
+        {isViewProductPage || (isEditProductPage && product.images?.length) ? (
           product.images?.length > 0 ? (
             <div className="flex flex-col space-y-4">
-              <Typography className="text-white">Product Images:</Typography>
-              <div className="flex space-x-4 items-center w-100 overflow-x-scroll">
+              <Typography className="text-white">
+                Product Images ({product.images?.length}):
+              </Typography>
+              <div className="flex p-4 space-x-4 items-center w-100 overflow-x-scroll">
                 {product.images.map((image: string | File, index) => {
                   return (
-                    <Avatar
-                      key={index}
-                      src={image?.toString()}
-                      variant="rounded"
-                      alt="Product-images"
-                      className="border border-lightpurple p-4 rounded-md"
-                      sx={{ width: 100, height: 100 }}
-                    />
+                    <div className="relative">
+                      {/* show remove icon also, if it's edit page */}
+                      {isEditProductPage && (
+                        <HighlightOff
+                          onClick={() => {
+                            if (setProduct) {
+                              setProduct({
+                                ...product,
+                                images: (
+                                  product.images as (File | string)[]
+                                )?.filter((_, i) => i !== index),
+                              });
+                            }
+                          }}
+                          className="text-slate-300 z-10 absolute top-[-10px] right-[-10px] cursor-pointer"
+                        />
+                      )}
+                      <Avatar
+                        key={index}
+                        src={image?.toString()}
+                        variant="rounded"
+                        alt="Product-images"
+                        className="border border-lightpurple p-4 rounded-md"
+                        sx={{ width: 100, height: 100 }}
+                      />
+                    </div>
                   );
                 })}
               </div>
             </div>
           ) : null
         ) : (
+          !isEditProductPage && (
+            <InputField
+              label={"Product Images"}
+              id={productStateIds.images}
+              required={true}
+              readOnly={isViewProductPage}
+              value={product?.images || ""}
+              type="file"
+              acceptFile="image/*"
+              multiple
+              onChange={handleOnChange}
+            />
+          )
+        )}
+
+        {isEditProductPage && (
           <InputField
             label={"Product Images"}
             id={productStateIds.images}
-            required={true}
-            readOnly={isViewProductPage}
+            required={product.images?.length ? false : true}
             value={product?.images || ""}
             type="file"
             acceptFile="image/*"

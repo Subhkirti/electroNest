@@ -176,7 +176,77 @@ app.post("/product/add", (req, res) => {
   );
 });
 
-/* delete product */
+/* Edit product details */
+app.post("/product/edit", (req, res) => {
+  const productId = req.query?.id;
+  const {
+    thumbnail,
+    images,
+    brand,
+    title,
+    color,
+    size,
+    description,
+    price,
+    quantity,
+    disPercentage,
+    disPrice,
+    topLevelCategory,
+    secondLevelCategory,
+    thirdLevelCategory,
+  } = req.body;
+
+  connection.query(
+    `UPDATE ${tableName} SET product_name = ?, description = ?, price = ?, discount_price = ?, discount_percentage = ?, quantity = ?, brand = ?, color = ?, size = ?, thumbnail = ?, images = ?, category_id = ?, section_id = ?, item_id = ? WHERE product_id = ?`,
+    [
+      title,
+      description,
+      price,
+      disPrice,
+      disPercentage,
+      quantity,
+      brand,
+      color,
+      size,
+      JSON.stringify([thumbnail]),
+      JSON.stringify(images),
+      topLevelCategory,
+      secondLevelCategory,
+      thirdLevelCategory,
+      productId,
+    ],
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while updating product" });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: "Product not found",
+        });
+      }
+
+      // return the updated product details
+      connection.query(
+        `SELECT * FROM ${tableName} WHERE product_id = ?`,
+        [productId],
+        (err, result) => {
+          if (err) {
+            return res.status(400).json({
+              status: 400,
+              message: "Error fetching updated product",
+            });
+          }
+          return res.status(200).json({ status: 200, data: result[0] });
+        }
+      );
+    }
+  );
+});
+
+/* Delete product */
 app.delete("/product/delete", (req, res) => {
   const { id } = req.query;
   if (!id) {
@@ -210,7 +280,7 @@ app.get("/product-details", (req, res) => {
       .json({ status: 400, message: "Product Id not found in request" });
   }
   connection.query(
-    `SELECT * FROM ${tableName} WHERE product_id =?`,
+    `SELECT * FROM ${tableName} WHERE product_id = ?`,
     [id],
     (err, result) => {
       if (err) {

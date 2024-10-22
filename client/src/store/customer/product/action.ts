@@ -179,7 +179,8 @@ const findProductsById =
   };
 
 const addProduct =
-  (reqData: ProductReqBody, navigate: NavigateFunction) => async (dispatch: ActionDispatch) => {
+  (reqData: ProductReqBody, navigate: NavigateFunction) =>
+  async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.ADD_PRODUCT_REQUEST });
 
     try {
@@ -189,15 +190,44 @@ const addProduct =
         type: ActionTypes.ADD_PRODUCT_SUCCESS,
         payload: res?.data?.data ? productMap(res?.data?.data) : {},
       });
-      if (res?.data?.data){
+      if (res?.data?.data) {
         toast.success("Product added successfully");
-        navigate(AdminAppRoutes.products)
+        navigate(AdminAppRoutes.products);
       }
-  
     } catch (error) {
       handleCatchError({
         error,
         actionType: ActionTypes.ADD_PRODUCT_FAILURE,
+      });
+    }
+  };
+
+const editProduct =
+  (productId: number, reqData: ProductReqBody, navigate: NavigateFunction) =>
+  async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.EDIT_PRODUCT_REQUEST });
+    try {
+      const res = await axios.post(
+        `${ApiUrls.editProduct}id=${productId}`,
+        reqData,
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.EDIT_PRODUCT_SUCCESS,
+        payload: {
+          data: res?.data?.data ? productMap(res?.data?.data) : {},
+          id: productId,
+        },
+      });
+      if (res?.data?.data) {
+        toast.success("Product edited successfully.");
+        navigate(AdminAppRoutes.products);
+      }
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.EDIT_PRODUCT_FAILURE,
       });
     }
   };
@@ -248,6 +278,7 @@ export {
   findProducts,
   findProductsById,
   addProduct,
+  editProduct,
   deleteProduct,
   uploadFile,
   getTopLevelCategories,

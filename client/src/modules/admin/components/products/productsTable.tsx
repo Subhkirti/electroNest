@@ -104,6 +104,9 @@ export default function ProductsTable() {
                 <StyledTableCell>
                   {formattedDateTime(product.createdAt)}
                 </StyledTableCell>
+                <StyledTableCell>
+                  {formattedDateTime(product.updatedAt)}
+                </StyledTableCell>
                 <TableCell align="center" sx={{ color: AppColors.lightWhite }}>
                   <Box className="flex items-center justify-between space-x-2">
                     <ActionButton

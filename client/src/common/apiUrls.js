@@ -7,6 +7,7 @@ const ApiUrls = {
   getProducts: apiBaseUrl + "/products?",
   addProduct: apiBaseUrl + "/product/add",
   deleteProduct: apiBaseUrl + "/product/delete?",
+  editProduct: apiBaseUrl + "/product/edit?",
   getCart: apiBaseUrl + "/cart",
   addItemToCart: apiBaseUrl + "/cart/add",
   cartItems: apiBaseUrl + "/cart_items/",
