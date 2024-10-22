@@ -15,6 +15,7 @@ const AppStrings = {
   monthlyOverview: "Monthly Overview",
   addProduct: "Add Product",
   editProduct: "Edit Product",
+  cancel: "Cancel",
   dashboard: "Dashboard",
   welcomeToDashboard: "Welcome to the Admin Dashboard",
 

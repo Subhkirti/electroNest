@@ -13,10 +13,12 @@ import {
 
 function ProductFields({
   isViewProductPage,
+  isEditProductPage,
   product,
   handleOnChange,
 }: {
   isViewProductPage?: boolean;
+  isEditProductPage?: boolean;
   product: ProductReqBody;
   handleOnChange?: (elementValue: any, id: string) => void;
 }) {
@@ -83,52 +85,8 @@ function ProductFields({
         />
       </Grid>
 
-      <Grid item xs={12} lg={12}>
-        {isViewProductPage ? (
-          <div className="flex border-lightpurple justify-between border rounded-md p-6">
-            <div>
-              <Typography className="text-white">
-                Thumbnail & Product Images :
-              </Typography>
-              <img
-                width={200}
-                height={200}
-                className="mt-4"
-                src={product?.thumbnail?.toString()}
-              />
-            </div>
-            {product.images?.length > 0 ? (
-              <div className="flex space-x-4 items-center lg:max-w-[600px] sm:max-w-[300px] overflow-x-scroll">
-                {product.images?.map((image: string | File, index) => {
-                  return (
-                    <Avatar
-                      key={index}
-                      src={image.toString()}
-                      variant="rounded"
-                      alt="Product-images"
-                      className="border border-slate-400 p-4 rounded-md"
-                      sx={{ width: 100, height: 100 }}
-                    />
-                  );
-                })}
-              </div>
-            ) : (
-              ""
-            )}
-          </div>
-        ) : (
-          <InputField
-            label={"Thumbnail"}
-            readOnly={isViewProductPage}
-            id={productStateIds.thumbnail}
-            required={true}
-            type="file"
-            acceptFile="image/*"
-            value={product?.thumbnail || ""}
-            onChange={handleOnChange}
-          />
-        )}
-      </Grid>
+      {thumbnail()}
+
       <Grid item xs={12} lg={4}>
         <InputField
           label={"Price (₹)"}
@@ -237,8 +195,65 @@ function ProductFields({
         />
       </Grid>
 
+      {productImages()}
+    </>
+  );
+
+  function thumbnail() {
+    return (
       <Grid item xs={12} lg={12}>
-        {!isViewProductPage && (
+        {isViewProductPage ? (
+          <div className="flex border-lightpurple justify-between border rounded-md p-6">
+            <div>
+              <Typography className="text-white">Thumbnail:</Typography>
+              <img
+                width={200}
+                height={200}
+                className="mt-4"
+                src={product?.thumbnail?.toString()}
+              />
+            </div>
+          </div>
+        ) : (
+          <InputField
+            label={"Thumbnail"}
+            readOnly={isViewProductPage}
+            id={productStateIds.thumbnail}
+            required={true}
+            type="file"
+            acceptFile="image/*"
+            value={product?.thumbnail || ""}
+            onChange={handleOnChange}
+          />
+        )}
+      </Grid>
+    );
+  }
+
+  function productImages() {
+    return (
+      <Grid item xs={12} lg={12}>
+        {isViewProductPage ? (
+          product.images?.length > 0 ? (
+            <div className="flex flex-col space-y-4">
+              <Typography className="text-white">Product Images:</Typography>
+              <div className="flex space-x-4 items-center w-100 overflow-x-scroll">
+                {product.images.map((image: string | File, index) => {
+                  return (
+                    <Avatar
+                      key={index}
+                      src={image?.toString()}
+                      variant="rounded"
+                      alt="Product-images"
+                      className="border border-lightpurple p-4 rounded-md"
+                      sx={{ width: 100, height: 100 }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ) : null
+        ) : (
           <InputField
             label={"Product Images"}
             id={productStateIds.images}
@@ -252,8 +267,8 @@ function ProductFields({
           />
         )}
       </Grid>
-    </>
-  );
+    );
+  }
 }
 
 export default ProductFields;

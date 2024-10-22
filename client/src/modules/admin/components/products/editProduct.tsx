@@ -14,10 +14,9 @@ import {
   resetHeader,
   setHeader,
 } from "../../../../store/customer/header/action";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { productInitState } from "../../utils/productUtil";
-
-
+import AdminAppRoutes from "../../../../common/adminRoutes";
 
 function EditProduct() {
   const location = useLocation();
@@ -32,7 +31,9 @@ function EditProduct() {
     // set header props
     dispatch(
       setHeader({
-        title: product?.title ? "Edit " + product.title : AppStrings.editProduct,
+        title: product?.title
+          ? "Edit " + product.title
+          : AppStrings.editProduct,
         showBackIcon: true,
       })
     );
@@ -63,7 +64,7 @@ function EditProduct() {
       clearTimeout(timer);
       dispatch(resetHeader());
     };
-  }, [ productRes?.productId, product?.title]);
+  }, [productRes?.productId, product?.title]);
 
   function handleOnChange(value: any, fieldId: string) {
     setProduct({ ...product, [fieldId]: value });
@@ -77,15 +78,23 @@ function EditProduct() {
   return (
     <form onSubmit={handleOnEditProduct}>
       <Grid container spacing={2} justifyContent={"center"}>
-        <ProductFields product={product} handleOnChange={handleOnChange} />
+        <ProductFields
+          product={product}
+          isEditProductPage={true}
+          handleOnChange={handleOnChange}
+        />
 
-        <Button
-          type="submit"
-          variant="contained"
-          sx={{ mt: 4, minWidth: "300px" }}
-        >
-          {isLoading ? <Loader /> : AppStrings.editProduct}
-        </Button>
+        <div className="flex space-x-4 mt-8 items-center">
+          <Link to={AdminAppRoutes.products}>
+            <Button type="submit" variant="outlined" sx={{ minWidth: "200px" }}>
+              {AppStrings.cancel}
+            </Button>
+          </Link>
+
+          <Button type="submit" variant="contained" sx={{ minWidth: "200px" }}>
+            {isLoading ? <Loader /> : AppStrings.editProduct}
+          </Button>
+        </div>
       </Grid>
     </form>
   );

@@ -37,8 +37,10 @@ export default function InputField({
   dropdownKeys,
   multiple, // Destructure this property
 }: InputFieldState) {
+  const isFileType = type === "file";
+
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (type === "file" && e.target.files) {
+    if (isFileType && e.target.files) {
       const files = Array.from(e.target.files);
       const fileUrls: string[] = [];
 
@@ -68,15 +70,15 @@ export default function InputField({
       select={type === "dropdown" && dropdownOptions ? true : false}
       label={label}
       type={maxLength ? "text" : type}
-      value={type === "file" ? undefined : value}
-      focused={type === "file" ? true : undefined}
+      value={isFileType ? undefined : value}
+      focused={isFileType ? true : undefined}
       onChange={readOnly ? undefined : handleChange}
       placeholder={placeholder}
       required={required}
       fullWidth
       variant="outlined"
       margin="normal"
-      inputProps={type === "file" ? { accept: acceptFile, multiple } : {}}
+      inputProps={isFileType ? { accept: acceptFile, multiple } : {}}
       slotProps={{
         inputLabel: {
           shrink: value ? true : readOnly ? true : undefined,
@@ -101,12 +103,13 @@ export default function InputField({
           opacity: 0.6,
           color: AppColors.white,
           "&.Mui-focused": {
-            color: type === "file" ? AppColors.white : AppColors.lightPurple,
-            opacity: type === "file" ? 0.6 : 1,
+            color: isFileType ? AppColors.white : AppColors.lightPurple,
+            opacity: isFileType ? 0.6 : 1,
           },
         },
         "& .MuiInputBase-input": {
           color: AppColors.white,
+          cursor: isFileType ? "pointer" : "text",
         },
         "& .MuiInputBase-input::placeholder": {
           color: AppColors.white,
