@@ -50,7 +50,7 @@ function productReducer(
         products:
           state.products.length > 0
             ? [...state?.products, action?.payload]
-            : action?.payload,
+            : [action?.payload],
         product: action?.payload,
         totalCount: state.totalCount + 1,
       };
@@ -59,8 +59,10 @@ function productReducer(
         ...state,
         isLoading: false,
         error: null,
-        products: state.products.map(product =>
-          product?.productId === action.payload.id ? action.payload.data : product
+        products: state.products.map((product) =>
+          product?.productId === action.payload.id
+            ? action.payload.data
+            : product
         ),
         product: action?.payload?.data,
       };

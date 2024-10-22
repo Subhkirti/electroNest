@@ -31,6 +31,7 @@ import AppColors from "../../../../common/appColors";
 import { pageSizes } from "../../../../common/constants";
 import { useNavigate } from "react-router-dom";
 import AdminAppRoutes from "../../../../common/adminRoutes";
+import NoResultsFound from "../../../../common/components/noResultsFound";
 
 export default function ProductsTable() {
   const dispatch = useDispatch<AppDispatch>();
@@ -81,7 +82,7 @@ export default function ProductsTable() {
           </TableHead>
 
           <TableBody>
-            {products &&
+            {products?.length &&
               products.map((product) => (
                 <TableRow
                   key={product.productId}
@@ -152,18 +153,22 @@ export default function ProductsTable() {
         </Table>
       </TableContainer>
 
-      <TablePagination
-        rowsPerPageOptions={pageSizes}
-        component="div"
-        count={totalCount}
-        rowsPerPage={pageSize}
-        page={pageNumber}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        sx={{
-          color: AppColors.lightWhite,
-        }}
-      />
+      {products?.length ? (
+        <TablePagination
+          rowsPerPageOptions={pageSizes}
+          component="div"
+          count={totalCount}
+          rowsPerPage={pageSize}
+          page={pageNumber}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          sx={{
+            color: AppColors.lightWhite,
+          }}
+        />
+      ) : (
+        <NoResultsFound />
+      )}
     </Paper>
   );
 }

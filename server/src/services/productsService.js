@@ -225,7 +225,7 @@ app.post("/product/edit", (req, res) => {
         return res.status(404).json({
           status: 404,
           message: "Product not found",
-        });
+        }); 
       }
 
       // return the updated product details

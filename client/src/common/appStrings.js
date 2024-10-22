@@ -18,6 +18,7 @@ const AppStrings = {
   cancel: "Cancel",
   dashboard: "Dashboard",
   welcomeToDashboard: "Welcome to the Admin Dashboard",
+  resultsNotFound: "Results not Found !",
 
   /* errors */
   passwordError:

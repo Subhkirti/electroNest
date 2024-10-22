@@ -3,8 +3,11 @@ import { Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store/storeTypes";
+import { textTruncate } from "../../utils/productUtil";
+import { useMobile } from "../../../../common/mediaQuery";
 
 function Header({ isMenuDrawerOpen }: { isMenuDrawerOpen: boolean }) {
+  const isMobile = useMobile();
   const navigate = useNavigate();
   const { showBackIcon, buttons, title } = useSelector(
     (state: RootState) => state.header
@@ -25,7 +28,9 @@ function Header({ isMenuDrawerOpen }: { isMenuDrawerOpen: boolean }) {
               onClick={() => navigate(-1)}
             />
           )}
-          <Typography className="text-2xl font-medium"> {title}</Typography>
+          <Typography className="text-2xl font-medium">
+            {textTruncate(title, isMobile ? 20 : 80)}
+          </Typography>
         </Box>
         {buttons && buttons.length
           ? buttons.map((button, index) => {
