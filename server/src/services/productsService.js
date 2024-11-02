@@ -23,7 +23,7 @@ app.post("/product/categories/sections/items", (req, res) => {
 
       // Insert the category
       return new Promise((resolve, reject) => {
-        const insertCategoryQuery = `INSERT INTO product_categories (category_id, category_name) VALUES (?, ?)`;
+        const insertCategoryQuery = `INSERT INTO ${top_level_categories} (category_id, category_name) VALUES (?, ?)`;
         connection.query(
           insertCategoryQuery,
           [category_id, category.name],
@@ -34,7 +34,7 @@ app.post("/product/categories/sections/items", (req, res) => {
             const sectionInsertPromises = sections.map((section) => {
               const section_id = generateSlug(section.name);
               return new Promise((resolveSection, rejectSection) => {
-                const insertSectionQuery = `INSERT INTO product_category_sections (section_id, section_name, category_id) VALUES (?, ?, ?)`;
+                const insertSectionQuery = `INSERT INTO ${secondLevelCateTableName} (section_id, section_name, category_id) VALUES (?, ?, ?)`;
                 connection.query(
                   insertSectionQuery,
                   [section_id, section.name, category_id],
@@ -45,7 +45,7 @@ app.post("/product/categories/sections/items", (req, res) => {
                     const itemInsertPromises = section.items.map((item) => {
                       const item_id = generateSlug(item.name);
                       return new Promise((resolveItem, rejectItem) => {
-                        const insertItemQuery = `INSERT INTO product_category_section_items (item_id, item_name, section_id) VALUES (?, ?, ?)`;
+                        const insertItemQuery = `INSERT INTO ${thirdLevelCateTableName} (item_id, item_name, section_id) VALUES (?, ?, ?)`;
                         connection.query(
                           insertItemQuery,
                           [item_id, item.name, section_id],
@@ -225,7 +225,7 @@ app.post("/product/edit", (req, res) => {
         return res.status(404).json({
           status: 404,
           message: "Product not found",
-        }); 
+        });
       }
 
       // return the updated product details
@@ -334,46 +334,242 @@ app.get("/products", (req, res) => {
 
 /* Get top level categories list */
 app.get("/top-level-categories", (req, res) => {
-  connection.query(`SELECT * FROM ${topLevelCateTableName}`, (err, result) => {
-    if (err) {
-      return res
-        .status(400)
-        .json({ status: 400, message: "Error while getting products" });
+  const { pageNumber, pageSize } = req.query;
+  const limit = parseInt(pageSize);
+  const offset = (parseInt(pageNumber) - 1) * limit;
+  const selectQuery = pageNumber
+    ? `SELECT * FROM ${topLevelCateTableName} LIMIT ? OFFSET ?`
+    : `SELECT * FROM ${topLevelCateTableName}`;
+  /* Count query */
+  connection.query(
+    `SELECT COUNT(*) as totalCount FROM ${topLevelCateTableName}`,
+    (err, countResult) => {
+      if (err) {
+        return res.status(400).json({
+          status: 400,
+          message: "Error while counting top level categories",
+        });
+      }
+
+      const totalCount = countResult[0].totalCount;
+      /* Get top level categories query */
+      connection.query(selectQuery, [limit, offset], (err, result) => {
+        if (err) {
+          return res.status(400).json({
+            status: 400,
+            message: "Error while getting top level categories",
+          });
+        }
+
+        return res.status(200).json({
+          status: 200,
+          data: result,
+          totalCount: totalCount,
+        });
+      });
     }
-    return res.status(200).json({ status: 200, data: result });
-  });
+  );
 });
 
 /* Get second level categories list */
 app.get("/second-level-categories", (req, res) => {
-  const categoryId = req.query?.categoryId;
+  const { pageNumber, pageSize, categoryId } = req.query;
+  const limit = parseInt(pageSize);
+  const offset = (parseInt(pageNumber) - 1) * limit;
+  const selectQuery = pageNumber
+    ? `SELECT * FROM ${secondLevelCateTableName} WHERE category_id = ? LIMIT ? OFFSET ?`
+    : `SELECT * FROM ${secondLevelCateTableName} WHERE category_id = ?`;
+  /* Count query */
   connection.query(
-    `SELECT * FROM ${secondLevelCateTableName} WHERE category_id = ?`,
+    `SELECT COUNT(*) as totalCount FROM ${secondLevelCateTableName} WHERE category_id = ? `,
     [categoryId],
-    (err, result) => {
+    (err, countResult) => {
       if (err) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "Error while getting products" });
+        return res.status(400).json({
+          status: 400,
+          message: "Error while counting second level categories",
+        });
       }
-      return res.status(200).json({ status: 200, data: result });
+
+      const totalCount = countResult[0].totalCount;
+      /* Get second level categories query */
+      connection.query(
+        selectQuery,
+        [categoryId, limit, offset],
+        (err, result) => {
+          if (err) {
+            return res.status(400).json({
+              status: 400,
+              message: "Error while getting second level categories",
+            });
+          }
+
+          return res.status(200).json({
+            status: 200,
+            data: result,
+            totalCount: totalCount,
+          });
+        }
+      );
     }
   );
 });
 
 /* Get third level categories list */
 app.get("/third-level-categories", (req, res) => {
-  const sectionId = req.query?.sectionId;
+  const { pageNumber, pageSize, sectionId } = req.query;
+  const limit = parseInt(pageSize);
+  const offset = (parseInt(pageNumber) - 1) * limit;
+
+  const selectQuery = pageNumber
+    ? `SELECT * FROM ${thirdLevelCateTableName} WHERE section_id = ? LIMIT ? OFFSET ?`
+    : `SELECT * FROM ${thirdLevelCateTableName} WHERE section_id = ?`;
+
+  /* Count query */
   connection.query(
-    `SELECT * FROM ${thirdLevelCateTableName} WHERE section_id = ?`,
+    `SELECT COUNT(*) as totalCount FROM ${thirdLevelCateTableName} WHERE section_id = ?`,
     [sectionId],
+    (err, countResult) => {
+      if (err) {
+        return res.status(400).json({
+          status: 400,
+          message: "Error while counting third level categories",
+        });
+      }
+
+      const totalCount = countResult[0].totalCount;
+      /* Get third level categories query */
+      connection.query(
+        selectQuery,
+        [sectionId, limit, offset],
+        (err, result) => {
+          if (err) {
+            return res.status(400).json({
+              status: 400,
+              message: "Error while getting third level categories",
+            });
+          }
+
+          return res.status(200).json({
+            status: 200,
+            data: result,
+            totalCount: totalCount,
+          });
+        }
+      );
+    }
+  );
+});
+
+/* Add top level category */
+app.post("/top-level-categories/add", (req, res) => {
+  const { categoryName } = req.body;
+  const category_id = generateSlug(categoryName);
+
+  if (!categoryName) {
+    return res.status(400).json({
+      status: 400,
+      message: "CategoryName not found in request.",
+    });
+  }
+  connection.query(
+    `INSERT INTO ${topLevelCateTableName} (category_id, category_name) VALUES (?, ?)`,
+    [category_id, categoryName],
     (err, result) => {
       if (err) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "Error while getting products" });
+        console.log("err:", err.code);
+        if (err.code === "ER_DUP_ENTRY") {
+          return res.status(400).json({
+            status: 400,
+            message: "This Category already exists",
+          });
+        }
+
+        return res.status(400).json({
+          status: 400,
+          message: "Error while getting top level categories",
+        });
       }
-      return res.status(200).json({ status: 200, data: result });
+
+      return res.status(200).json({
+        status: 200,
+        data: result,
+      });
+    }
+  );
+});
+
+/* Add second level categories list */
+app.post("/second-level-categories/add", (req, res) => {
+  const { categoryName, sectionName } = req.body;
+  const category_id = generateSlug(categoryName);
+  const section_id = generateSlug(sectionName);
+
+  if (!categoryName || !sectionName) {
+    return res.status(400).json({
+      status: 400,
+      message: "CategoryName or sectionName not found in request.",
+    });
+  }
+  connection.query(
+    `INSERT INTO ${secondLevelCateTableName} (section_id, section_name, category_id) VALUES (?, ?, ?)`,
+    [section_id, sectionName, category_id],
+    (err, result) => {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          return res.status(400).json({
+            status: 400,
+            message: "This Category already exists",
+          });
+        }
+        return res.status(400).json({
+          status: 400,
+          message: "Error while getting second level categories",
+        });
+      }
+
+      return res.status(200).json({
+        status: 200,
+        data: result,
+      });
+    }
+  );
+});
+
+/* Add third level categories list */
+app.post("/third-level-categories/add", (req, res) => {
+  const { sectionName, itemName } = req.body;
+  const section_id = generateSlug(sectionName);
+  const item_id = generateSlug(itemName);
+
+  if (!sectionName || !itemName) {
+    return res.status(400).json({
+      status: 400,
+      message: "SectionName or itemName not found in request.",
+    });
+  }
+
+  connection.query(
+    `INSERT INTO ${thirdLevelCateTableName} (item_id, item_name, section_id) VALUES (?, ?, ?)`,
+    [item_id, itemName, section_id],
+    (err, result) => {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          return res.status(400).json({
+            status: 400,
+            message: "This Category already exists",
+          });
+        }
+        return res.status(400).json({
+          status: 400,
+          message: "Error while getting third level categories",
+        });
+      }
+
+      return res.status(200).json({
+        status: 200,
+        data: result,
+      });
     }
   );
 });

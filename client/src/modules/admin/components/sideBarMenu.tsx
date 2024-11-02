@@ -1,7 +1,6 @@
 import {
   Avatar,
   Box,
-  CssBaseline,
   Drawer,
   IconButton,
   List,

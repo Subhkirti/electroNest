@@ -13,7 +13,7 @@ import {
 import { HighlightOff } from "@mui/icons-material";
 import RichTextEditor from "../../../../common/components/richTextEditor";
 
-function ProductFields({
+const ProductFields = ({
   isViewProductPage,
   isEditProductPage,
   product,
@@ -25,35 +25,37 @@ function ProductFields({
   product: ProductReqBody;
   setProduct?: (value: any) => void;
   handleOnChange?: (elementValue: any, id: string) => void;
-}) {
+}) => {
   const dispatch = useDispatch<AppDispatch>();
+
   const { topLevelCategories, secondLevelCategories, thirdLevelCategories } =
     useSelector((state: RootState) => state.product);
   const thumbnailImg = product?.thumbnail;
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      (!topLevelCategories.length ||
-        !secondLevelCategories?.length ||
-        !thirdLevelCategories.length) &&
-        loadCategories();
+      loadCategories();
     }, 10);
 
     return () => clearTimeout(timer);
+    // eslint-disable-next-line
   }, [
-    topLevelCategories.length,
+    topLevelCategories?.length,
     secondLevelCategories?.length,
-    thirdLevelCategories.length,
+    thirdLevelCategories?.length,
     product.topLevelCategory,
     product.secondLevelCategory,
+    product.thirdLevelCategory,
   ]);
 
   function loadCategories() {
     if (!topLevelCategories.length) dispatch(getTopLevelCategories());
-    if (product.topLevelCategory)
+    if (product.topLevelCategory && !secondLevelCategories.length)
       dispatch(getSecondLevelCategories(product.topLevelCategory));
-    if (product.topLevelCategory && product.secondLevelCategory)
+    if (product.secondLevelCategory && !thirdLevelCategories.length)
       dispatch(getThirdLevelCategories(product.secondLevelCategory));
   }
+
   return (
     <>
       <Grid item xs={12} lg={6}>
@@ -224,6 +226,7 @@ function ProductFields({
                   width={200}
                   height={200}
                   className="mt-4"
+                  alt="thumbnail"
                   src={thumbnailImg?.toString()}
                 />
               </div>
@@ -234,7 +237,6 @@ function ProductFields({
             label={"Thumbnail"}
             readOnly={isViewProductPage}
             id={productStateIds.thumbnail}
-            required={true}
             type="file"
             acceptFile="image/*"
             value={thumbnailImg || ""}
@@ -257,7 +259,7 @@ function ProductFields({
               <div className="flex p-4 space-x-4 items-center w-100 overflow-x-scroll">
                 {product.images.map((image: string | File, index) => {
                   return (
-                    <div className="relative">
+                    <div className="relative" key={index}>
                       {/* show remove icon also, if it's edit page */}
                       {isEditProductPage && (
                         <HighlightOff
@@ -293,7 +295,6 @@ function ProductFields({
             <InputField
               label={"Product Images"}
               id={productStateIds.images}
-              required={true}
               readOnly={isViewProductPage}
               value={product?.images || ""}
               type="file"
@@ -319,6 +320,5 @@ function ProductFields({
       </Grid>
     );
   }
-}
-
+};
 export default ProductFields;

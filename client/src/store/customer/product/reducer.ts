@@ -1,3 +1,8 @@
+import {
+  SecondLevelCategories,
+  ThirdLevelCategories,
+  TopLevelCategories,
+} from "../../../modules/customer/types/productTypes";
 import { ProductState, RootAction } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
 
@@ -10,6 +15,9 @@ const initState: ProductState = {
   isLoading: false,
   error: null,
   totalCount: 0,
+  topLCategoryCount: 0,
+  secondLCategoryCount: 0,
+  thirdLCategoryCount: 0,
 };
 
 function productReducer(
@@ -71,21 +79,51 @@ function productReducer(
         ...state,
         isLoading: false,
         error: null,
-        topLevelCategories: action.payload,
+        topLevelCategories: [
+          ...state.topLevelCategories.filter(
+            (existingCategory) =>
+              !action.payload?.data.some(
+                (newCategory: TopLevelCategories) =>
+                  newCategory.categoryId === existingCategory.categoryId
+              )
+          ),
+          ...action.payload?.data,
+        ],
+        topLCategoryCount: action.payload?.totalCount,
       };
     case ActionTypes.GET_SECOND_LEVEL_CATEGORIES_SUCCESS:
       return {
         ...state,
         isLoading: false,
         error: null,
-        secondLevelCategories: action.payload,
+        secondLevelCategories: [
+          ...state.secondLevelCategories.filter(
+            (existingCategory) =>
+              !action.payload?.data.some(
+                (newCategory: SecondLevelCategories) =>
+                  newCategory.sectionId === existingCategory.sectionId
+              )
+          ),
+          ...action.payload?.data,
+        ],
+        secondLCategoryCount: action.payload?.totalCount,
       };
     case ActionTypes.GET_THIRD_LEVEL_CATEGORIES_SUCCESS:
       return {
         ...state,
         isLoading: false,
         error: null,
-        thirdLevelCategories: action.payload,
+        thirdLevelCategories: [
+          ...state.thirdLevelCategories.filter(
+            (existingCategory) =>
+              !action.payload?.data.some(
+                (newCategory: ThirdLevelCategories) =>
+                  newCategory.itemId === existingCategory.itemId
+              )
+          ),
+          ...action.payload?.data,
+        ],
+        thirdLCategoryCount: action.payload?.totalCount,
       };
 
     case ActionTypes.GET_PRODUCTS_SUCCESS:

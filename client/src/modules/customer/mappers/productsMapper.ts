@@ -10,6 +10,7 @@ function topLevelCategoriesMap(doc: any): TopLevelCategories {
     categoryId: doc?.category_id,
     categoryName: doc?.category_name,
     createdAt: doc?.created_at,
+    updatedAt: doc?.updated_at,
   };
 }
 
@@ -19,6 +20,7 @@ function secondLevelCategoriesMap(doc: any): SecondLevelCategories {
     sectionName: doc?.section_name,
     categoryId: doc?.category_id,
     createdAt: doc?.created_at,
+    updatedAt: doc?.updated_at,
   };
 }
 
@@ -28,6 +30,7 @@ function thirdLevelCategoriesMap(doc: any): ThirdLevelCategories {
     itemId: doc?.item_id,
     itemName: doc?.item_name,
     createdAt: doc?.created_at,
+    updatedAt: doc?.updated_at,
   };
 }
 

@@ -21,4 +21,11 @@ interface LoginReqBody {
   email: FormDataEntryValue | null;
   password: FormDataEntryValue | null;
 }
-export type { User, RegisterReqBody, LoginReqBody };
+
+interface TableColumn<T> {
+  id: keyof T;
+  label: string;
+  align?: "left" | "center" | "right";
+  render?: (value: any, row: T) => React.ReactNode;
+}
+export type { User, RegisterReqBody, LoginReqBody, TableColumn };

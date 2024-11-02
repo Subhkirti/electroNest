@@ -63,12 +63,14 @@ input:-webkit-autofill:focus {
   box-shadow: -1px 2px 15px 3px rgba(214, 214, 214, 1);
 }
 
+
 /* admin classes */
 .admin-container {
   max-width: 1500px;
   margin: 0px auto;
   padding: 0px 3rem;
   background-color: var(--purple);
+  color: var(--white);
   min-height: 100vh;
 }
 

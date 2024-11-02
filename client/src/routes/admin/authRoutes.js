@@ -1,5 +1,15 @@
 import { lazy } from "react";
 
+const AddCategory = lazy(() =>
+  import("../../modules/admin/components/categories/addCategory")
+);
+
+const ViewCategory = lazy(() =>
+  import("../../modules/admin/components/categories/viewCategory")
+);
+const EditCategory = lazy(() =>
+  import("../../modules/admin/components/categories/editCategory")
+);
 const AddProducts = lazy(() =>
   import("../../modules/admin/components/products/addProduct")
 );
@@ -19,7 +29,18 @@ const Customers = lazy(() =>
   import("../../modules/admin/components/customers/customers")
 );
 
+const Categories = lazy(() =>
+  import("../../modules/admin/components/categories/categories")
+);
+const Dashboard = lazy(() =>
+  import("../../modules/admin/components/dashboard/dashboard")
+);
+
 const authRoutes = [
+  {
+    path: "/",
+    component: Dashboard,
+  },
   {
     path: "/product/add",
     component: AddProducts,
@@ -39,6 +60,22 @@ const authRoutes = [
   {
     path: "/orders",
     component: Orders,
+  },
+  {
+    path: "/categories",
+    component: Categories,
+  },
+  {
+    path: "/categories/add",
+    component: AddCategory,
+  },
+  {
+    path: "/categories/view/:id",
+    component: ViewCategory,
+  },
+  {
+    path: "/categories/edit/:id",
+    component: EditCategory,
   },
   {
     path: "/customers",

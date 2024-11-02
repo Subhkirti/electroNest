@@ -15,6 +15,12 @@ const productStateIds = {
   thirdLevelCategory: "thirdLevelCategory",
 };
 
+const categoryStateIds = {
+  categoryName: "categoryName",
+  sectionName: "sectionName",
+  itemName: "itemName",
+};
+
 const productColors = [
   { label: "White", value: "white" },
   { label: "Black", value: "black" },
@@ -32,22 +38,6 @@ const productColors = [
   { label: "Cyan", value: "cyan" },
   { label: "Magenta", value: "magenta" },
 ];
-const productInitState = {
-  thumbnail: "",
-  images: [],
-  brand: "",
-  title: "",
-  description: "",
-  price: null,
-  quantity: null,
-  color: null,
-  size: null,
-  disPercentage: null,
-  disPrice: null,
-  topLevelCategory: "",
-  secondLevelCategory: "",
-  thirdLevelCategory: "",
-};
 
 const productsHeader = [
   "Id",
@@ -90,13 +80,42 @@ function formatAmount(amount: Float32Array | string) {
   );
 }
 
+const productInitState = {
+  thumbnail: "",
+  images: [],
+  brand: "",
+  title: "",
+  description: "",
+  price: null,
+  quantity: null,
+  color: null,
+  size: null,
+  disPercentage: null,
+  disPrice: null,
+  topLevelCategory: "",
+  secondLevelCategory: "",
+  thirdLevelCategory: "",
+};
+
+const categoryInitState = {
+  categoryName: "",
+  sectionName: "",
+  itemName: "",
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+
+
 export {
   productInitState,
+  categoryInitState,
   productStateIds,
+  categoryStateIds,
   productColors,
   productsHeader,
   formattedDateTime,
   textTruncate,
   formatAmount,
-  stripHtml
+  stripHtml,
 };

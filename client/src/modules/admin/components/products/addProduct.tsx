@@ -42,6 +42,7 @@ function AddProduct() {
       clearTimeout(timer);
       dispatch(resetHeader());
     };
+    // eslint-disable-next-line
   }, [product, productRes?.productId]);
 
   function handleOnChange(value: any, fieldId: string) {

@@ -1,6 +1,5 @@
 import { Button, SvgIconTypeMap } from "@mui/material";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
-import AppColors from "../appColors";
 
 function ActionButton({
   endIcon: EndIcon,

@@ -21,43 +21,66 @@ import AppStrings from "../../../common/appStrings";
 import AdminAppRoutes from "../../../common/adminRoutes";
 import { NavigateFunction } from "react-router-dom";
 
-const getTopLevelCategories = () => async (dispatch: ActionDispatch) => {
-  dispatch({ type: ActionTypes.GET_TOP_LEVEL_CATEGORIES_REQUEST });
+/* Categories section start here */
+const getTopLevelCategories =
+  (pageNumber?: number, pageSize?: number) =>
+  async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.GET_TOP_LEVEL_CATEGORIES_REQUEST });
 
-  try {
-    const res = await axios.get(ApiUrls.getTopLevelCategories, headersConfig);
+    try {
+      const res = await axios.get(
+        pageNumber
+          ? `${
+              ApiUrls.getTopLevelCategories
+            }?pageNumber=${pageNumber}&pageSize=${pageSize || 10}`
+          : ApiUrls.getTopLevelCategories,
+        headersConfig
+      );
 
-    dispatch({
-      type: ActionTypes.GET_TOP_LEVEL_CATEGORIES_SUCCESS,
-      payload:
-        res?.data?.data?.length > 0
-          ? res?.data?.data.map(topLevelCategoriesMap)
-          : [],
-    });
-  } catch (error) {
-    handleCatchError({
-      error,
-      actionType: ActionTypes.GET_TOP_LEVEL_CATEGORIES_FAILURE,
-    });
-  }
-};
+      dispatch({
+        type: ActionTypes.GET_TOP_LEVEL_CATEGORIES_SUCCESS,
+        payload: {
+          data:
+            res?.data?.data?.length > 0
+              ? res?.data?.data.map(topLevelCategoriesMap)
+              : [],
+          totalCount: res?.data?.totalCount,
+        },
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_TOP_LEVEL_CATEGORIES_FAILURE,
+      });
+    }
+  };
 
 const getSecondLevelCategories =
-  (categoryId: string) => async (dispatch: ActionDispatch) => {
+  (categoryId: string, pageNumber?: number, pageSize?: number) =>
+  async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.GET_SECOND_LEVEL_CATEGORIES_REQUEST });
 
     try {
       const res = await axios.get(
-        `${ApiUrls.getSecondLevelCategories}?categoryId=${categoryId}`,
+        pageNumber
+          ? `${
+              ApiUrls.getSecondLevelCategories
+            }?categoryId=${categoryId}&pageNumber=${pageNumber}&pageSize=${
+              pageSize || 10
+            }`
+          : `${ApiUrls.getSecondLevelCategories}?categoryId=${categoryId}`,
         headersConfig
       );
 
       dispatch({
         type: ActionTypes.GET_SECOND_LEVEL_CATEGORIES_SUCCESS,
-        payload:
-          res?.data?.data?.length > 0
-            ? res?.data?.data.map(secondLevelCategoriesMap)
-            : [],
+        payload: {
+          data:
+            res?.data?.data?.length > 0
+              ? res?.data?.data.map(secondLevelCategoriesMap)
+              : [],
+          totalCount: res?.data?.totalCount,
+        },
       });
     } catch (error) {
       handleCatchError({
@@ -68,21 +91,31 @@ const getSecondLevelCategories =
   };
 
 const getThirdLevelCategories =
-  (sectionId: string) => async (dispatch: ActionDispatch) => {
+  (sectionId: string, pageNumber?: number, pageSize?: number) =>
+  async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.GET_THIRD_LEVEL_CATEGORIES_REQUEST });
 
     try {
       const res = await axios.get(
-        `${ApiUrls.getThirdLevelCategories}?sectionId=${sectionId}`,
+        pageNumber
+          ? `${
+              ApiUrls.getThirdLevelCategories
+            }?sectionId=${sectionId}&pageNumber=${pageNumber}&pageSize=${
+              pageSize || 10
+            }`
+          : `${ApiUrls.getThirdLevelCategories}?sectionId=${sectionId}`,
         headersConfig
       );
 
       dispatch({
         type: ActionTypes.GET_THIRD_LEVEL_CATEGORIES_SUCCESS,
-        payload:
-          res?.data?.data?.length > 0
-            ? res?.data?.data.map(thirdLevelCategoriesMap)
-            : [],
+        payload: {
+          data:
+            res?.data?.data?.length > 0
+              ? res?.data?.data.map(thirdLevelCategoriesMap)
+              : [],
+          totalCount: res?.data?.totalCount,
+        },
       });
     } catch (error) {
       handleCatchError({
@@ -91,6 +124,98 @@ const getThirdLevelCategories =
       });
     }
   };
+
+const addTopLevelCategories =
+  (categoryName: string) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.ADD_TOP_LEVEL_CATEGORIES_REQUEST });
+
+    try {
+      const res = await axios.post(
+        ApiUrls.addTopLevelCategories,
+        { categoryName },
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.ADD_TOP_LEVEL_CATEGORIES_SUCCESS,
+        payload: {
+          data:
+            res?.data?.data?.length > 0
+              ? res?.data?.data.map(topLevelCategoriesMap)
+              : [],
+          totalCount: res?.data?.totalCount,
+        },
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.ADD_TOP_LEVEL_CATEGORIES_FAILURE,
+      });
+    }
+  };
+
+const addSecondLevelCategories =
+  (categoryName: string, sectionName: string) =>
+  async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.ADD_SECOND_LEVEL_CATEGORIES_REQUEST });
+
+    try {
+      const res = await axios.post(
+        ApiUrls.addSecondLevelCategories,
+        { categoryName, sectionName },
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.ADD_SECOND_LEVEL_CATEGORIES_SUCCESS,
+        payload: {
+          data:
+            res?.data?.data?.length > 0
+              ? res?.data?.data.map(secondLevelCategoriesMap)
+              : [],
+          totalCount: res?.data?.totalCount,
+        },
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.ADD_SECOND_LEVEL_CATEGORIES_FAILURE,
+      });
+    }
+  };
+
+const addThirdLevelCategories =
+  (sectionName: string, itemName: string) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.ADD_THIRD_LEVEL_CATEGORIES_REQUEST });
+
+    try {
+      const res = await axios.post(
+        ApiUrls.addThirdLevelCategories,
+        { sectionName, itemName },
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.ADD_THIRD_LEVEL_CATEGORIES_SUCCESS,
+        payload: {
+          data:
+            res?.data?.data?.length > 0
+              ? res?.data?.data.map(thirdLevelCategoriesMap)
+              : [],
+          totalCount: res?.data?.totalCount,
+        },
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.ADD_THIRD_LEVEL_CATEGORIES_REQUEST,
+      });
+    }
+  };
+
+/* Categories section ends here */
+
+/* Products section starts here */
 
 const getProducts =
   (pageNumber: number, pageSize: number) =>
@@ -254,6 +379,7 @@ const deleteProduct =
       });
     }
   };
+/* Products section ends here */
 
 const uploadFile = async (filePath: File | null) => {
   try {
@@ -284,4 +410,7 @@ export {
   getTopLevelCategories,
   getSecondLevelCategories,
   getThirdLevelCategories,
+  addTopLevelCategories,
+  addSecondLevelCategories,
+  addThirdLevelCategories,
 };

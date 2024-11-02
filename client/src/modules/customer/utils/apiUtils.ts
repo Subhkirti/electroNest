@@ -1,7 +1,5 @@
 import { AxiosError } from "axios";
 import { toast } from "react-toastify";
-import { Action } from "redux";
-import { RootAction } from "../../../store/storeTypes";
 import store from "../../../store/store";
 import { getCurrentUser } from "./localStorageUtils";
 import AppStrings from "../../../common/appStrings";

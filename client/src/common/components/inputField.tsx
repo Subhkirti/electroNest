@@ -70,7 +70,7 @@ export default function InputField({
       select={type === "dropdown" && dropdownOptions ? true : false}
       label={label}
       type={maxLength ? "text" : type}
-      value={isFileType ? undefined : value}
+      value={isFileType ? '' : value || ''}
       focused={isFileType ? true : undefined}
       onChange={readOnly ? undefined : handleChange}
       placeholder={placeholder}

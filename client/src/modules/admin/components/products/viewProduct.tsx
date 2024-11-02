@@ -12,6 +12,7 @@ import {
   setHeader,
 } from "../../../../store/customer/header/action";
 import { productInitState } from "../../utils/productUtil";
+import AppStrings from "../../../../common/appStrings";
 
 function ViewProduct() {
   const dispatch = useDispatch<AppDispatch>();
@@ -23,8 +24,6 @@ function ViewProduct() {
   );
 
   useEffect(() => {
-    dispatch(setHeader({ title: product.title, showBackIcon: true }));
-
     const timer = setTimeout(() => {
       // Fetch product details
       dispatch(findProductsById(productId));
@@ -34,9 +33,17 @@ function ViewProduct() {
       clearTimeout(timer);
       dispatch(resetHeader());
     };
-  }, [product.title, productId]);
+    // eslint-disable-next-line
+  }, [productId]);
 
   useEffect(() => {
+    dispatch(
+      setHeader({
+        title: productRes?.productName || AppStrings.viewProductDetails,
+        showBackIcon: true,
+      })
+    );
+
     if (!isLoading && productRes) {
       setProduct({
         thumbnail: productRes?.thumbnail?.[0] || "",
@@ -55,6 +62,7 @@ function ViewProduct() {
         thirdLevelCategory: productRes.itemId || "",
       });
     }
+    // eslint-disable-next-line
   }, [isLoading, productRes?.productName]);
 
   return (

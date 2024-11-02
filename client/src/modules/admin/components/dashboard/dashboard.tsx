@@ -30,6 +30,7 @@ export default function Dashboard() {
     return () => {
       dispatch(resetHeader());
     };
+    // eslint-disable-next-line
   }, []);
 
   return (

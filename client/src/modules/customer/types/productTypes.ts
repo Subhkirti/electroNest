@@ -12,7 +12,7 @@ interface ProductSearchReqBody {
 
 interface ProductReqBody {
   thumbnail: File | string;
-  images: File[]| string[];
+  images: File[] | string[];
   brand: string;
   title: string;
   description: string;
@@ -31,6 +31,7 @@ interface TopLevelCategories {
   categoryId: string;
   categoryName: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 interface SecondLevelCategories {
@@ -38,6 +39,7 @@ interface SecondLevelCategories {
   sectionName: string;
   categoryId: string; //parent key
   createdAt: Date;
+  updatedAt: Date;
 }
 
 interface ThirdLevelCategories {
@@ -45,6 +47,7 @@ interface ThirdLevelCategories {
   itemName: string;
   sectionId: string; //parent key
   createdAt: Date;
+  updatedAt: Date;
 }
 
 interface Product {
@@ -67,6 +70,18 @@ interface Product {
   updatedAt: Date;
 }
 
+export enum CategoryTypes {
+  topLevelCategories = "topLevelCategories",
+  secondLevelCategories = "secondLevelCategories",
+  thirdLevelCategories = "thirdLevelCategories",
+}
+
+interface CategoryState {
+  categoryName: string;
+  sectionName: string;
+  itemName: string;
+}
+
 export type {
   ProductSearchReqBody,
   ProductReqBody,
@@ -74,4 +89,5 @@ export type {
   SecondLevelCategories,
   ThirdLevelCategories,
   Product,
+  CategoryState,
 };

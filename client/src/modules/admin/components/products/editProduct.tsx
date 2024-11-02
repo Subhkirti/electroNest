@@ -4,7 +4,6 @@ import AppStrings from "../../../../common/appStrings";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import {
-  addProduct,
   editProduct,
   findProductsById,
 } from "../../../../store/customer/product/action";
@@ -39,6 +38,7 @@ function EditProduct() {
       clearTimeout(timer);
       dispatch(resetHeader());
     };
+    // eslint-disable-next-line
   }, [productId]);
 
   useEffect(() => {
@@ -70,6 +70,7 @@ function EditProduct() {
         thirdLevelCategory: productRes.itemId || "",
       });
     }
+    // eslint-disable-next-line
   }, [isLoading, productRes?.productName]);
 
   function handleOnChange(value: any, fieldId: string) {

@@ -5,6 +5,7 @@ import {
   Groups,
   LocalShipping,
   Logout,
+  ViewList,
 } from "@mui/icons-material";
 import AdminAppRoutes from "../../../common/adminRoutes";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
@@ -42,6 +43,12 @@ const adminMenuItems: AdminMenuItem[] = [
     name: "Orders",
     path: AdminAppRoutes.orders,
     icon: LocalShipping,
+    active: true,
+  },
+  {
+    name: "Categories",
+    path: AdminAppRoutes.categories,
+    icon: ViewList,
     active: true,
   },
   {

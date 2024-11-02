@@ -62,6 +62,7 @@ export default function Product() {
       stock: stockValue,
     };
     dispatch(findProducts(reqData));
+    // eslint-disable-next-line
   }, [
     params.levelThree,
     colorValue,

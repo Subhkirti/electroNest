@@ -12,18 +12,21 @@ const AppStrings = {
   shopWith: "Shop with ElectroNest",
   congratulations: "Congratulations",
   viewSales: "View Sales",
+  viewProductDetails: "View Product Details",
   monthlyOverview: "Monthly Overview",
   addProduct: "Add Product",
   editProduct: "Edit Product",
   cancel: "Cancel",
+  categories: "Categories",
+  addCategory: "Add Category",
   dashboard: "Dashboard",
   welcomeToDashboard: "Welcome to the Admin Dashboard",
-  resultsNotFound: "Results not Found !",
 
-  /* errors */
+  /* error messages */
   passwordError:
     "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.",
   somethingWentWrong: "Something went wrong",
+  resultsNotFound: "Results not Found!",
   oopsPageNotFound: "Oops! Page Not Found",
   pageNotExist: "The page you're looking for doesn't exist or has been moved.",
 };
