@@ -6,7 +6,7 @@ import {
 } from "../../../../store/customer/header/action";
 import AppStrings from "../../../../common/appStrings";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
-import { Delete, Edit, PostAdd, Visibility } from "@mui/icons-material";
+import { Delete, Edit, PostAdd } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import AdminAppRoutes from "../../../../common/adminRoutes";
 import CustomTable from "../../../../common/components/customTable";
@@ -55,13 +55,6 @@ function Categories() {
     return (
       <>
         <ActionButton
-          startIcon={Visibility}
-          onClick={() =>
-            navigate(AdminAppRoutes.viewProduct + product.productId)
-          }
-          text={"View"}
-        />
-        <ActionButton
           startIcon={Edit}
           onClick={() =>
             navigate(AdminAppRoutes.editProduct + product.productId)
@@ -102,9 +95,7 @@ function Categories() {
           <CustomTable
             fetchData={(page, size) =>
               topLevelCategories.map((category: TopLevelCategories) => {
-                dispatch(
-                  getSecondLevelCategories(category.categoryId)
-                );
+                dispatch(getSecondLevelCategories(category.categoryId));
               })
             }
             showPagination={false}
@@ -127,9 +118,8 @@ function Categories() {
           <CustomTable
             fetchData={(page, size) =>
               secondLevelCategories.map((category: SecondLevelCategories) => {
-                dispatch(
-                  getThirdLevelCategories(category.sectionId)
-                );
+                console.log("category:", category);
+                dispatch(getThirdLevelCategories(category.sectionId));
               })
             }
             showPagination={false}

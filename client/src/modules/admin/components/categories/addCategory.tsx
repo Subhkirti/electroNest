@@ -67,6 +67,7 @@ function AddCategory() {
         ? addThirdLevelCategories(category.sectionName, category.itemName)
         : addTopLevelCategories(category.categoryName)
     );
+    setCategory(categoryInitState);
   }
   return (
     <form onSubmit={handleOnAddCategory}>
@@ -82,7 +83,7 @@ function AddCategory() {
         <Button
           type="submit"
           variant="contained"
-          sx={{ mt: 4, minWidth: "300px" }}
+          sx={{ mt: 4, minWidth: "300px", position: "absolute", bottom: 20 }}
         >
           {isLoading ? <Loader /> : AppStrings.addCategory}
         </Button>

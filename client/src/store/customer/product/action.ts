@@ -139,13 +139,10 @@ const addTopLevelCategories =
       dispatch({
         type: ActionTypes.ADD_TOP_LEVEL_CATEGORIES_SUCCESS,
         payload: {
-          data:
-            res?.data?.data?.length > 0
-              ? res?.data?.data.map(topLevelCategoriesMap)
-              : [],
-          totalCount: res?.data?.totalCount,
+          data: res?.data?.data ? topLevelCategoriesMap(res?.data?.data) : {},
         },
       });
+      toast.success(AppStrings.categoryAddedSuccessfully);
     } catch (error) {
       handleCatchError({
         error,
@@ -169,13 +166,12 @@ const addSecondLevelCategories =
       dispatch({
         type: ActionTypes.ADD_SECOND_LEVEL_CATEGORIES_SUCCESS,
         payload: {
-          data:
-            res?.data?.data?.length > 0
-              ? res?.data?.data.map(secondLevelCategoriesMap)
-              : [],
-          totalCount: res?.data?.totalCount,
+          data: res?.data?.data
+            ? secondLevelCategoriesMap(res?.data?.data)
+            : {},
         },
       });
+      toast.success(AppStrings.categoryAddedSuccessfully);
     } catch (error) {
       handleCatchError({
         error,
@@ -185,7 +181,8 @@ const addSecondLevelCategories =
   };
 
 const addThirdLevelCategories =
-  (sectionName: string, itemName: string) => async (dispatch: ActionDispatch) => {
+  (sectionName: string, itemName: string) =>
+  async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.ADD_THIRD_LEVEL_CATEGORIES_REQUEST });
 
     try {
@@ -198,17 +195,14 @@ const addThirdLevelCategories =
       dispatch({
         type: ActionTypes.ADD_THIRD_LEVEL_CATEGORIES_SUCCESS,
         payload: {
-          data:
-            res?.data?.data?.length > 0
-              ? res?.data?.data.map(thirdLevelCategoriesMap)
-              : [],
-          totalCount: res?.data?.totalCount,
+          data: res?.data?.data ? thirdLevelCategoriesMap(res?.data?.data) : {},
         },
       });
+      toast.success(AppStrings.categoryAddedSuccessfully);
     } catch (error) {
       handleCatchError({
         error,
-        actionType: ActionTypes.ADD_THIRD_LEVEL_CATEGORIES_REQUEST,
+        actionType: ActionTypes.ADD_THIRD_LEVEL_CATEGORIES_FAILURE,
       });
     }
   };

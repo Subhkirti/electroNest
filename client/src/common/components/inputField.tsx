@@ -1,9 +1,10 @@
-import { MenuItem, TextField } from "@mui/material";
+import React, { useState } from "react";
+import { MenuItem, TextField, IconButton, Tooltip } from "@mui/material";
 import { uploadFile } from "../../store/customer/product/action";
 import AppColors from "../appColors";
+import { InfoOutlined } from "@mui/icons-material";
 
 type DropdownListItem = { label: string; value: any };
-
 type DropdownKeys = { labelKey: string; valueKey: string };
 
 interface InputFieldState {
@@ -20,6 +21,7 @@ interface InputFieldState {
   type?: "text" | "number" | "email" | "password" | "dropdown" | "file";
   multiple?: boolean;
   readOnly?: boolean;
+  infoText?: string;
 }
 
 export default function InputField({
@@ -35,9 +37,21 @@ export default function InputField({
   maxLength,
   dropdownOptions,
   dropdownKeys,
-  multiple, // Destructure this property
+  multiple,
+  infoText,
 }: InputFieldState) {
   const isFileType = type === "file";
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const idPopover = open ? "info-popover" : undefined;
+
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isFileType && e.target.files) {
@@ -70,7 +84,7 @@ export default function InputField({
       select={type === "dropdown" && dropdownOptions ? true : false}
       label={label}
       type={maxLength ? "text" : type}
-      value={isFileType ? '' : value || ''}
+      value={isFileType ? "" : value || ""}
       focused={isFileType ? true : undefined}
       onChange={readOnly ? undefined : handleChange}
       placeholder={placeholder}
@@ -81,10 +95,25 @@ export default function InputField({
       inputProps={isFileType ? { accept: acceptFile, multiple } : {}}
       slotProps={{
         inputLabel: {
-          shrink: value ? true : readOnly ? true : undefined,
+          shrink: value ? true : readOnly && value ? true : undefined,
         },
         input: {
           readOnly: readOnly,
+          endAdornment: infoText && (
+            <Tooltip open={open} title={infoText} arrow placement="top">
+              <IconButton
+                aria-describedby={idPopover}
+                onMouseEnter={handlePopoverOpen}
+                onMouseLeave={handlePopoverClose}
+                size="small"
+              >
+                <InfoOutlined
+                  fontSize="small"
+                  style={{ color: AppColors.blue, opacity: 0.6 }}
+                />
+              </IconButton>
+            </Tooltip>
+          ),
         },
       }}
       sx={{

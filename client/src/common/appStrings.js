@@ -29,6 +29,10 @@ const AppStrings = {
   resultsNotFound: "Results not Found!",
   oopsPageNotFound: "Oops! Page Not Found",
   pageNotExist: "The page you're looking for doesn't exist or has been moved.",
+
+
+   /* success messages */
+   categoryAddedSuccessfully: "Category added successfully",
 };
 
 export default AppStrings;

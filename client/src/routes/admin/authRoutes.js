@@ -3,10 +3,6 @@ import { lazy } from "react";
 const AddCategory = lazy(() =>
   import("../../modules/admin/components/categories/addCategory")
 );
-
-const ViewCategory = lazy(() =>
-  import("../../modules/admin/components/categories/viewCategory")
-);
 const EditCategory = lazy(() =>
   import("../../modules/admin/components/categories/editCategory")
 );
@@ -28,7 +24,6 @@ const Orders = lazy(() =>
 const Customers = lazy(() =>
   import("../../modules/admin/components/customers/customers")
 );
-
 const Categories = lazy(() =>
   import("../../modules/admin/components/categories/categories")
 );
@@ -68,10 +63,6 @@ const authRoutes = [
   {
     path: "/categories/add",
     component: AddCategory,
-  },
-  {
-    path: "/categories/view/:id",
-    component: ViewCategory,
   },
   {
     path: "/categories/edit/:id",

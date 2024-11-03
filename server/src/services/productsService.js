@@ -477,7 +477,6 @@ app.post("/top-level-categories/add", (req, res) => {
     [category_id, categoryName],
     (err, result) => {
       if (err) {
-        console.log("err:", err.code);
         if (err.code === "ER_DUP_ENTRY") {
           return res.status(400).json({
             status: 400,
@@ -489,12 +488,33 @@ app.post("/top-level-categories/add", (req, res) => {
           status: 400,
           message: "Error while getting top level categories",
         });
-      }
+      } else {
+        const categoryId = result.insertId;
+        // Fetch newly added category details
+        connection.query(
+          `SELECT * FROM ${topLevelCateTableName} WHERE id = ?`,
+          [categoryId],
+          (err, result) => {
+            if (err) {
+              return res.status(400).json({
+                status: 400,
+                message: "Error checking category",
+              });
+            }
+            if (!result.length) {
+              return res.status(400).json({
+                status: 400,
+                message: "Failed to get category",
+              });
+            }
 
-      return res.status(200).json({
-        status: 200,
-        data: result,
-      });
+            return res.status(200).json({
+              status: 200,
+              data: result[0],
+            });
+          }
+        );
+      }
     }
   );
 });
@@ -524,14 +544,35 @@ app.post("/second-level-categories/add", (req, res) => {
         }
         return res.status(400).json({
           status: 400,
-          message: "Error while getting second level categories",
+          message: "Error while getting top level categories",
         });
-      }
+      } else {
+        const categoryId = result.insertId;
+        // Fetch newly added category details
+        connection.query(
+          `SELECT * FROM ${secondLevelCateTableName} WHERE id = ?`,
+          [categoryId],
+          (err, result) => {
+            if (err) {
+              return res.status(400).json({
+                status: 400,
+                message: "Error checking category",
+              });
+            }
+            if (!result.length) {
+              return res.status(400).json({
+                status: 400,
+                message: "Failed to get category",
+              });
+            }
 
-      return res.status(200).json({
-        status: 200,
-        data: result,
-      });
+            return res.status(200).json({
+              status: 200,
+              data: result[0],
+            });
+          }
+        );
+      }
     }
   );
 });
@@ -564,12 +605,33 @@ app.post("/third-level-categories/add", (req, res) => {
           status: 400,
           message: "Error while getting third level categories",
         });
-      }
+      } else {
+        const categoryId = result.insertId;
+        // Fetch newly added category details
+        connection.query(
+          `SELECT * FROM ${thirdLevelCateTableName} WHERE id = ?`,
+          [categoryId],
+          (err, result) => {
+            if (err) {
+              return res.status(400).json({
+                status: 400,
+                message: "Error checking category",
+              });
+            }
+            if (!result.length) {
+              return res.status(400).json({
+                status: 400,
+                message: "Failed to get category",
+              });
+            }
 
-      return res.status(200).json({
-        status: 200,
-        data: result,
-      });
+            return res.status(200).json({
+              status: 200,
+              data: result[0],
+            });
+          }
+        );
+      }
     }
   );
 });

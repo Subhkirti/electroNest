@@ -8,7 +8,6 @@ const AdminAppRoutes = {
   orders: "/admin/orders",
   categories: "/admin/categories",
   addCategory: "/admin/categories/add",
-  viewCategory: "/admin/categories/view/",
   editCategory: "/admin/categories/edit/",
 };
 

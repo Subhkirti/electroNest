@@ -34,6 +34,9 @@ function productReducer(
     case ActionTypes.GET_PRODUCTS_REQUEST:
     case ActionTypes.DELETE_PRODUCT_REQUEST:
     case ActionTypes.EDIT_PRODUCT_REQUEST:
+    case ActionTypes.ADD_TOP_LEVEL_CATEGORIES_REQUEST:
+    case ActionTypes.ADD_SECOND_LEVEL_CATEGORIES_REQUEST:
+    case ActionTypes.ADD_THIRD_LEVEL_CATEGORIES_REQUEST:
       return { ...state, isLoading: true, error: null };
     case ActionTypes.FIND_PRODUCTS_SUCCESS:
       return {
@@ -74,6 +77,39 @@ function productReducer(
         ),
         product: action?.payload?.data,
       };
+    case ActionTypes.ADD_TOP_LEVEL_CATEGORIES_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        topLevelCategories: [
+          action.payload?.data,
+          ...state.topLevelCategories,
+        ],
+        topLCategoryCount: state.topLCategoryCount + 1,
+      };
+    case ActionTypes.ADD_SECOND_LEVEL_CATEGORIES_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        secondLevelCategories: [
+          action.payload?.data,
+          ...state.secondLevelCategories,
+        ],
+        secondLCategoryCount: state.secondLCategoryCount + 1,
+      };
+    case ActionTypes.ADD_THIRD_LEVEL_CATEGORIES_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        thirdLevelCategories: [
+          action.payload?.data,
+          ...state.thirdLevelCategories,
+        ],
+        thirdLCategoryCount: state.thirdLCategoryCount + 1,
+      };
     case ActionTypes.GET_TOP_LEVEL_CATEGORIES_SUCCESS:
       return {
         ...state,
@@ -91,6 +127,7 @@ function productReducer(
         ],
         topLCategoryCount: action.payload?.totalCount,
       };
+
     case ActionTypes.GET_SECOND_LEVEL_CATEGORIES_SUCCESS:
       return {
         ...state,
@@ -157,6 +194,9 @@ function productReducer(
     case ActionTypes.GET_PRODUCTS_FAILURE:
     case ActionTypes.DELETE_PRODUCT_FAILURE:
     case ActionTypes.EDIT_PRODUCT_FAILURE:
+    case ActionTypes.ADD_TOP_LEVEL_CATEGORIES_FAILURE:
+    case ActionTypes.ADD_SECOND_LEVEL_CATEGORIES_FAILURE:
+    case ActionTypes.ADD_THIRD_LEVEL_CATEGORIES_FAILURE:
       return { ...state, isLoading: false, error: action?.payload };
     default:
       return state;

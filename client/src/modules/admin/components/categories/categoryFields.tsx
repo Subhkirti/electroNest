@@ -1,35 +1,50 @@
 import { Grid } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import InputField from "../../../../common/components/inputField";
 import { categoryStateIds } from "../../utils/productUtil";
 import { CategoryState } from "../../../customer/types/productTypes";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../store/storeTypes";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
+import {
+  getSecondLevelCategories,
+  getTopLevelCategories,
+} from "../../../../store/customer/product/action";
 
 function CategoryFields({
-  isViewProductPage,
   category,
   handleOnChange,
   isTopLCategory,
   isSecondLCategory,
   isThirdLCategory,
 }: {
-  isViewProductPage?: boolean;
   isTopLCategory: boolean;
   isSecondLCategory: boolean;
   isThirdLCategory: boolean;
   category: CategoryState;
   handleOnChange?: (elementValue: any, id: string) => void;
 }) {
+  const dispatch = useDispatch<AppDispatch>();
   const { topLevelCategories, secondLevelCategories } = useSelector(
     (state: RootState) => state.product
   );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      !topLevelCategories.length && dispatch(getTopLevelCategories());
+      !secondLevelCategories.length &&
+        dispatch(getSecondLevelCategories(category.categoryName));
+    }, 10);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [category.categoryName]);
+
   return (
     <>
       <Grid item xs={12} lg={12}>
         <InputField
           label={"Category Name"}
-          readOnly={isViewProductPage}
           required={true}
           type={isThirdLCategory || isSecondLCategory ? "dropdown" : "text"}
           id={categoryStateIds.categoryName}
@@ -45,10 +60,15 @@ function CategoryFields({
         <Grid item xs={12} lg={12}>
           <InputField
             label={"Section Name"}
-            readOnly={isViewProductPage}
             required={true}
             type={isThirdLCategory ? "dropdown" : "text"}
+            readOnly={isThirdLCategory && !category.categoryName ? true : false}
             dropdownOptions={secondLevelCategories}
+            infoText={
+              isThirdLCategory && !category.categoryName
+                ? "Please select category name"
+                : ""
+            }
             id={categoryStateIds.sectionName}
             dropdownKeys={{ labelKey: "sectionName", valueKey: "sectionId" }}
             value={category.sectionName}
@@ -62,7 +82,19 @@ function CategoryFields({
           <InputField
             label={"Item Name"}
             required={true}
-            readOnly={isViewProductPage}
+            infoText={
+              isThirdLCategory && !category.sectionName
+                ? !category.categoryName
+                  ? "Please select category name"
+                  : "Please select section name"
+                : ""
+            }
+            readOnly={
+              isThirdLCategory &&
+              (!category.categoryName || !category.sectionName)
+                ? true
+                : false
+            }
             id={categoryStateIds.itemName}
             value={category.itemName}
             onChange={handleOnChange}

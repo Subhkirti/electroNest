@@ -1,7 +1,9 @@
+import { useLocation } from "react-router-dom";
 import earPods from "../../../assets/images/home/earpods.gif";
 import electronicsPurchase from "../../../assets/images/home/electronics.jpg";
 import mobile from "../../../assets/images/home/mobile.jpg";
 import watch from "../../../assets/images/home/watch.jpg";
+import { useEffect } from "react";
 
 const mainCarouselData: { image: string; path: string }[] = [
   {
@@ -62,4 +64,14 @@ const footerSections: {
     ],
   },
 ];
-export { mainCarouselData, footerSections };
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+export { mainCarouselData, footerSections, ScrollToTop };
