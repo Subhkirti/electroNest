@@ -519,7 +519,7 @@ app.post("/top-level-categories/add", (req, res) => {
   );
 });
 
-/* Add second level categories list */
+/* Add second level category  */
 app.post("/second-level-categories/add", (req, res) => {
   const { categoryName, sectionName } = req.body;
   const category_id = generateSlug(categoryName);
@@ -577,7 +577,7 @@ app.post("/second-level-categories/add", (req, res) => {
   );
 });
 
-/* Add third level categories list */
+/* Add third level category  */
 app.post("/third-level-categories/add", (req, res) => {
   const { sectionName, itemName } = req.body;
   const section_id = generateSlug(sectionName);
@@ -632,6 +632,92 @@ app.post("/third-level-categories/add", (req, res) => {
           }
         );
       }
+    }
+  );
+});
+
+/* Delete top level category */
+app.delete("/top-level-categories/delete", (req, res) => {
+  const categoryId = req.query.id;
+  if (!categoryId) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Category Id not found in request" });
+  }
+
+  connection.query(
+    `SELECT section_id FROM ${secondLevelCateTableName} WHERE category_id = ?`,
+    [categoryId],
+    (err, results) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while retrieving sections" });
+      }
+
+      if (results.length === 0) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "No sections found" });
+      }
+
+      // Prepare to delete each section_id
+      const sectionIds = results.map((row) => row.section_id);
+      const deletePromises = sectionIds.map((sectionId) => {
+        return new Promise((resolve, reject) => {
+          connection.query(
+            `DELETE FROM ${thirdLevelCateTableName} WHERE section_id = ?`,
+            [sectionId],
+            (err) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve();
+            }
+          );
+        });
+      });
+
+      // Execute all delete queries
+      Promise.all(deletePromises)
+        .then(() => {
+          connection.query(
+            `DELETE FROM ${secondLevelCateTableName} WHERE category_id = ?`,
+            [categoryId],
+            (err) => {
+              if (err) {
+                return res.status(400).json({
+                  status: 400,
+                  message: "Error while retrieving sections",
+                });
+              } else {
+                connection.query(
+                  `DELETE FROM ${topLevelCateTableName} WHERE category_id = ?`,
+                  [categoryId],
+                  (err) => {
+                    if (err) {
+                      return res.status(400).json({
+                        status: 400,
+                        message: "Error while retrieving sections",
+                      });
+                    } else {
+                      return res.status(200).json({
+                        status: 200,
+                        message: "Categories deleted successfully",
+                      });
+                    }
+                  }
+                );
+              }
+            }
+          );
+        })
+        .catch((err) => {
+          return res.status(400).json({
+            status: 400,
+            message: "Error while retrieving items",
+          });
+        });
     }
   );
 });

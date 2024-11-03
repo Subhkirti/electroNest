@@ -12,6 +12,7 @@ import AdminAppRoutes from "../../../../common/adminRoutes";
 import CustomTable from "../../../../common/components/customTable";
 import ActionButton from "../../../../common/components/actionButton";
 import {
+  deleteTopLevelCategory,
   getSecondLevelCategories,
   getThirdLevelCategories,
   getTopLevelCategories,
@@ -25,11 +26,13 @@ import {
 import { TableColumn } from "../../../customer/types/userTypes";
 import { formattedDateTime } from "../../utils/productUtil";
 import { Box, Button } from "@mui/material";
+import Loader from "../../../../common/components/loader";
 
 function Categories() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const {
+    isLoading,
     topLevelCategories,
     topLCategoryCount,
     secondLevelCategories,
@@ -51,7 +54,39 @@ function Categories() {
     // eslint-disable-next-line
   }, []);
 
-  const handleActions = (product: any) => {
+  const handleTopLevelActions = (row: TopLevelCategories) => {
+    return (
+      <>
+        <ActionButton
+          startIcon={Edit}
+          onClick={() => navigate(AdminAppRoutes.editProduct + row.categoryId)}
+          text={"Edit"}
+        />
+        <ActionButton
+          startIcon={Delete}
+          onClick={() => dispatch(deleteTopLevelCategory(row.categoryId))}
+          text={"Delete"}
+        />
+      </>
+    );
+  };
+
+  const handleSecondLevelActions = (product: any) => {
+    return (
+      <>
+        <ActionButton
+          startIcon={Edit}
+          onClick={() =>
+            navigate(AdminAppRoutes.editProduct + product.productId)
+          }
+          text={"Edit"}
+        />
+        <ActionButton startIcon={Delete} onClick={() => {}} text={"Delete"} />
+      </>
+    );
+  };
+
+  const handleThirdLevelActions = (product: any) => {
     return (
       <>
         <ActionButton
@@ -74,14 +109,14 @@ function Categories() {
         url={AdminAppRoutes.addCategory}
         urlState={{ categoryType: CategoryTypes.topLevelCategories }}
       />
-
+      {isLoading && <Loader fixed={true} />}
       <CustomTable
         fetchData={(page, size) => dispatch(getTopLevelCategories())}
         data={topLevelCategories}
         totalCount={topLCategoryCount}
         columns={topLCategoryColumns}
         showPagination={false}
-        actions={handleActions}
+        actions={handleTopLevelActions}
       />
 
       {topLevelCategories.length && (
@@ -102,7 +137,7 @@ function Categories() {
             data={secondLevelCategories}
             totalCount={secondLCategoryCount}
             columns={secondLCategoryColumns}
-            actions={handleActions}
+            actions={handleSecondLevelActions}
           />
         </Box>
       )}
@@ -118,7 +153,6 @@ function Categories() {
           <CustomTable
             fetchData={(page, size) =>
               secondLevelCategories.map((category: SecondLevelCategories) => {
-                console.log("category:", category);
                 dispatch(getThirdLevelCategories(category.sectionId));
               })
             }
@@ -126,7 +160,7 @@ function Categories() {
             data={thirdLevelCategories}
             totalCount={thirdLCategoryCount}
             columns={thirdLCategoryColumns}
-            actions={handleActions}
+            actions={handleThirdLevelActions}
           />
         </Box>
       )}
@@ -193,7 +227,7 @@ const secondLCategoryColumns: TableColumn<SecondLevelCategories>[] = [
   },
   {
     id: "categoryId",
-    label: "Parent Category Id",
+    label: "Category Id",
   },
   {
     id: "createdAt",
@@ -218,7 +252,7 @@ const thirdLCategoryColumns: TableColumn<ThirdLevelCategories>[] = [
   },
   {
     id: "sectionId",
-    label: "Parent Category Id",
+    label: "Section Id",
   },
   {
     id: "createdAt",

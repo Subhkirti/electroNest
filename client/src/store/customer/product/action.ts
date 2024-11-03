@@ -207,6 +207,28 @@ const addThirdLevelCategories =
     }
   };
 
+const deleteTopLevelCategory =
+  (id: string) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.DELETE_TOP_LEVEL_CATEGORIES_REQUEST });
+    try {
+      const res = await axios.delete(
+        `${ApiUrls.deleteTopLevelCategory}id=${id}`,
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.DELETE_TOP_LEVEL_CATEGORIES_SUCCESS,
+        payload: id,
+      });
+
+      res?.data?.message && toast.success(res?.data?.message);
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.DELETE_TOP_LEVEL_CATEGORIES_FAILURE,
+      });
+    }
+  };
 /* Categories section ends here */
 
 /* Products section starts here */
@@ -407,4 +429,5 @@ export {
   addTopLevelCategories,
   addSecondLevelCategories,
   addThirdLevelCategories,
+  deleteTopLevelCategory,
 };

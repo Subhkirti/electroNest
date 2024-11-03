@@ -20,6 +20,9 @@ const ApiUrls = {
   addTopLevelCategories: apiBaseUrl + "/top-level-categories/add",
   addSecondLevelCategories: apiBaseUrl + "/second-level-categories/add",
   addThirdLevelCategories: apiBaseUrl + "/third-level-categories/add",
+  deleteTopLevelCategory: apiBaseUrl + "/top-level-categories/delete?",
+  deleteSecondLevelCategory: apiBaseUrl + "/second-level-categories/delete?",
+  deleteThirdLevelCategory: apiBaseUrl + "/third-level-categories/delete?",
   uploadFile: "https://v2.convertapi.com/upload",
 };
 
