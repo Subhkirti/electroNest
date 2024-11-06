@@ -18,7 +18,7 @@ function AddProduct() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [product, setProduct] = useState<ProductReqBody>(productInitState);
-  const { isLoading, product: productRes } = useSelector(
+  const { isLoading, newProduct: productRes } = useSelector(
     (state: RootState) => state.product
   );
 

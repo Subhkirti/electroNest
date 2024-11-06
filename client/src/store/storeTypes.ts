@@ -39,6 +39,7 @@ interface ProductState {
   thirdLevelCategories: any[];
   products: Product[];
   product: Product | null;
+  newProduct: Product | null;
   isLoading: boolean;
   error: string | null;
   totalCount: number;
@@ -64,6 +65,7 @@ interface OrderState {
 interface UsersState {
   users: User[];
   user: User | null;
+  newUser: User | null;
   isLoading: boolean;
   error: string | null;
   totalCount: number;

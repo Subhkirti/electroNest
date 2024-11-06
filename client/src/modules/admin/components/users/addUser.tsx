@@ -21,7 +21,7 @@ function AddUser() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [user, setUser] = useState<UserReqBody>(userInitState);
-  const { isLoading, user: userRes } = useSelector(
+  const { isLoading, newUser: userRes } = useSelector(
     (state: RootState) => state.users
   );
 

@@ -4,6 +4,7 @@ import ActionTypes from "./actionTypes";
 const initState: UsersState = {
   users: [],
   user: null,
+  newUser: null,
   isLoading: false,
   error: null,
   totalCount: 0,
@@ -29,7 +30,7 @@ function usersReducer(state: UsersState = initState, action: RootAction) {
         ...state,
         isLoading: false,
         error: null,
-        user: action?.payload,
+        newUser: action?.payload,
         users: [...state.users, action?.payload],
         totalCount: state.totalCount + 1,
       };

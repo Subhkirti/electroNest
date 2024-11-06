@@ -8,7 +8,6 @@ import { ActionDispatch } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
 import { userMap } from "../../../modules/customer/mappers/userMapper";
 import { UserReqBody } from "../../../modules/customer/types/userTypes";
-import { NavigateFunction } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const getAllUsers =

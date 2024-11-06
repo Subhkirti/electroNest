@@ -12,6 +12,7 @@ const initState: ProductState = {
   thirdLevelCategories: [],
   products: [],
   product: null,
+  newProduct: null,
   isLoading: false,
   error: null,
   totalCount: 0,
@@ -65,7 +66,7 @@ function productReducer(
           state.products.length > 0
             ? [...state?.products, action?.payload]
             : [action?.payload],
-        product: action?.payload,
+        newProduct: action?.payload,
         totalCount: state.totalCount + 1,
       };
     case ActionTypes.EDIT_PRODUCT_SUCCESS:
