@@ -2,7 +2,8 @@ import { SvgIconTypeMap } from "@mui/material";
 import {
   Category,
   Dashboard,
-  Groups,
+  Group,
+  Groups2,
   LocalShipping,
   Logout,
   ViewList,
@@ -34,9 +35,15 @@ const adminMenuItems: AdminMenuItem[] = [
     active: true,
   },
   {
+    name: "Users",
+    path: AdminAppRoutes.users,
+    icon: Groups2,
+    active: true,
+  },
+  {
     name: "Customers",
     path: AdminAppRoutes.customers,
-    icon: Groups,
+    icon: Group,
     active: true,
   },
   {
@@ -51,6 +58,7 @@ const adminMenuItems: AdminMenuItem[] = [
     icon: ViewList,
     active: true,
   },
+
   {
     name: "Logout",
     path: null,

@@ -9,12 +9,15 @@ const AppStrings = {
   goToHome: "Go to Homepage",
 
   /* admin strings */
+  users: "Users",
   shopWith: "Shop with ElectroNest",
   congratulations: "Congratulations",
   viewSales: "View Sales",
   viewProductDetails: "View Product Details",
+  viewUserDetails: "View User Details",
   monthlyOverview: "Monthly Overview",
   addProduct: "Add Product",
+  addUser: "Add User",
   editProduct: "Edit Product",
   cancel: "Cancel",
   categories: "Categories",
@@ -25,6 +28,8 @@ const AppStrings = {
   /* error messages */
   passwordError:
     "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.",
+  mobileNumberError: "Please enter valid mobile number.",
+  emailIdError: "Please enter valid email id.",
   somethingWentWrong: "Something went wrong",
   resultsNotFound: "Results not Found!",
   oopsPageNotFound: "Oops! Page Not Found",

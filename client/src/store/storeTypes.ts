@@ -1,6 +1,11 @@
 import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { User } from "../modules/customer/types/userTypes";
-import { Product, SecondLevelCategories, ThirdLevelCategories, TopLevelCategories } from "../modules/customer/types/productTypes";
+import {
+  Product,
+  SecondLevelCategories,
+  ThirdLevelCategories,
+  TopLevelCategories,
+} from "../modules/customer/types/productTypes";
 import { SvgIconTypeMap } from "@mui/material";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
 
@@ -10,6 +15,7 @@ interface RootState {
   cart: CartState;
   order: OrderState;
   header: HeaderState;
+  users: UsersState;
 }
 
 interface RootAction {
@@ -55,6 +61,14 @@ interface OrderState {
   error: string | null;
 }
 
+interface UsersState {
+  users: User[];
+  user: User | null;
+  isLoading: boolean;
+  error: string | null;
+  totalCount: number;
+}
+
 interface HeaderButtons {
   icon?: OverridableComponent<SvgIconTypeMap<{}, "svg">>;
   onClick: () => void;
@@ -77,4 +91,5 @@ export type {
   CartState,
   OrderState,
   HeaderState,
+  UsersState,
 };

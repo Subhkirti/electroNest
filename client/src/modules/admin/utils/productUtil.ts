@@ -1,3 +1,5 @@
+import { ProductReqBody } from "../../customer/types/productTypes";
+
 const productStateIds = {
   thumbnail: "thumbnail",
   images: "images",
@@ -80,7 +82,7 @@ function formatAmount(amount: Float32Array | string) {
   );
 }
 
-const productInitState = {
+const productInitState: ProductReqBody = {
   thumbnail: "",
   images: [],
   brand: "",
@@ -104,8 +106,6 @@ const categoryInitState = {
   createdAt: new Date(),
   updatedAt: new Date(),
 };
-
-
 
 export {
   productInitState,

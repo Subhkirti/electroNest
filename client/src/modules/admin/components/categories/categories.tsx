@@ -12,6 +12,8 @@ import AdminAppRoutes from "../../../../common/adminRoutes";
 import CustomTable from "../../../../common/components/customTable";
 import ActionButton from "../../../../common/components/actionButton";
 import {
+  deleteSecondLevelCategory,
+  deleteThirdLevelCategory,
   deleteTopLevelCategory,
   getSecondLevelCategories,
   getThirdLevelCategories,
@@ -34,11 +36,8 @@ function Categories() {
   const {
     isLoading,
     topLevelCategories,
-    topLCategoryCount,
     secondLevelCategories,
-    secondLCategoryCount,
     thirdLevelCategories,
-    thirdLCategoryCount,
   } = useSelector((state: RootState) => state.product);
 
   useEffect(() => {
@@ -57,11 +56,11 @@ function Categories() {
   const handleTopLevelActions = (row: TopLevelCategories) => {
     return (
       <>
-        <ActionButton
+        {/* <ActionButton
           startIcon={Edit}
           onClick={() => navigate(AdminAppRoutes.editProduct + row.categoryId)}
           text={"Edit"}
-        />
+        /> */}
         <ActionButton
           startIcon={Delete}
           onClick={() => dispatch(deleteTopLevelCategory(row.categoryId))}
@@ -71,32 +70,36 @@ function Categories() {
     );
   };
 
-  const handleSecondLevelActions = (product: any) => {
+  const handleSecondLevelActions = (row: SecondLevelCategories) => {
     return (
       <>
-        <ActionButton
+        {/* <ActionButton
           startIcon={Edit}
-          onClick={() =>
-            navigate(AdminAppRoutes.editProduct + product.productId)
-          }
+          onClick={() => navigate(AdminAppRoutes.editProduct + row.sectionId)}
           text={"Edit"}
+        /> */}
+        <ActionButton
+          startIcon={Delete}
+          onClick={() => dispatch(deleteSecondLevelCategory(row.sectionId))}
+          text={"Delete"}
         />
-        <ActionButton startIcon={Delete} onClick={() => {}} text={"Delete"} />
       </>
     );
   };
 
-  const handleThirdLevelActions = (product: any) => {
+  const handleThirdLevelActions = (row: ThirdLevelCategories) => {
     return (
       <>
-        <ActionButton
+        {/* <ActionButton
           startIcon={Edit}
-          onClick={() =>
-            navigate(AdminAppRoutes.editProduct + product.productId)
-          }
+          onClick={() => navigate(AdminAppRoutes.editProduct + row.itemId)}
           text={"Edit"}
+        /> */}
+        <ActionButton
+          startIcon={Delete}
+          onClick={() => dispatch(deleteThirdLevelCategory(row.itemId))}
+          text={"Delete"}
         />
-        <ActionButton startIcon={Delete} onClick={() => {}} text={"Delete"} />
       </>
     );
   };
@@ -104,7 +107,7 @@ function Categories() {
   return (
     <div>
       <SubHeader
-        header="Top Level Categories"
+        header={`Top Level Categories: ${topLevelCategories.length}`}
         buttonText="Add Top Level Category"
         url={AdminAppRoutes.addCategory}
         urlState={{ categoryType: CategoryTypes.topLevelCategories }}
@@ -113,7 +116,7 @@ function Categories() {
       <CustomTable
         fetchData={(page, size) => dispatch(getTopLevelCategories())}
         data={topLevelCategories}
-        totalCount={topLCategoryCount}
+        totalCount={topLevelCategories.length}
         columns={topLCategoryColumns}
         showPagination={false}
         actions={handleTopLevelActions}
@@ -122,7 +125,7 @@ function Categories() {
       {topLevelCategories.length && (
         <Box mt={5}>
           <SubHeader
-            header="Second Level Categories"
+            header={`Second Level Categories: ${secondLevelCategories.length}`}
             buttonText="Add Second Level Categories"
             url={AdminAppRoutes.addCategory}
             urlState={{ categoryType: CategoryTypes.secondLevelCategories }}
@@ -135,17 +138,17 @@ function Categories() {
             }
             showPagination={false}
             data={secondLevelCategories}
-            totalCount={secondLCategoryCount}
+            totalCount={secondLevelCategories.length}
             columns={secondLCategoryColumns}
             actions={handleSecondLevelActions}
           />
         </Box>
       )}
 
-      {secondLevelCategories.length && (
+      {secondLevelCategories.length > 0 && (
         <Box mt={5}>
           <SubHeader
-            header="Third Level Categories"
+            header={`Third Level Categories: ${thirdLevelCategories.length}`}
             buttonText="Add Third Level Categories"
             url={AdminAppRoutes.addCategory}
             urlState={{ categoryType: CategoryTypes.thirdLevelCategories }}
@@ -158,7 +161,7 @@ function Categories() {
             }
             showPagination={false}
             data={thirdLevelCategories}
-            totalCount={thirdLCategoryCount}
+            totalCount={thirdLevelCategories.length}
             columns={thirdLCategoryColumns}
             actions={handleThirdLevelActions}
           />

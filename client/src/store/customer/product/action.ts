@@ -208,17 +208,17 @@ const addThirdLevelCategories =
   };
 
 const deleteTopLevelCategory =
-  (id: string) => async (dispatch: ActionDispatch) => {
+  (categoryId: string) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.DELETE_TOP_LEVEL_CATEGORIES_REQUEST });
     try {
       const res = await axios.delete(
-        `${ApiUrls.deleteTopLevelCategory}id=${id}`,
+        `${ApiUrls.deleteTopLevelCategory}id=${categoryId}`,
         headersConfig
       );
 
       dispatch({
         type: ActionTypes.DELETE_TOP_LEVEL_CATEGORIES_SUCCESS,
-        payload: id,
+        payload: categoryId,
       });
 
       res?.data?.message && toast.success(res?.data?.message);
@@ -226,6 +226,52 @@ const deleteTopLevelCategory =
       handleCatchError({
         error,
         actionType: ActionTypes.DELETE_TOP_LEVEL_CATEGORIES_FAILURE,
+      });
+    }
+  };
+
+const deleteSecondLevelCategory =
+  (sectionId: string) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.DELETE_SECOND_LEVEL_CATEGORIES_REQUEST });
+    try {
+      const res = await axios.delete(
+        `${ApiUrls.deleteSecondLevelCategory}id=${sectionId}`,
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.DELETE_SECOND_LEVEL_CATEGORIES_SUCCESS,
+        payload: sectionId,
+      });
+
+      res?.data?.message && toast.success(res?.data?.message);
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.DELETE_SECOND_LEVEL_CATEGORIES_FAILURE,
+      });
+    }
+  };
+
+const deleteThirdLevelCategory =
+  (itemId: string) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.DELETE_THIRD_LEVEL_CATEGORIES_REQUEST });
+    try {
+      const res = await axios.delete(
+        `${ApiUrls.deleteThirdLevelCategory}id=${itemId}`,
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.DELETE_THIRD_LEVEL_CATEGORIES_SUCCESS,
+        payload: itemId,
+      });
+
+      res?.data?.message && toast.success(res?.data?.message);
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.DELETE_THIRD_LEVEL_CATEGORIES_FAILURE,
       });
     }
   };
@@ -310,7 +356,11 @@ const findProductsById =
           res?.data?.data?.length > 0 ? productMap(res?.data?.data[0]) : {},
       });
       res?.data?.data?.length === 0 &&
-        toast.info(`Product details not found for id ${productId}`);
+        toast.info(
+          productId
+            ? `Product details not found for id ${productId}.`
+            : "Product details not found."
+        );
     } catch (error) {
       handleCatchError({
         error,
@@ -430,4 +480,6 @@ export {
   addSecondLevelCategories,
   addThirdLevelCategories,
   deleteTopLevelCategory,
+  deleteSecondLevelCategory,
+  deleteThirdLevelCategory,
 };

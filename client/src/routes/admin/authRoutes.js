@@ -24,6 +24,13 @@ const Orders = lazy(() =>
 const Customers = lazy(() =>
   import("../../modules/admin/components/customers/customers")
 );
+const Users = lazy(() => import("../../modules/admin/components/users/users"));
+const AddUser = lazy(() =>
+  import("../../modules/admin/components/users/addUser")
+);
+const ViewUser = lazy(() =>
+  import("../../modules/admin/components/users/viewUser")
+);
 const Categories = lazy(() =>
   import("../../modules/admin/components/categories/categories")
 );
@@ -71,6 +78,22 @@ const authRoutes = [
   {
     path: "/customers",
     component: Customers,
+  },
+  {
+    path: "/users",
+    component: Users,
+  },
+  {
+    path: "/users/add",
+    component: AddUser,
+  },
+  {
+    path: "/users/view/:id",
+    component: ViewUser,
+  },
+  {
+    path: "/users/edit/:id",
+    component: ViewUser,
   },
 ];
 

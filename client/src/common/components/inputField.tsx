@@ -92,7 +92,11 @@ export default function InputField({
       fullWidth
       variant="outlined"
       margin="normal"
-      inputProps={isFileType ? { accept: acceptFile, multiple } : {}}
+      inputProps={
+        isFileType
+          ? { accept: acceptFile, multiple, maxLength: maxLength }
+          : { maxLength: maxLength }
+      }
       slotProps={{
         inputLabel: {
           shrink: value ? true : readOnly && value ? true : undefined,

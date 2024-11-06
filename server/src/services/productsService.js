@@ -258,7 +258,6 @@ app.delete("/product/delete", (req, res) => {
     `DELETE FROM ${tableName} WHERE product_id = ?`,
     [parseInt(id)],
     (err) => {
-      console.log("err:", err);
       if (err) {
         return res
           .status(400)
@@ -718,6 +717,263 @@ app.delete("/top-level-categories/delete", (req, res) => {
             message: "Error while retrieving items",
           });
         });
+    }
+  );
+});
+
+/* Delete second-level category */
+app.delete("/second-level-categories/delete", (req, res) => {
+  const sectionId = req.query.id;
+  if (!sectionId) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Section Id not found in request" });
+  }
+
+  // Retrieve the category_id associated with this section_id
+  connection.query(
+    `SELECT category_id FROM ${secondLevelCateTableName} WHERE section_id = ?`,
+    [sectionId],
+    (err, results) => {
+      if (err) {
+        return res.status(400).json({
+          status: 400,
+          message: "Error while retrieving category information",
+        });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: "No section found with the provided section ID",
+        });
+      }
+
+      const categoryId = results[0].category_id;
+
+      // Delete items from the third-level category that depend on this section
+      connection.query(
+        `DELETE FROM ${thirdLevelCateTableName} WHERE section_id = ?`,
+        [sectionId],
+        (err) => {
+          if (err) {
+            return res.status(400).json({
+              status: 400,
+              message: "Error while deleting third-level category items",
+            });
+          }
+
+          // Once third-level items are deleted, we can safely delete the second-level section
+          connection.query(
+            `DELETE FROM ${secondLevelCateTableName} WHERE section_id = ?`,
+            [sectionId],
+            (err) => {
+              if (err) {
+                return res.status(400).json({
+                  status: 400,
+                  message:
+                    "Error while deleting second-level category (section)",
+                });
+              }
+
+              // Check if there are any more sections left for the top-level category
+              connection.query(
+                `SELECT COUNT(*) AS section_count FROM ${secondLevelCateTableName} WHERE category_id = ?`,
+                [categoryId],
+                (err, results) => {
+                  if (err) {
+                    return res.status(400).json({
+                      status: 400,
+                      message: "Error while checking remaining sections",
+                    });
+                  }
+
+                  // If no other sections exist for this category, we can delete the top-level category
+                  if (results[0].section_count === 0) {
+                    connection.query(
+                      `DELETE FROM ${topLevelCateTableName} WHERE category_id = ?`,
+                      [categoryId],
+                      (err) => {
+                        if (err) {
+                          return res.status(400).json({
+                            status: 400,
+                            message: "Error while deleting top-level category",
+                          });
+                        }
+
+                        // Success response
+                        return res.status(200).json({
+                          status: 200,
+                          message: "Category deleted Successfully.",
+                        });
+                      }
+                    );
+                  } else {
+                    // If there are still sections, we just delete the second-level category
+                    return res.status(200).json({
+                      status: 200,
+                      message: "Category deleted Successfully.",
+                    });
+                  }
+                }
+              );
+            }
+          );
+        }
+      );
+    }
+  );
+});
+
+/* Delete third-level category */
+app.delete("/third-level-categories/delete", (req, res) => {
+  const itemId = req.query.id;
+  if (!itemId) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Item Id not found in request" });
+  }
+
+  // Step 1: Retrieve the section_id and category_id associated with this item
+  connection.query(
+    `SELECT section_id FROM ${thirdLevelCateTableName} WHERE item_id = ?`,
+    [itemId],
+    (err, results) => {
+      if (err) {
+        return res.status(400).json({
+          status: 400,
+          message: "Error while retrieving section information",
+        });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: "No item found with the provided item ID",
+        });
+      }
+
+      const sectionId = results[0].section_id;
+
+      // Step 2: Delete the third-level category (item) from the third-level table
+      connection.query(
+        `DELETE FROM ${thirdLevelCateTableName} WHERE item_id = ?`,
+        [itemId],
+        (err) => {
+          if (err) {
+            return res.status(400).json({
+              status: 400,
+              message: "Error while deleting third-level category (item)",
+            });
+          }
+
+          // Step 3: After deleting the third-level item, check if the second-level section can be deleted
+          connection.query(
+            `SELECT category_id FROM ${secondLevelCateTableName} WHERE section_id = ?`,
+            [sectionId],
+            (err, results) => {
+              if (err) {
+                return res.status(400).json({
+                  status: 400,
+                  message:
+                    "Error while retrieving category information for section",
+                });
+              }
+
+              if (results.length === 0) {
+                return res.status(404).json({
+                  status: 404,
+                  message: "No section found with the provided section ID",
+                });
+              }
+
+              const categoryId = results[0].category_id;
+
+              // Step 4: Check if there are any other sections left in this second-level category
+              connection.query(
+                `SELECT COUNT(*) AS section_count FROM ${thirdLevelCateTableName} WHERE section_id = ?`,
+                [sectionId],
+                (err, results) => {
+                  if (err) {
+                    return res.status(400).json({
+                      status: 400,
+                      message:
+                        "Error while checking remaining third-level items",
+                    });
+                  }
+
+                  // If no more third-level items exist for this section, delete the second-level section
+                  if (results[0].section_count === 0) {
+                    connection.query(
+                      `DELETE FROM ${secondLevelCateTableName} WHERE section_id = ?`,
+                      [sectionId],
+                      (err) => {
+                        if (err) {
+                          return res.status(400).json({
+                            status: 400,
+                            message:
+                              "Error while deleting second-level category (section)",
+                          });
+                        }
+
+                        // Step 5: Check if the top-level category should be deleted
+                        connection.query(
+                          `SELECT COUNT(*) AS section_count FROM ${secondLevelCateTableName} WHERE category_id = ?`,
+                          [categoryId],
+                          (err, results) => {
+                            if (err) {
+                              return res.status(400).json({
+                                status: 400,
+                                message:
+                                  "Error while checking remaining sections for top-level category",
+                              });
+                            }
+
+                            // If no other sections exist for this category, we can delete the top-level category
+                            if (results[0].section_count === 0) {
+                              connection.query(
+                                `DELETE FROM ${topLevelCateTableName} WHERE category_id = ?`,
+                                [categoryId],
+                                (err) => {
+                                  if (err) {
+                                    return res.status(400).json({
+                                      status: 400,
+                                      message:
+                                        "Error while deleting top-level category",
+                                    });
+                                  }
+
+                                  // Success response
+                                  return res.status(200).json({
+                                    status: 200,
+                                    message: "Category deleted Successfully.",
+                                  });
+                                }
+                              );
+                            } else {
+                              // If sections still exist, don't delete the top-level category
+                              return res.status(200).json({
+                                status: 200,
+                                message: "Category deleted Successfully.",
+                              });
+                            }
+                          }
+                        );
+                      }
+                    );
+                  } else {
+                    // If there are still third-level items, just return success for third-level deletion
+                    return res.status(200).json({
+                      status: 200,
+                      message: "Category deleted Successfully.",
+                    });
+                  }
+                }
+              );
+            }
+          );
+        }
+      );
     }
   );
 });
