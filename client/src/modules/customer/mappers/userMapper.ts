@@ -14,6 +14,7 @@ function userMap(doc: any): User {
     role: doc?.role || "customer",
     mobile: doc?.mobile,
     createdAt: doc?.created_at,
+    updatedAt: doc?.updated_at,
   };
 }
 

@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import { ThemeProvider } from "@mui/material";
+import { ThemeProvider, StyledEngineProvider } from "@mui/material";
 import theme from "./modules/customer/utils/theme";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
@@ -15,9 +15,11 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <Provider store={store}>
-        <ThemeProvider theme={theme}>
-          <App />
-        </ThemeProvider>
+        <StyledEngineProvider injectFirst>
+          <ThemeProvider theme={theme}>
+            <App />
+          </ThemeProvider>
+        </StyledEngineProvider>
       </Provider>
     </BrowserRouter>
   </React.StrictMode>

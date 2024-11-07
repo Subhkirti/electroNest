@@ -13,9 +13,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { passwordRegEx } from "../../../../common/constants";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
-import Loader from "../common/loader";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { register } from "../../../../store/customer/auth/action";
+import Loader from "../../../../common/components/loader";
 
 function RegisterForm() {
   const navigate = useNavigate();

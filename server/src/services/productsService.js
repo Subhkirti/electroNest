@@ -1,12 +1,11 @@
 const connection = require("../connection");
 const tableName = "products";
-const productCategoriesTableName = "product_categories";
-const productCategorySectionsTableName = "product_category_sections";
-const productCategorySectionItemsTableName = "product_category_section_items";
+const topLevelCateTableName = "top_level_categories"; // also known as categories
+const secondLevelCateTableName = "second_level_categories"; // also known as sections
+const thirdLevelCateTableName = "third_level_categories"; // also known as items
 
 const app = require("../app");
 createProductCateSectionItemsTable();
-
 app.post("/product/categories/sections/items", (req, res) => {
   const { categories } = req.body;
 
@@ -24,7 +23,7 @@ app.post("/product/categories/sections/items", (req, res) => {
 
       // Insert the category
       return new Promise((resolve, reject) => {
-        const insertCategoryQuery = `INSERT INTO product_categories (category_id, category_name) VALUES (?, ?)`;
+        const insertCategoryQuery = `INSERT INTO ${topLevelCateTableName} (category_id, category_name) VALUES (?, ?)`;
         connection.query(
           insertCategoryQuery,
           [category_id, category.name],
@@ -35,7 +34,7 @@ app.post("/product/categories/sections/items", (req, res) => {
             const sectionInsertPromises = sections.map((section) => {
               const section_id = generateSlug(section.name);
               return new Promise((resolveSection, rejectSection) => {
-                const insertSectionQuery = `INSERT INTO product_category_sections (section_id, section_name, category_id) VALUES (?, ?, ?)`;
+                const insertSectionQuery = `INSERT INTO ${secondLevelCateTableName} (section_id, section_name, category_id) VALUES (?, ?, ?)`;
                 connection.query(
                   insertSectionQuery,
                   [section_id, section.name, category_id],
@@ -46,7 +45,7 @@ app.post("/product/categories/sections/items", (req, res) => {
                     const itemInsertPromises = section.items.map((item) => {
                       const item_id = generateSlug(item.name);
                       return new Promise((resolveItem, rejectItem) => {
-                        const insertItemQuery = `INSERT INTO product_category_section_items (item_id, item_name, section_id) VALUES (?, ?, ?)`;
+                        const insertItemQuery = `INSERT INTO ${thirdLevelCateTableName} (item_id, item_name, section_id) VALUES (?, ?, ?)`;
                         connection.query(
                           insertItemQuery,
                           [item_id, item.name, section_id],
@@ -108,10 +107,281 @@ app.post("/product/categories/sections/items", (req, res) => {
   });
 });
 
+// Get all categories data
+app.get("/product/categories", (req, res) => {
+  // Query to get all top-level categories
+  const getCategoriesQuery = `SELECT * FROM ${topLevelCateTableName}`;
+
+  connection.query(getCategoriesQuery, (err, categories) => {
+    if (err) {
+      console.error("Error fetching categories:", err);
+      return res.status(500).json({
+        status: 500,
+        message: "Error fetching categories",
+      });
+    }
+
+    // Fetch the sections for each category
+    const categoryPromises = categories.map((category) => {
+      return new Promise((resolveCategory, rejectCategory) => {
+        const categoryId = category.category_id;
+
+        // Query to get sections for each category
+        const getSectionsQuery = `SELECT * FROM ${secondLevelCateTableName} WHERE category_id = ?`;
+
+        connection.query(getSectionsQuery, [categoryId], (err, sections) => {
+          if (err) {
+            console.error(
+              "Error fetching sections for category:",
+              categoryId,
+              err
+            );
+            return rejectCategory(err);
+          }
+
+          // Fetch items for each section
+          const sectionPromises = sections.map((section) => {
+            return new Promise((resolveSection, rejectSection) => {
+              const sectionId = section.section_id;
+
+              // Query to get items for each section
+              const getItemsQuery = `SELECT * FROM ${thirdLevelCateTableName} WHERE section_id = ?`;
+
+              connection.query(getItemsQuery, [sectionId], (err, items) => {
+                if (err) {
+                  console.error(
+                    "Error fetching items for section:",
+                    sectionId,
+                    err
+                  );
+                  return rejectSection(err);
+                }
+
+                // Map items to the required structure
+                section.items = items.map((item) => ({
+                  id: item.item_id,
+                  name: item.item_name,
+                }));
+
+                resolveSection(section);
+              });
+            });
+          });
+
+          // Wait for all sections to be processed
+          Promise.all(sectionPromises)
+            .then((resolvedSections) => {
+              // Map sections to the required structure
+              category.sections = resolvedSections.map((section) => ({
+                id: section.section_id,
+                name: section.section_name,
+                items: section.items,
+              }));
+
+              resolveCategory(category);
+            })
+            .catch(rejectCategory);
+        });
+      });
+    });
+
+    // Wait for all categories to be processed
+    Promise.all(categoryPromises)
+      .then((resolvedCategories) => {
+        // Map categories to the required structure
+        const allCategories = resolvedCategories.map((category) => ({
+          id: category.category_id,
+          name: category.category_name,
+          sections: category.sections,
+        }));
+
+        // Return the final response
+        return res.status(200).json({ status: 200, data: allCategories });
+      })
+      .catch((err) => {
+        console.error("Error getting categories:", err);
+        return res.status(500).json({
+          status: 500,
+          message: "Error getting categories: categories",
+        });
+      });
+  });
+});
+
 /* Set products list */
-app.set("/products", (req, res) => {
+app.post("/product/add", (req, res) => {
+  const {
+    thumbnail,
+    images,
+    brand,
+    title,
+    color,
+    size,
+    description,
+    price,
+    quantity,
+    disPercentage,
+    disPrice,
+    topLevelCategory,
+    secondLevelCategory,
+    thirdLevelCategory,
+  } = req.body;
+
   connection.query(
-    `INSERT INTO ${tableName} (product_name,  price, stock_quantity, category_id) VALUES (?,?,?,?)`,
+    `INSERT INTO ${tableName} (product_name, description, price, discount_price, discount_percentage, quantity, brand, color, size, thumbnail, images, category_id, section_id, item_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    [
+      title,
+      description,
+      price,
+      disPrice,
+      disPercentage,
+      quantity,
+      brand,
+      color,
+      size,
+      JSON.stringify(thumbnail),
+      JSON.stringify(images),
+      topLevelCategory,
+      secondLevelCategory,
+      thirdLevelCategory,
+    ],
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while adding product" });
+      } else {
+        const productId = result.insertId;
+        // give product details
+        connection.query(
+          `SELECT * FROM ${tableName} WHERE product_id = ?`,
+          [productId],
+          (err, result) => {
+            if (err) {
+              return res.status(400).json({
+                status: 400,
+                message: "Error checking product",
+              });
+            }
+            if (!result.length) {
+              return res.status(400).json({
+                status: 400,
+                message: "Failed to get product",
+              });
+            }
+            return res.status(200).json({ status: 200, data: result[0] });
+          }
+        );
+      }
+    }
+  );
+});
+
+/* Edit product details */
+app.post("/product/edit", (req, res) => {
+  const productId = req.query?.id;
+  const {
+    thumbnail,
+    images,
+    brand,
+    title,
+    color,
+    size,
+    description,
+    price,
+    quantity,
+    disPercentage,
+    disPrice,
+    topLevelCategory,
+    secondLevelCategory,
+    thirdLevelCategory,
+  } = req.body;
+
+  connection.query(
+    `UPDATE ${tableName} SET product_name = ?, description = ?, price = ?, discount_price = ?, discount_percentage = ?, quantity = ?, brand = ?, color = ?, size = ?, thumbnail = ?, images = ?, category_id = ?, section_id = ?, item_id = ? WHERE product_id = ?`,
+    [
+      title,
+      description,
+      price,
+      disPrice,
+      disPercentage,
+      quantity,
+      brand,
+      color,
+      size,
+      JSON.stringify([thumbnail]),
+      JSON.stringify(images),
+      topLevelCategory,
+      secondLevelCategory,
+      thirdLevelCategory,
+      productId,
+    ],
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while updating product" });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: "Product not found",
+        });
+      }
+
+      // return the updated product details
+      connection.query(
+        `SELECT * FROM ${tableName} WHERE product_id = ?`,
+        [productId],
+        (err, result) => {
+          if (err) {
+            return res.status(400).json({
+              status: 400,
+              message: "Error fetching updated product",
+            });
+          }
+          return res.status(200).json({ status: 200, data: result[0] });
+        }
+      );
+    }
+  );
+});
+
+/* Delete product */
+app.delete("/product/delete", (req, res) => {
+  const { id } = req.query;
+  if (!id) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Product Id not found in request" });
+  }
+  connection.query(
+    `DELETE FROM ${tableName} WHERE product_id = ?`,
+    [parseInt(id)],
+    (err) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while getting products" });
+      }
+      return res
+        .status(200)
+        .json({ status: 200, data: "Product deleted successfully" });
+    }
+  );
+});
+
+/* Get product details by id */
+app.get("/product-details", (req, res) => {
+  const { id } = req.query;
+  if (!id) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Product Id not found in request" });
+  }
+  connection.query(
+    `SELECT * FROM ${tableName} WHERE product_id = ?`,
+    [id],
     (err, result) => {
       if (err) {
         return res
@@ -125,14 +395,688 @@ app.set("/products", (req, res) => {
 
 /* Get products list */
 app.get("/products", (req, res) => {
-  connection.query(`SELECT * FROM ${tableName}`, (err, result) => {
-    if (err) {
-      return res
-        .status(400)
-        .json({ status: 400, message: "Error while getting products" });
+  const { pageNumber, pageSize } = req.query;
+  const limit = parseInt(pageSize);
+  const offset = (parseInt(pageNumber) - 1) * limit;
+
+  /* Count query */
+  connection.query(
+    `SELECT COUNT(*) as totalCount FROM ${tableName}`,
+    (err, countResult) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while counting products" });
+      }
+
+      const totalCount = countResult[0].totalCount;
+      /* Get Products query */
+      connection.query(
+        `SELECT * FROM ${tableName} LIMIT ? OFFSET ?`,
+        [limit, offset],
+        (err, result) => {
+          if (err) {
+            return res
+              .status(400)
+              .json({ status: 400, message: "Error while getting products" });
+          }
+
+          return res.status(200).json({
+            status: 200,
+            data: result,
+            totalCount: totalCount,
+          });
+        }
+      );
     }
-    return res.status(200).json({ status: 200, data: result });
-  });
+  );
+});
+
+/* Get top level categories list */
+app.get("/top-level-categories", (req, res) => {
+  const { pageNumber, pageSize } = req.query;
+  const limit = parseInt(pageSize);
+  const offset = (parseInt(pageNumber) - 1) * limit;
+  const selectQuery = pageNumber
+    ? `SELECT * FROM ${topLevelCateTableName} LIMIT ? OFFSET ?`
+    : `SELECT * FROM ${topLevelCateTableName}`;
+  /* Count query */
+  connection.query(
+    `SELECT COUNT(*) as totalCount FROM ${topLevelCateTableName}`,
+    (err, countResult) => {
+      if (err) {
+        return res.status(400).json({
+          status: 400,
+          message: "Error while counting top level categories",
+        });
+      }
+
+      const totalCount = countResult[0].totalCount;
+      /* Get top level categories query */
+      connection.query(selectQuery, [limit, offset], (err, result) => {
+        if (err) {
+          return res.status(400).json({
+            status: 400,
+            message: "Error while getting top level categories",
+          });
+        }
+
+        return res.status(200).json({
+          status: 200,
+          data: result,
+          totalCount: totalCount,
+        });
+      });
+    }
+  );
+});
+
+/* Get second level categories list */
+app.get("/second-level-categories", (req, res) => {
+  const { pageNumber, pageSize, categoryId } = req.query;
+  const limit = parseInt(pageSize);
+  const offset = (parseInt(pageNumber) - 1) * limit;
+  const selectQuery = pageNumber
+    ? `SELECT * FROM ${secondLevelCateTableName} WHERE category_id = ? LIMIT ? OFFSET ?`
+    : `SELECT * FROM ${secondLevelCateTableName} WHERE category_id = ?`;
+  /* Count query */
+  connection.query(
+    `SELECT COUNT(*) as totalCount FROM ${secondLevelCateTableName} WHERE category_id = ? `,
+    [categoryId],
+    (err, countResult) => {
+      if (err) {
+        return res.status(400).json({
+          status: 400,
+          message: "Error while counting second level categories",
+        });
+      }
+
+      const totalCount = countResult[0].totalCount;
+      /* Get second level categories query */
+      connection.query(
+        selectQuery,
+        [categoryId, limit, offset],
+        (err, result) => {
+          if (err) {
+            return res.status(400).json({
+              status: 400,
+              message: "Error while getting second level categories",
+            });
+          }
+
+          return res.status(200).json({
+            status: 200,
+            data: result,
+            totalCount: totalCount,
+          });
+        }
+      );
+    }
+  );
+});
+
+/* Get third level categories list */
+app.get("/third-level-categories", (req, res) => {
+  const { pageNumber, pageSize, sectionId } = req.query;
+  const limit = parseInt(pageSize);
+  const offset = (parseInt(pageNumber) - 1) * limit;
+
+  const selectQuery = pageNumber
+    ? `SELECT * FROM ${thirdLevelCateTableName} WHERE section_id = ? LIMIT ? OFFSET ?`
+    : `SELECT * FROM ${thirdLevelCateTableName} WHERE section_id = ?`;
+
+  /* Count query */
+  connection.query(
+    `SELECT COUNT(*) as totalCount FROM ${thirdLevelCateTableName} WHERE section_id = ?`,
+    [sectionId],
+    (err, countResult) => {
+      if (err) {
+        return res.status(400).json({
+          status: 400,
+          message: "Error while counting third level categories",
+        });
+      }
+
+      const totalCount = countResult[0].totalCount;
+      /* Get third level categories query */
+      connection.query(
+        selectQuery,
+        [sectionId, limit, offset],
+        (err, result) => {
+          if (err) {
+            return res.status(400).json({
+              status: 400,
+              message: "Error while getting third level categories",
+            });
+          }
+
+          return res.status(200).json({
+            status: 200,
+            data: result,
+            totalCount: totalCount,
+          });
+        }
+      );
+    }
+  );
+});
+
+/* Add top level category */
+app.post("/top-level-categories/add", (req, res) => {
+  const { categoryName } = req.body;
+  const category_id = generateSlug(categoryName);
+
+  if (!categoryName) {
+    return res.status(400).json({
+      status: 400,
+      message: "CategoryName not found in request.",
+    });
+  }
+  connection.query(
+    `INSERT INTO ${topLevelCateTableName} (category_id, category_name) VALUES (?, ?)`,
+    [category_id, categoryName],
+    (err, result) => {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          return res.status(400).json({
+            status: 400,
+            message: "This Category already exists",
+          });
+        }
+
+        return res.status(400).json({
+          status: 400,
+          message: "Error while getting top level categories",
+        });
+      } else {
+        const categoryId = result.insertId;
+        // Fetch newly added category details
+        connection.query(
+          `SELECT * FROM ${topLevelCateTableName} WHERE id = ?`,
+          [categoryId],
+          (err, result) => {
+            if (err) {
+              return res.status(400).json({
+                status: 400,
+                message: "Error checking category",
+              });
+            }
+            if (!result.length) {
+              return res.status(400).json({
+                status: 400,
+                message: "Failed to get category",
+              });
+            }
+
+            return res.status(200).json({
+              status: 200,
+              data: result[0],
+            });
+          }
+        );
+      }
+    }
+  );
+});
+
+/* Add second level category  */
+app.post("/second-level-categories/add", (req, res) => {
+  const { categoryName, sectionName } = req.body;
+  const category_id = generateSlug(categoryName);
+  const section_id = generateSlug(sectionName);
+
+  if (!categoryName || !sectionName) {
+    return res.status(400).json({
+      status: 400,
+      message: "CategoryName or sectionName not found in request.",
+    });
+  }
+  connection.query(
+    `INSERT INTO ${secondLevelCateTableName} (section_id, section_name, category_id) VALUES (?, ?, ?)`,
+    [section_id, sectionName, category_id],
+    (err, result) => {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          return res.status(400).json({
+            status: 400,
+            message: "This Category already exists",
+          });
+        }
+        return res.status(400).json({
+          status: 400,
+          message: "Error while getting top level categories",
+        });
+      } else {
+        const categoryId = result.insertId;
+        // Fetch newly added category details
+        connection.query(
+          `SELECT * FROM ${secondLevelCateTableName} WHERE id = ?`,
+          [categoryId],
+          (err, result) => {
+            if (err) {
+              return res.status(400).json({
+                status: 400,
+                message: "Error checking category",
+              });
+            }
+            if (!result.length) {
+              return res.status(400).json({
+                status: 400,
+                message: "Failed to get category",
+              });
+            }
+
+            return res.status(200).json({
+              status: 200,
+              data: result[0],
+            });
+          }
+        );
+      }
+    }
+  );
+});
+
+/* Add third level category  */
+app.post("/third-level-categories/add", (req, res) => {
+  const { sectionName, itemName } = req.body;
+  const section_id = generateSlug(sectionName);
+  const item_id = generateSlug(itemName);
+
+  if (!sectionName || !itemName) {
+    return res.status(400).json({
+      status: 400,
+      message: "SectionName or itemName not found in request.",
+    });
+  }
+
+  connection.query(
+    `INSERT INTO ${thirdLevelCateTableName} (item_id, item_name, section_id) VALUES (?, ?, ?)`,
+    [item_id, itemName, section_id],
+    (err, result) => {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          return res.status(400).json({
+            status: 400,
+            message: "This Category already exists",
+          });
+        }
+        return res.status(400).json({
+          status: 400,
+          message: "Error while getting third level categories",
+        });
+      } else {
+        const categoryId = result.insertId;
+        // Fetch newly added category details
+        connection.query(
+          `SELECT * FROM ${thirdLevelCateTableName} WHERE id = ?`,
+          [categoryId],
+          (err, result) => {
+            if (err) {
+              return res.status(400).json({
+                status: 400,
+                message: "Error checking category",
+              });
+            }
+            if (!result.length) {
+              return res.status(400).json({
+                status: 400,
+                message: "Failed to get category",
+              });
+            }
+
+            return res.status(200).json({
+              status: 200,
+              data: result[0],
+            });
+          }
+        );
+      }
+    }
+  );
+});
+
+/* Delete top level category */
+app.delete("/top-level-categories/delete", (req, res) => {
+  const categoryId = req.query.id;
+  if (!categoryId) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Category Id not found in request" });
+  }
+
+  connection.query(
+    `SELECT section_id FROM ${secondLevelCateTableName} WHERE category_id = ?`,
+    [categoryId],
+    (err, results) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while retrieving sections" });
+      }
+
+      if (results.length === 0) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "No sections found" });
+      }
+
+      // Prepare to delete each section_id
+      const sectionIds = results.map((row) => row.section_id);
+      const deletePromises = sectionIds.map((sectionId) => {
+        return new Promise((resolve, reject) => {
+          connection.query(
+            `DELETE FROM ${thirdLevelCateTableName} WHERE section_id = ?`,
+            [sectionId],
+            (err) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve();
+            }
+          );
+        });
+      });
+
+      // Execute all delete queries
+      Promise.all(deletePromises)
+        .then(() => {
+          connection.query(
+            `DELETE FROM ${secondLevelCateTableName} WHERE category_id = ?`,
+            [categoryId],
+            (err) => {
+              if (err) {
+                return res.status(400).json({
+                  status: 400,
+                  message: "Error while retrieving sections",
+                });
+              } else {
+                connection.query(
+                  `DELETE FROM ${topLevelCateTableName} WHERE category_id = ?`,
+                  [categoryId],
+                  (err) => {
+                    if (err) {
+                      return res.status(400).json({
+                        status: 400,
+                        message: "Error while retrieving sections",
+                      });
+                    } else {
+                      return res.status(200).json({
+                        status: 200,
+                        message: "Categories deleted successfully",
+                      });
+                    }
+                  }
+                );
+              }
+            }
+          );
+        })
+        .catch((err) => {
+          return res.status(400).json({
+            status: 400,
+            message: "Error while retrieving items",
+          });
+        });
+    }
+  );
+});
+
+/* Delete second-level category */
+app.delete("/second-level-categories/delete", (req, res) => {
+  const sectionId = req.query.id;
+  if (!sectionId) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Section Id not found in request" });
+  }
+
+  // Retrieve the category_id associated with this section_id
+  connection.query(
+    `SELECT category_id FROM ${secondLevelCateTableName} WHERE section_id = ?`,
+    [sectionId],
+    (err, results) => {
+      if (err) {
+        return res.status(400).json({
+          status: 400,
+          message: "Error while retrieving category information",
+        });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: "No section found with the provided section ID",
+        });
+      }
+
+      const categoryId = results[0].category_id;
+
+      // Delete items from the third-level category that depend on this section
+      connection.query(
+        `DELETE FROM ${thirdLevelCateTableName} WHERE section_id = ?`,
+        [sectionId],
+        (err) => {
+          if (err) {
+            return res.status(400).json({
+              status: 400,
+              message: "Error while deleting third-level category items",
+            });
+          }
+
+          // Once third-level items are deleted, we can safely delete the second-level section
+          connection.query(
+            `DELETE FROM ${secondLevelCateTableName} WHERE section_id = ?`,
+            [sectionId],
+            (err) => {
+              if (err) {
+                return res.status(400).json({
+                  status: 400,
+                  message:
+                    "Error while deleting second-level category (section)",
+                });
+              }
+
+              // Check if there are any more sections left for the top-level category
+              connection.query(
+                `SELECT COUNT(*) AS section_count FROM ${secondLevelCateTableName} WHERE category_id = ?`,
+                [categoryId],
+                (err, results) => {
+                  if (err) {
+                    return res.status(400).json({
+                      status: 400,
+                      message: "Error while checking remaining sections",
+                    });
+                  }
+
+                  // If no other sections exist for this category, we can delete the top-level category
+                  if (results[0].section_count === 0) {
+                    connection.query(
+                      `DELETE FROM ${topLevelCateTableName} WHERE category_id = ?`,
+                      [categoryId],
+                      (err) => {
+                        if (err) {
+                          return res.status(400).json({
+                            status: 400,
+                            message: "Error while deleting top-level category",
+                          });
+                        }
+
+                        // Success response
+                        return res.status(200).json({
+                          status: 200,
+                          message: "Category deleted Successfully.",
+                        });
+                      }
+                    );
+                  } else {
+                    // If there are still sections, we just delete the second-level category
+                    return res.status(200).json({
+                      status: 200,
+                      message: "Category deleted Successfully.",
+                    });
+                  }
+                }
+              );
+            }
+          );
+        }
+      );
+    }
+  );
+});
+
+/* Delete third-level category */
+app.delete("/third-level-categories/delete", (req, res) => {
+  const itemId = req.query.id;
+  if (!itemId) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Item Id not found in request" });
+  }
+
+  // Step 1: Retrieve the section_id and category_id associated with this item
+  connection.query(
+    `SELECT section_id FROM ${thirdLevelCateTableName} WHERE item_id = ?`,
+    [itemId],
+    (err, results) => {
+      if (err) {
+        return res.status(400).json({
+          status: 400,
+          message: "Error while retrieving section information",
+        });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: "No item found with the provided item ID",
+        });
+      }
+
+      const sectionId = results[0].section_id;
+
+      // Step 2: Delete the third-level category (item) from the third-level table
+      connection.query(
+        `DELETE FROM ${thirdLevelCateTableName} WHERE item_id = ?`,
+        [itemId],
+        (err) => {
+          if (err) {
+            return res.status(400).json({
+              status: 400,
+              message: "Error while deleting third-level category (item)",
+            });
+          }
+
+          // Step 3: After deleting the third-level item, check if the second-level section can be deleted
+          connection.query(
+            `SELECT category_id FROM ${secondLevelCateTableName} WHERE section_id = ?`,
+            [sectionId],
+            (err, results) => {
+              if (err) {
+                return res.status(400).json({
+                  status: 400,
+                  message:
+                    "Error while retrieving category information for section",
+                });
+              }
+
+              if (results.length === 0) {
+                return res.status(404).json({
+                  status: 404,
+                  message: "No section found with the provided section ID",
+                });
+              }
+
+              const categoryId = results[0].category_id;
+
+              // Step 4: Check if there are any other sections left in this second-level category
+              connection.query(
+                `SELECT COUNT(*) AS section_count FROM ${thirdLevelCateTableName} WHERE section_id = ?`,
+                [sectionId],
+                (err, results) => {
+                  if (err) {
+                    return res.status(400).json({
+                      status: 400,
+                      message:
+                        "Error while checking remaining third-level items",
+                    });
+                  }
+
+                  // If no more third-level items exist for this section, delete the second-level section
+                  if (results[0].section_count === 0) {
+                    connection.query(
+                      `DELETE FROM ${secondLevelCateTableName} WHERE section_id = ?`,
+                      [sectionId],
+                      (err) => {
+                        if (err) {
+                          return res.status(400).json({
+                            status: 400,
+                            message:
+                              "Error while deleting second-level category (section)",
+                          });
+                        }
+
+                        // Step 5: Check if the top-level category should be deleted
+                        connection.query(
+                          `SELECT COUNT(*) AS section_count FROM ${secondLevelCateTableName} WHERE category_id = ?`,
+                          [categoryId],
+                          (err, results) => {
+                            if (err) {
+                              return res.status(400).json({
+                                status: 400,
+                                message:
+                                  "Error while checking remaining sections for top-level category",
+                              });
+                            }
+
+                            // If no other sections exist for this category, we can delete the top-level category
+                            if (results[0].section_count === 0) {
+                              connection.query(
+                                `DELETE FROM ${topLevelCateTableName} WHERE category_id = ?`,
+                                [categoryId],
+                                (err) => {
+                                  if (err) {
+                                    return res.status(400).json({
+                                      status: 400,
+                                      message:
+                                        "Error while deleting top-level category",
+                                    });
+                                  }
+
+                                  // Success response
+                                  return res.status(200).json({
+                                    status: 200,
+                                    message: "Category deleted Successfully.",
+                                  });
+                                }
+                              );
+                            } else {
+                              // If sections still exist, don't delete the top-level category
+                              return res.status(200).json({
+                                status: 200,
+                                message: "Category deleted Successfully.",
+                              });
+                            }
+                          }
+                        );
+                      }
+                    );
+                  } else {
+                    // If there are still third-level items, just return success for third-level deletion
+                    return res.status(200).json({
+                      status: 200,
+                      message: "Category deleted Successfully.",
+                    });
+                  }
+                }
+              );
+            }
+          );
+        }
+      );
+    }
+  );
 });
 
 /* Create tables section starts here */
@@ -141,7 +1085,7 @@ function createProductCateSectionItemsTable() {
 
   connection.query(
     checkTableQuery,
-    [productCategorySectionItemsTableName],
+    [thirdLevelCateTableName],
     (err, results) => {
       if (err) {
         console.error("Error checking table existence:", err);
@@ -152,33 +1096,31 @@ function createProductCateSectionItemsTable() {
       if (results && results.length && results[0].count === 0) {
         /* Table creation query */
         const createItemsQuery = `
-          CREATE TABLE ${productCategorySectionItemsTableName} (
+          CREATE TABLE ${thirdLevelCateTableName} (
             item_id VARCHAR(255) NOT NULL PRIMARY KEY,
             item_name VARCHAR(255) NOT NULL,
             section_id VARCHAR(255) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (section_id) REFERENCES ${productCategorySectionsTableName}(section_id)
+            FOREIGN KEY (section_id) REFERENCES ${secondLevelCateTableName}(section_id)
           )
         `;
 
         connection.query(createItemsQuery, (err) => {
           if (err) {
             console.error(
-              `Error creating ${productCategorySectionItemsTableName} table: ${err}`
+              `Error creating ${thirdLevelCateTableName} table: ${err}`
             );
           } else {
             console.log(
-              `${productCategorySectionItemsTableName} Table created successfully.`
+              `${thirdLevelCateTableName} Table created successfully.`
             );
             /* Now that the items table is created, we can create sections table */
             createProductCateSectionsTable();
           }
         });
       } else {
-        console.log(
-          `${productCategorySectionItemsTableName} Table already exists.`
-        );
+        console.log(`${thirdLevelCateTableName} Table already exists.`);
         createProductCateSectionsTable();
       }
     }
@@ -190,7 +1132,7 @@ function createProductCateSectionsTable() {
 
   connection.query(
     checkTableQuery,
-    [productCategorySectionsTableName],
+    [secondLevelCateTableName],
     (err, results) => {
       if (err) {
         console.error("Error checking table existence:", err);
@@ -201,33 +1143,31 @@ function createProductCateSectionsTable() {
       if (results && results.length && results[0].count === 0) {
         /* Table creation query */
         const createSectionsQuery = `
-        CREATE TABLE ${productCategorySectionsTableName} (
+        CREATE TABLE ${secondLevelCateTableName} (
           section_id VARCHAR(255) NOT NULL PRIMARY KEY,
           section_name VARCHAR(255) NOT NULL,
           category_id VARCHAR(255) NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          FOREIGN KEY (category_id) REFERENCES ${productCategoriesTableName}(category_id)
+          FOREIGN KEY (category_id) REFERENCES ${topLevelCateTableName}(category_id)
         )
       `;
 
         connection.query(createSectionsQuery, (err) => {
           if (err) {
             console.error(
-              `Error creating ${productCategorySectionsTableName} table: ${err}`
+              `Error creating ${secondLevelCateTableName} table: ${err}`
             );
           } else {
             console.log(
-              `${productCategorySectionsTableName} Table created successfully.`
+              `${secondLevelCateTableName} Table created successfully.`
             );
             /* Now that the sections table is created, we can create categories table */
             createProductCateTable();
           }
         });
       } else {
-        console.log(
-          `${productCategorySectionsTableName} Table already exists.`
-        );
+        console.log(`${secondLevelCateTableName} Table already exists.`);
         /* If sections already exist, check/create categories table */
         createProductCateTable();
       }
@@ -239,40 +1179,34 @@ function createProductCateTable() {
   const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
 
   /* Checked and created product_categories table if it does not exist */
-  connection.query(
-    checkTableQuery,
-    [productCategoriesTableName],
-    (err, results) => {
-      if (err) {
-        console.error("Error checking table existence:", results?.[0]?.count);
-        return;
-      }
-
-      /* If the table does not exist, create it */
-      if (results && results.length && results[0].count === 0) {
-        /* Table creation query */
-        const createCategoriesQuery = `CREATE TABLE ${productCategoriesTableName} (category_id VARCHAR(255) NOT NULL PRIMARY KEY, category_name VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)`;
-
-        connection.query(createCategoriesQuery, (err) => {
-          if (err) {
-            console.error(
-              `Error creating ${productCategoriesTableName} table: ${err}`
-            );
-          } else {
-            console.log(
-              `${productCategoriesTableName} Table created successfully.`
-            );
-            /* Now that the categories table is created, we can create products table */
-            createProductsTable();
-          }
-        });
-      } else {
-        console.log(`${productCategoriesTableName} Table already exists.`);
-        /* If categories already exist, check/create products table */
-        createProductsTable();
-      }
+  connection.query(checkTableQuery, [topLevelCateTableName], (err, results) => {
+    if (err) {
+      console.error("Error checking table existence:", results?.[0]?.count);
+      return;
     }
-  );
+
+    /* If the table does not exist, create it */
+    if (results && results.length && results[0].count === 0) {
+      /* Table creation query */
+      const createCategoriesQuery = `CREATE TABLE ${topLevelCateTableName} (category_id VARCHAR(255) NOT NULL PRIMARY KEY, category_name VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)`;
+
+      connection.query(createCategoriesQuery, (err) => {
+        if (err) {
+          console.error(
+            `Error creating ${topLevelCateTableName} table: ${err}`
+          );
+        } else {
+          console.log(`${topLevelCateTableName} Table created successfully.`);
+          /* Now that the categories table is created, we can create products table */
+          createProductsTable();
+        }
+      });
+    } else {
+      console.log(`${topLevelCateTableName} Table already exists.`);
+      /* If categories already exist, check/create products table */
+      createProductsTable();
+    }
+  });
 }
 
 function createProductsTable() {
@@ -287,7 +1221,26 @@ function createProductsTable() {
     /* If the table does not exist, create it */
     if (results && results.length && results[0].count === 0) {
       /* Table creation query */
-      const createQuery = `CREATE TABLE ${tableName} (product_id INT AUTO_INCREMENT PRIMARY KEY, product_name VARCHAR(255) NOT NULL, price DECIMAL(10, 2) NOT NULL, stock_quantity INT DEFAULT 0, category_id VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (category_id) REFERENCES ${productCategoriesTableName}(category_id))`;
+      const createQuery = `CREATE TABLE ${tableName} (
+        product_id INT AUTO_INCREMENT PRIMARY KEY,
+        product_name VARCHAR(255) NOT NULL,
+        description TEXT,
+        price DECIMAL(10, 2) NOT NULL,
+        discount_price DECIMAL(10, 2),
+        discount_percentage DECIMAL(5, 2),
+        quantity INT DEFAULT 0,
+        brand VARCHAR(255),
+        color VARCHAR(50),
+        size VARCHAR(50),
+        thumbnail TEXT,
+        images TEXT,
+        category_id VARCHAR(255) NOT NULL,
+        section_id VARCHAR(255) NOT NULL,
+        item_id VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (category_id) REFERENCES ${topLevelCateTableName}(category_id)
+    )`;
 
       connection.query(createQuery, (err) => {
         if (err) {
@@ -312,95 +1265,3 @@ function generateSlug(name) {
         .replace(/^-+|-+$/g, "")
     : ""; // Remove leading and trailing hyphens
 }
-
-/*
-reqBody format:::===>
-  {
-  "categories": [
-    {
-      "name": "Televisions & accessories",
-      "sections": [
-        {
-          "name": "LED TVs",
-          "items": [
-            { "name": "All LED Tvs" },
-            { "name": "QLED" },
-            { "name": "OLED TVs" },
-            { "name": "4K Ultra HD TVs" },
-            { "name": "8K Ultra HD TVs" }
-          ]
-        },
-        {
-          "name": "TV accessories ",
-          "items": [
-            { "name": "All TV Accessories" },
-            { "name": "V Wall Mount & Stands" },
-            { "name": "Cables & Connectors" },
-            { "name": "Remotes & IR Blasters" }
-          ]
-        },
-        {
-          "name": "Projectors",
-          "items": [
-            {
-              "name": "Short Throw Projectors"
-            },
-            {
-              "name": "Ultra Short Throw Projectors"
-            },
-            { "name": "Full HD Projectors" },
-            { "name": "Ultra HD 4K Projectors" }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Home Appliances",
-
-      "sections": [
-        {
-          "name": "Washing Machines & Dryers",
-          "items": [
-            {
-              "name": "Front Load Washing Machines"
-            },
-            {
-              "name": "Top Load Washing Machines"
-            },
-            {
-              "name": "Semi Automatic Washing Machines"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Phones Wearables",
-      "sections": [
-        {
-          "name": "Mobile Phones",
-          "items": [
-            { "name": "Android Phones" },
-            { "name": "iPhones" },
-            {
-              "name": "Flip and Fold Mobile Phones"
-            },
-            { "name": "Gaming Mobile Phones" }
-          ]
-        },
-        {
-          "name": "Headphones & Earphones",
-          "items": [
-            { "name": "Bluetooth Earphones" },
-            { "name": "Bluetooth Headphones" },
-            { "name": "Truly Wireless Earbuds" },
-            { "name": "Bluetooth" },
-            { "name": "Headphones" }
-          ]
-        }
-      ]
-    }
-  ]
-}
-
-*/
