@@ -412,7 +412,7 @@ const editProduct =
         },
       });
       if (res?.data?.data) {
-        toast.success("Product edited successfully.");
+        toast.success("Product details updated successfully.");
         navigate(AdminAppRoutes.products);
       }
     } catch (error) {

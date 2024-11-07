@@ -313,6 +313,51 @@ app.delete("/user/delete", (req, res) => {
   );
 });
 
+/* Edit user details */
+app.post("/user/edit", (req, res) => {
+  const userId = req.query?.id;
+  const { firstName, lastName, email, password, role, mobile } = req.body;
+
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "User Id not found in request" });
+  }
+
+  connection.query(
+    `UPDATE ${tableName} SET first_name = ?, last_name = ?, email = ?, password = ?, role = ?, mobile = ? WHERE id = ?`,
+    [firstName, lastName, email, password, role, mobile, userId],
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while updating user" });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: "User not found",
+        });
+      }
+
+      // return the updated user details
+      connection.query(
+        `SELECT * FROM ${tableName} WHERE id = ?`,
+        [userId],
+        (err, result) => {
+          if (err) {
+            return res.status(400).json({
+              status: 400,
+              message: "Error fetching updated user",
+            });
+          }
+          return res.status(200).json({ status: 200, data: result[0] });
+        }
+      );
+    }
+  );
+});
+
 function checkTableExistence() {
   // Checked and created users table if it does not exist
   const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;

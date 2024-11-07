@@ -9,6 +9,8 @@ import ActionTypes from "./actionTypes";
 import { userMap } from "../../../modules/customer/mappers/userMapper";
 import { UserReqBody } from "../../../modules/customer/types/userTypes";
 import { toast } from "react-toastify";
+import { NavigateFunction } from "react-router-dom";
+import AdminAppRoutes from "../../../common/adminRoutes";
 
 const getAllUsers =
   (pageNumber: number, pageSize: number) =>
@@ -99,4 +101,35 @@ const deleteUser = (userId: number) => async (dispatch: ActionDispatch) => {
   }
 };
 
-export { getAllUsers, addUser, findUserById, deleteUser };
+
+const editUser =
+  (userId: number, reqData: UserReqBody, navigate: NavigateFunction) =>
+  async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.EDIT_USER_REQUEST });
+    try {
+      const res = await axios.post(
+        `${ApiUrls.editUser}id=${userId}`,
+        reqData,
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.EDIT_USER_SUCCESS,
+        payload: {
+          data: res?.data?.data ? userMap(res?.data?.data) : {},
+          id: userId,
+        },
+      });
+      if (res?.data?.data) {
+        toast.success("User details updated successfully.");
+        navigate(AdminAppRoutes.users);
+      }
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.EDIT_USER_FAILURE,
+      });
+    }
+  };
+
+export { getAllUsers, addUser, findUserById, deleteUser, editUser };

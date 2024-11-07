@@ -99,7 +99,7 @@ function Users() {
         <ActionButton
           startIcon={Edit}
           onClick={() =>
-            navigate(AdminAppRoutes.editProduct + user.id)
+            navigate(AdminAppRoutes.editUser + user.id)
           }
           text={"Edit"}
         />

@@ -15,6 +15,9 @@ const ViewProduct = lazy(() =>
 const EditProduct = lazy(() =>
   import("../../modules/admin/components/products/editProduct")
 );
+const EditUser = lazy(() =>
+  import("../../modules/admin/components/users/editUser")
+);
 const Products = lazy(() =>
   import("../../modules/admin/components/products/products")
 );
@@ -93,7 +96,7 @@ const authRoutes = [
   },
   {
     path: "/users/edit/:id",
-    component: ViewUser,
+    component: EditUser,
   },
 ];
 

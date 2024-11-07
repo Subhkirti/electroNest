@@ -18,6 +18,7 @@ const AppStrings = {
   monthlyOverview: "Monthly Overview",
   addProduct: "Add Product",
   addUser: "Add User",
+  editUser: "Edit User",
   editProduct: "Edit Product",
   cancel: "Cancel",
   categories: "Categories",

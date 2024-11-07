@@ -7,6 +7,7 @@ const ApiUrls = {
   getUsers: apiBaseUrl + "/users?",
   findUsers: apiBaseUrl + "/user-details?",
   addUser: apiBaseUrl + "/user/add",
+  editUser: apiBaseUrl + "/user/edit?",
   deleteUser: apiBaseUrl + "/user/delete?",
   getProducts: apiBaseUrl + "/products?",
   addProduct: apiBaseUrl + "/product/add",

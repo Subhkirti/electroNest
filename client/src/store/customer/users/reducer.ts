@@ -16,6 +16,7 @@ function usersReducer(state: UsersState = initState, action: RootAction) {
     case ActionTypes.ADD_USER_REQUEST:
     case ActionTypes.FIND_USER_BY_ID_REQUEST:
     case ActionTypes.DELETE_USER_REQUEST:
+    case ActionTypes.EDIT_USER_REQUEST:
       return { ...state, isLoading: true, error: null };
     case ActionTypes.GET_ALL_USERS_SUCCESS:
       return {
@@ -52,10 +53,21 @@ function usersReducer(state: UsersState = initState, action: RootAction) {
         users: filteredUsers,
         totalCount: state.totalCount - 1,
       };
+    case ActionTypes.EDIT_USER_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        users: state.users.map((user) =>
+          user?.id === action.payload.id ? action.payload.data : user
+        ),
+        user: action?.payload?.data,
+      };
     case ActionTypes.GET_ALL_USERS_FAILURE:
     case ActionTypes.ADD_USER_FAILURE:
     case ActionTypes.DELETE_USER_FAILURE:
     case ActionTypes.FIND_USER_BY_ID_FAILURE:
+    case ActionTypes.EDIT_USER_FAILURE:
       return { ...state, isLoading: false, error: action?.payload };
     default:
       return state;
