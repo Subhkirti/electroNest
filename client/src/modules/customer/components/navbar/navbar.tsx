@@ -18,6 +18,7 @@ import { useDispatch } from "react-redux";
 import AppRoutes from "../../../../common/appRoutes";
 import { logout } from "../../../../store/customer/auth/action";
 import { AppDispatch } from "../../../../store/storeTypes";
+import AdminAppRoutes from "../../../../common/adminRoutes";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -66,9 +67,6 @@ export default function Navbar() {
     close();
   };
 
-  const handleLogout = () => {
-    handleCloseUserMenu();
-  };
   const handleMyOrderClick = () => {
     handleCloseUserMenu();
     navigate("/account/order");
@@ -346,10 +344,17 @@ export default function Navbar() {
                           "aria-labelledby": "basic-button",
                         }}
                       >
+                        <MenuItem
+                          onClick={() =>
+                            user.role === "admin" &&
+                            navigate(AdminAppRoutes.dashboard)
+                          }
+                        >
+                          {"Profile"}
+                        </MenuItem>
                         <MenuItem onClick={handleMyOrderClick}>
                           {"My Orders"}
                         </MenuItem>
-                        <MenuItem onClick={handleLogout}>Logout</MenuItem>
                       </Menu>
                     </div>
                   )}

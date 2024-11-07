@@ -43,7 +43,7 @@ const productColumns: TableColumn<Product>[] = [
     id: "description",
     label: "Description",
     render: (value: string) => (
-      <div dangerouslySetInnerHTML={{ __html: textTruncate(value, 300) }} />
+      <div dangerouslySetInnerHTML={{ __html: textTruncate(value, 100) }} />
     ),
   },
   { id: "brand", label: "Brand" },
