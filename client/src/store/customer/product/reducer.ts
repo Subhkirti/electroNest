@@ -10,6 +10,7 @@ const initState: ProductState = {
   topLevelCategories: [],
   secondLevelCategories: [],
   thirdLevelCategories: [],
+  categories: [],
   products: [],
   product: null,
   newProduct: null,
@@ -41,6 +42,7 @@ function productReducer(
     case ActionTypes.DELETE_TOP_LEVEL_CATEGORIES_REQUEST:
     case ActionTypes.DELETE_SECOND_LEVEL_CATEGORIES_REQUEST:
     case ActionTypes.DELETE_THIRD_LEVEL_CATEGORIES_REQUEST:
+    case ActionTypes.GET_ALL_CATEGORIES_REQUEST:
       return { ...state, isLoading: true, error: null };
     case ActionTypes.FIND_PRODUCTS_SUCCESS:
       return {
@@ -145,6 +147,13 @@ function productReducer(
         thirdLevelCategories: filterThirdCategories,
         thirdLCategoryCount: state.thirdLCategoryCount - 1,
       };
+    case ActionTypes.GET_ALL_CATEGORIES_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        categories: action.payload,
+      };
     case ActionTypes.GET_TOP_LEVEL_CATEGORIES_SUCCESS:
       return {
         ...state,
@@ -235,6 +244,7 @@ function productReducer(
     case ActionTypes.DELETE_TOP_LEVEL_CATEGORIES_FAILURE:
     case ActionTypes.DELETE_SECOND_LEVEL_CATEGORIES_FAILURE:
     case ActionTypes.DELETE_THIRD_LEVEL_CATEGORIES_FAILURE:
+    case ActionTypes.GET_ALL_CATEGORIES_FAILURE:
       return { ...state, isLoading: false, error: action?.payload };
     default:
       return state;

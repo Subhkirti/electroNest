@@ -19,6 +19,7 @@ const ApiUrls = {
   getOrderHistory: apiBaseUrl + "/orders/",
   getOrder: apiBaseUrl + "/order?id=",
   createOrder: apiBaseUrl + "/order/add",
+  getCategories: apiBaseUrl + "/product/categories",
   getTopLevelCategories: apiBaseUrl + "/top-level-categories",
   getSecondLevelCategories: apiBaseUrl + "/second-level-categories",
   getThirdLevelCategories: apiBaseUrl + "/third-level-categories",

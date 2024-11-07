@@ -73,7 +73,9 @@ input:-webkit-autofill:focus {
   color: var(--white);
   min-height: 100vh;
 }
-
+.MuiAccordion-root::before {
+  opacity: 0.3;
+}
 .admin-card {
   background-color: var(--purple01) !important;
   color: var(--white) !important;

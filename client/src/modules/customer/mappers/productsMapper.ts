@@ -5,6 +5,29 @@ import {
   TopLevelCategories,
 } from "../types/productTypes";
 
+function categoriesMap(doc: any) {
+  return {
+    categoryId: doc?.id || "",
+    categoryName: doc?.name || "",
+    sections: doc?.sections.length ? doc?.sections.map(sectionsMap) : [],
+  };
+}
+
+function sectionsMap(doc: any) {
+  return {
+    sectionId: doc?.id || "",
+    sectionName: doc?.name || "",
+    items: doc?.items.length ? doc.items.map(itemsMap) : [],
+  };
+}
+
+function itemsMap(doc: any) {
+  return {
+    itemId: doc?.id || "",
+    itemName: doc?.name || "",
+  };
+}
+
 function topLevelCategoriesMap(doc: any): TopLevelCategories {
   return {
     categoryId: doc?.category_id,
@@ -55,9 +78,11 @@ function productMap(doc: any): Product {
     updatedAt: doc?.updated_at,
   };
 }
+
 export {
   topLevelCategoriesMap,
   secondLevelCategoriesMap,
   thirdLevelCategoriesMap,
   productMap,
+  categoriesMap,
 };

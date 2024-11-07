@@ -37,6 +37,7 @@ interface ProductState {
   topLevelCategories: any[];
   secondLevelCategories: any[];
   thirdLevelCategories: any[];
+  categories: any[];
   products: Product[];
   product: Product | null;
   newProduct: Product | null;

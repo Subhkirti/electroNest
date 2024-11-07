@@ -11,6 +11,7 @@ import {
   ProductSearchReqBody,
 } from "../../../modules/customer/types/productTypes";
 import {
+  categoriesMap,
   productMap,
   secondLevelCategoriesMap,
   thirdLevelCategoriesMap,
@@ -22,6 +23,27 @@ import AdminAppRoutes from "../../../common/adminRoutes";
 import { NavigateFunction } from "react-router-dom";
 
 /* Categories section start here */
+const getAllCategories = () => async (dispatch: ActionDispatch) => {
+  dispatch({ type: ActionTypes.GET_ALL_CATEGORIES_REQUEST });
+
+  try {
+    const res = await axios.get(ApiUrls.getCategories, headersConfig);
+
+    dispatch({
+      type: ActionTypes.GET_ALL_CATEGORIES_SUCCESS,
+      payload:
+        res?.data?.data?.length > 0
+          ? res?.data?.data.map(categoriesMap)
+          : [],
+    });
+  } catch (error) {
+    handleCatchError({
+      error,
+      actionType: ActionTypes.GET_ALL_CATEGORIES_FAILURE,
+    });
+  }
+};
+
 const getTopLevelCategories =
   (pageNumber?: number, pageSize?: number) =>
   async (dispatch: ActionDispatch) => {
@@ -473,6 +495,7 @@ export {
   editProduct,
   deleteProduct,
   uploadFile,
+  getAllCategories,
   getTopLevelCategories,
   getSecondLevelCategories,
   getThirdLevelCategories,
