@@ -32,7 +32,7 @@ function cartReducer(state = initState, action: RootAction) {
         ...state,
         isLoading: false,
         cartItems: state.cartItems.filter(
-          (item: { id: any }) => item?.id != action?.payload
+          (item: { id: any }) => item?.id !== action?.payload
         ),
       };
     case ActionTypes.UPDATE_CART_ITEM_SUCCESS:

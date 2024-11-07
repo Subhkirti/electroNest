@@ -16,6 +16,7 @@ function HomeScreen() {
 
   useEffect(() => {
     if (user) navigate(AppRoutes.home);
+    // eslint-disable-next-line
   }, []);
 
   return (

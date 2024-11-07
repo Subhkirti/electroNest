@@ -18,7 +18,6 @@ function AddDeliveryAddress() {
       zipCode: data.get("zipCode"),
       phoneNumber: data.get("phoneNumber"),
     };
-    console.log("data:", data, formData);
   }
 
   return (

@@ -1,9 +1,8 @@
 import { AxiosError } from "axios";
 import { toast } from "react-toastify";
-import { Action } from "redux";
-import { RootAction } from "../../../store/storeTypes";
 import store from "../../../store/store";
 import { getCurrentUser } from "./localStorageUtils";
+import AppStrings from "../../../common/appStrings";
 
 interface ErrorResponse {
   message: string;
@@ -17,10 +16,9 @@ function handleCatchError({
   actionType: string;
 }) {
   const dispatch = store.dispatch;
-  console.log("store:", store);
   const axiosError = error as AxiosError<ErrorResponse>;
   const errorMessage =
-    axiosError?.response?.data?.message || "An error occurred";
+    axiosError?.response?.data?.message || AppStrings.somethingWentWrong;
   toast.error(errorMessage);
   dispatch({
     type: actionType,

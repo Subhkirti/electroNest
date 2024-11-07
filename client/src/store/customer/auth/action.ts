@@ -10,6 +10,7 @@ import {
   LoginReqBody,
   RegisterReqBody,
 } from "../../../modules/customer/types/userTypes";
+import AdminAppRoutes from "../../../common/adminRoutes";
 
 // register user actions
 const register =
@@ -46,7 +47,11 @@ const login =
         type: ActionTypes.LOGIN_SUCCESS,
         payload: user,
       });
-      window.location.pathname = AppRoutes.home;
+
+      window.location.pathname =
+        window.location.pathname === "/admin"
+          ? AdminAppRoutes.dashboard
+          : AppRoutes.home;
     } catch (error) {
       handleCatchError({
         error,

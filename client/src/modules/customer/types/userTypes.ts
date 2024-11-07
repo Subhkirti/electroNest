@@ -3,9 +3,11 @@ interface User {
   name: string;
   email: string;
   password: string;
+  imageUrl?: string;
   token: string;
   role: "customer" | "admin";
   createdAt: Date;
+  updatedAt: Date;
   mobile: number | null;
   avatarText?: string;
 }
@@ -21,4 +23,20 @@ interface LoginReqBody {
   email: FormDataEntryValue | null;
   password: FormDataEntryValue | null;
 }
-export type { User, RegisterReqBody, LoginReqBody };
+
+interface UserReqBody {
+  imageUrl?: File | string;
+  firstName: string;
+  lastName?: string;
+  email: string;
+  password: string;
+  role: "customer" | "admin";
+  mobile: number | null;
+}
+interface TableColumn<T> {
+  id: keyof T;
+  label: string;
+  align?: "left" | "center" | "right";
+  render?: (value: any, row: T) => React.ReactNode;
+}
+export type { User, RegisterReqBody, LoginReqBody, TableColumn, UserReqBody };

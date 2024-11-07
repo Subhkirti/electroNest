@@ -1,11 +1,21 @@
 import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { User } from "../modules/customer/types/userTypes";
+import {
+  Product,
+  SecondLevelCategories,
+  ThirdLevelCategories,
+  TopLevelCategories,
+} from "../modules/customer/types/productTypes";
+import { SvgIconTypeMap } from "@mui/material";
+import { OverridableComponent } from "@mui/material/OverridableComponent";
 
 interface RootState {
   auth: AuthState;
   product: ProductState;
   cart: CartState;
   order: OrderState;
+  header: HeaderState;
+  users: UsersState;
 }
 
 interface RootAction {
@@ -24,10 +34,19 @@ interface AuthState {
 }
 
 interface ProductState {
-  products: [];
-  product: {} | null;
+  topLevelCategories: any[];
+  secondLevelCategories: any[];
+  thirdLevelCategories: any[];
+  categories: any[];
+  products: Product[];
+  product: Product | null;
+  newProduct: Product | null;
   isLoading: boolean;
   error: string | null;
+  totalCount: number;
+  topLCategoryCount: number;
+  secondLCategoryCount: number;
+  thirdLCategoryCount: number;
 }
 
 interface CartState {
@@ -44,6 +63,27 @@ interface OrderState {
   error: string | null;
 }
 
+interface UsersState {
+  users: User[];
+  user: User | null;
+  newUser: User | null;
+  isLoading: boolean;
+  error: string | null;
+  totalCount: number;
+}
+
+interface HeaderButtons {
+  icon?: OverridableComponent<SvgIconTypeMap<{}, "svg">>;
+  onClick: () => void;
+  text: string;
+}
+
+interface HeaderState {
+  title: string;
+  showBackIcon?: boolean;
+  buttons?: HeaderButtons[];
+}
+
 export type {
   RootState,
   RootAction,
@@ -53,4 +93,6 @@ export type {
   ProductState,
   CartState,
   OrderState,
+  HeaderState,
+  UsersState,
 };

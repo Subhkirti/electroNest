@@ -2,9 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --primary: #4f45e4;
+  --purple: #000015;
+  --purple01: #2c2c54;
+  --white: #fff;
+  --light-purple: #9f5eff;
+  --yellow: #eab500;
+  --green: #21d266;
+  --red: #e05240;
+  --blue: #0ebaeb;
+}
 body {
   font-family: "Montserrat", sans-serif;
-  background-color: white;
+  background-color: var(--white);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+  background-color: transparent !important;
+  transition: background-color 0s 600000s, color 0s 600000s;
 }
 
 .container {
@@ -18,7 +35,7 @@ body {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  color: #4f45e4;
+  color: var(--primary);
   box-shadow: calc(1 * var(--d)) calc(0 * var(--d)) 0 0,
     calc(0.707 * var(--d)) calc(0.707 * var(--d)) 0 1px,
     calc(0 * var(--d)) calc(1 * var(--d)) 0 2px,
@@ -44,4 +61,28 @@ body {
 
 .productCard:hover {
   box-shadow: -1px 2px 15px 3px rgba(214, 214, 214, 1);
+}
+
+
+/* admin classes */
+.admin-container {
+  max-width: 1500px;
+  margin: 0px auto;
+  padding: 0px 3rem;
+  background-color: var(--purple);
+  color: var(--white);
+  min-height: 100vh;
+}
+.MuiAccordion-root::before {
+  opacity: 0.3;
+}
+.admin-card {
+  background-color: var(--purple01) !important;
+  color: var(--white) !important;
+}
+.drawer-paper {
+  width: 16%;
+  background-color: var(--purple) !important;
+  color: var(--white) !important;
+  border-right: 0.1px solid #9e5eff61 !important;
 }
