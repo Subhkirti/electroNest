@@ -33,9 +33,9 @@ const AppStrings = {
   emailIdError: "Please enter valid email id.",
   somethingWentWrong: "Something went wrong",
   resultsNotFound: "Results not Found!",
+  productsNotFound: "Products not Found!",
   oopsPageNotFound: "Oops! Page Not Found",
   pageNotExist: "The page you're looking for doesn't exist or has been moved.",
-
 
    /* success messages */
    categoryAddedSuccessfully: "Category added successfully",

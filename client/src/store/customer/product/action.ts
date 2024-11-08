@@ -32,9 +32,7 @@ const getAllCategories = () => async (dispatch: ActionDispatch) => {
     dispatch({
       type: ActionTypes.GET_ALL_CATEGORIES_SUCCESS,
       payload:
-        res?.data?.data?.length > 0
-          ? res?.data?.data.map(categoriesMap)
-          : [],
+        res?.data?.data?.length > 0 ? res?.data?.data.map(categoriesMap) : [],
     });
   } catch (error) {
     handleCatchError({
@@ -300,7 +298,6 @@ const deleteThirdLevelCategory =
 /* Categories section ends here */
 
 /* Products section starts here */
-
 const getProducts =
   (pageNumber: number, pageSize: number) =>
   async (dispatch: ActionDispatch) => {
@@ -331,25 +328,10 @@ const getProducts =
   };
 const findProducts =
   (reqData: ProductSearchReqBody) => async (dispatch: ActionDispatch) => {
-    const {
-      colors,
-      minPrice,
-      maxPrice,
-      discount,
-      category,
-      stock,
-      sort,
-      pageNumber,
-      pageSize,
-    } = reqData;
-
     dispatch({ type: ActionTypes.FIND_PRODUCTS_REQUEST });
 
     try {
-      const res = await axios.get(
-        `${ApiUrls.findProducts}color=${colors}&minPrice=${minPrice}&maxPrice=${maxPrice}&minDiscount=${discount}&category=${category}&stock=${stock}&sort=${sort}&pageNumber=${pageNumber}&pageSize=${pageSize}`
-      );
-
+      const res = await axios.post(`${ApiUrls.findProducts}`, reqData);
       dispatch({
         type: ActionTypes.FIND_PRODUCTS_SUCCESS,
         payload: {
@@ -370,7 +352,7 @@ const findProductsById =
     dispatch({ type: ActionTypes.FIND_PRODUCT_BY_ID_REQUEST });
 
     try {
-      const res = await axios.get(`${ApiUrls.findProducts}id=${productId}`);
+      const res = await axios.get(`${ApiUrls.productDetails}id=${productId}`);
 
       dispatch({
         type: ActionTypes.FIND_PRODUCT_BY_ID_SUCCESS,

@@ -432,6 +432,120 @@ app.get("/products", (req, res) => {
   );
 });
 
+/* Find products on the basis of filters */
+app.post("/find-products", (req, res) => {
+  const {
+    categoryId,
+    sectionId,
+    itemId,
+    colors,
+    minPrice,
+    maxPrice,
+    discount,
+    stock,
+    sort,
+    pageNumber,
+    pageSize,
+  } = req.body;
+
+  const limit = parseInt(pageSize);
+  const offset = (parseInt(pageNumber) - 1) * limit;
+
+  let queryParams = [];
+  let whereClauses = [];
+
+  // Handling colors filter
+  if (colors && colors.length > 0) {
+    whereClauses.push("color IN (?)");
+    queryParams.push(colors);
+  }
+
+  // Handling minPrice filter
+  if (minPrice && minPrice.length > 0) {
+    whereClauses.push("price >= ?");
+    queryParams.push(Math.min(...minPrice));
+  }
+
+  // Handling maxPrice filter
+  if (maxPrice && maxPrice.length > 0) {
+    whereClauses.push("price <= ?");
+    queryParams.push(Math.max(...maxPrice));
+  }
+
+  // Handling discount filter
+  if (discount && discount.length > 0) {
+    const discountConditions = discount.map((d) => `discount_percentage >= ?`);
+    whereClauses.push(`(${discountConditions.join(" OR ")})`);
+    discount.forEach((d) => queryParams.push(parseInt(d)));
+  }
+
+  if (stock) {
+    whereClauses.push("quantity > 0");
+    queryParams.push(stock);
+  }
+
+  // Handling category filter
+  if (categoryId) {
+    whereClauses.push("category_id = ?");
+    queryParams.push(categoryId);
+  }
+
+  // Handling section filter
+  if (sectionId) {
+    whereClauses.push("section_id = ?");
+    queryParams.push(sectionId);
+  }
+
+  // Handling item filter
+  if (itemId) {
+    whereClauses.push("item_id	 = ?");
+    queryParams.push(itemId);
+  }
+
+  // Create the SQL query with dynamic WHERE clauses
+  let query = `SELECT * FROM ${tableName}`;
+
+  if (whereClauses.length > 0) {
+    query += ` WHERE ${whereClauses.join(" AND ")}`;
+  }
+
+  query += " LIMIT ? OFFSET ?";
+  queryParams.push(limit, offset);
+
+  connection.query(query, queryParams, (err, result) => {
+    if (err) {
+      console.log("err:", err);
+      return res
+        .status(400)
+        .json({ status: 400, message: "Error while getting products" });
+    }
+
+    // Optional: get the total count of products matching the filter criteria
+    const countQuery = `SELECT COUNT(*) AS totalCount FROM ${tableName} ${
+      whereClauses?.length ? "WHERE " + whereClauses.join(" AND ") : ""
+    }`;
+
+    connection.query(
+      countQuery,
+      queryParams.slice(0, -2),
+      (countErr, countResult) => {
+        if (countErr) {
+          console.log("countErr:", countErr);
+          return res
+            .status(400)
+            .json({ status: 400, message: "Error while getting total count" });
+        }
+
+        return res.status(200).json({
+          status: 200,
+          data: result,
+          totalCount: countResult[0].totalCount,
+        });
+      }
+    );
+  });
+});
+
 /* Get top level categories list */
 app.get("/top-level-categories", (req, res) => {
   const { pageNumber, pageSize } = req.query;

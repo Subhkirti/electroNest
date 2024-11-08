@@ -1,11 +1,13 @@
 interface ProductSearchReqBody {
+  categoryId: string;
+  sectionId: string;
+  itemId: string;
   pageNumber: number;
   pageSize: number;
-  colors: string;
-  minPrice: number;
-  maxPrice: number;
-  discount: string;
-  category: string;
+  colors: string[];
+  minPrice: number[];
+  maxPrice: number[];
+  discount: string[];
   stock: string | null;
   sort: string;
 }

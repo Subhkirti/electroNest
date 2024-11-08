@@ -42,6 +42,7 @@ export default function Navbar() {
   const [openAuthModal, setOpenAuthModal] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showMore, setShowMore] = useState(false);
+  console.log('showMore:', showMore)
   const { categories } = useSelector((state: RootState) => state.product);
   const openUserMenu = Boolean(anchorEl);
   const user = getCurrentUser();
@@ -89,6 +90,7 @@ export default function Navbar() {
     }
     handleCloseUserMenu();
     setOpen(false);
+    setShowMore(false);
   };
 
   const handleMyOrderClick = () => {
