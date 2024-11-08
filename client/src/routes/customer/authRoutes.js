@@ -20,7 +20,11 @@ const Product = lazy(() =>
 
 const authRoutes = [
   {
-    path: AppRoutes.product,
+    path: AppRoutes.thirdLevelProduct,
+    component: Product,
+  },
+  {
+    path: AppRoutes.secondLevelProduct,
     component: Product,
   },
   {

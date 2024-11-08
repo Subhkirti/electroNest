@@ -138,6 +138,7 @@ export default function Navbar() {
               {/* Flyout menus */}
               <Popover.Group className="hidden lg:block lg:self-stretch z-10">
                 <div className="flex h-full space-x-8">
+                  {/* First four menus */}
                   {firstFourCategories.length > 0 &&
                     firstFourCategories.map(
                       (category: {
@@ -146,10 +147,11 @@ export default function Navbar() {
                         sections: any[];
                       }) => (
                         <Popover key={category.categoryId} className="flex">
-                          {({ open }) => (
+                          {({ open, close }) => (
                             <>
                               <div className="relative flex">
                                 <Popover.Button
+                                  onClick={() => setShowMore(false)}
                                   className={classNames(
                                     open
                                       ? "border-indigo-600 text-indigo-600"
@@ -188,14 +190,15 @@ export default function Navbar() {
                                             }) => (
                                               <div key={section.sectionId}>
                                                 <p
-                                                  onClick={() =>
+                                                  onClick={() => {
+                                                    close();
                                                     !section.items?.length &&
-                                                    handleCategoryClick(
-                                                      category,
-                                                      section,
-                                                      null
-                                                    )
-                                                  }
+                                                      handleCategoryClick(
+                                                        category,
+                                                        section,
+                                                        null
+                                                      );
+                                                  }}
                                                   id={`${section.sectionName}-heading`}
                                                   className={
                                                     section.items?.length
@@ -219,13 +222,14 @@ export default function Navbar() {
                                                             className="flex"
                                                           >
                                                             <p
-                                                              onClick={() =>
+                                                              onClick={() => {
+                                                                close();
                                                                 handleCategoryClick(
                                                                   category,
                                                                   section,
                                                                   item
-                                                                )
-                                                              }
+                                                                );
+                                                              }}
                                                               className="cursor-pointer hover:text-gray-800"
                                                             >
                                                               {item.itemName}
@@ -262,7 +266,9 @@ export default function Navbar() {
                                   : "border-transparent text-gray-700 hover:text-gray-800",
                                 "relative z-10 -mb-px flex items-center border-b-2 pt-px text-sm font-medium transition-colors duration-200 ease-out focus:outline-none"
                               )}
-                              onClick={() => setShowMore(!showMore)} // Toggle the "More" menu
+                              onClick={() => {
+                                setShowMore(!showMore);
+                              }}
                             >
                               More
                             </Popover.Button>
@@ -309,15 +315,16 @@ export default function Navbar() {
                                                 }) => (
                                                   <div key={section.sectionId}>
                                                     <p
-                                                      onClick={() =>
+                                                      onClick={() => {
+                                                        close();
                                                         !section.items
                                                           ?.length &&
-                                                        handleCategoryClick(
-                                                          category,
-                                                          section,
-                                                          null
-                                                        )
-                                                      }
+                                                          handleCategoryClick(
+                                                            category,
+                                                            section,
+                                                            null
+                                                          );
+                                                      }}
                                                       id={`${section.sectionName}-heading`}
                                                       className={
                                                         section.items?.length
@@ -343,13 +350,14 @@ export default function Navbar() {
                                                                 className="flex"
                                                               >
                                                                 <p
-                                                                  onClick={() =>
+                                                                  onClick={() => {
+                                                                    close();
                                                                     handleCategoryClick(
                                                                       category,
                                                                       section,
                                                                       item
-                                                                    )
-                                                                  }
+                                                                    );
+                                                                  }}
                                                                   className="cursor-pointer hover:text-gray-800"
                                                                 >
                                                                   {
