@@ -12,6 +12,10 @@ import { loadCategoryBreadCrumbs } from "../../utils/productUtils";
 import { CategoryBreadcrumbs } from "../../types/productTypes";
 import NotFound from "../../../../common/components/notFound";
 import AppStrings from "../../../../common/appStrings";
+import { formatAmount } from "../../../admin/utils/productUtil";
+import { carouselBreakpoints } from "../../../../common/constants";
+import Carousel from "react-multi-carousel";
+import "react-multi-carousel/lib/styles.css";
 
 export default function ProductDetails() {
   const params = useParams();
@@ -21,6 +25,7 @@ export default function ProductDetails() {
     CategoryBreadcrumbs[]
   >([]);
   const productId = params?.productId;
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { isLoading, product, categories } = useSelector(
     (state: RootState) => state.product
   );
@@ -83,27 +88,38 @@ export default function ProductDetails() {
               <div className="overflow-hidden rounded-lg max-w-[30rem] max-h-[35rem]">
                 <img
                   alt={"thumbnail"}
-                  src={product?.thumbnail}
+                  src={product?.images[selectedImageIndex]}
                   className="h-full w-full object-cover object-center"
                 />
               </div>
-              <div className="flex flex-wrap space-x-5 justify-center">
+
+              <Carousel
+                responsive={carouselBreakpoints}
+                containerClass="w-full my-6"
+                dotListClass="carousel-dots"
+                showDots={true}
+              >
                 {product?.images?.length > 0 &&
                   product?.images.map((item, index) => {
                     return (
                       <div
                         key={index}
-                        className="aspect-h-2 aspect-w-3 overflow-hidden rounded-lg max-w-[5rem] max-h-[5rem] mt-4"
+                        onClick={() => setSelectedImageIndex(index)}
+                        className={`flex justify-center m-2 py-3 rounded-lg cursor-pointer ${
+                          selectedImageIndex == index
+                            ? "border-2 border-primary"
+                            : "border"
+                        }`}
                       >
                         <img
                           alt={`product-image ${index}`}
                           src={item}
-                          className="h-full w-full object-cover object-center"
+                          className="max-w-[6rem] max-h-[6rem] object-cover object-center"
                         />
                       </div>
                     );
                   })}
-              </div>
+              </Carousel>
             </div>
 
             {/* Product info */}
@@ -117,13 +133,19 @@ export default function ProductDetails() {
                 </h1>
               </div>
 
-              {/* Options */}
+              {/* Price Details */}
               <div className="mt-4 lg:row-span-3 lg:mt-0">
                 <h2 className="sr-only">Product information</h2>
                 <div className="flex space-x-5 items-center text-lg lg:text-xl text-gray-900 mt-6">
-                  <p className="font-semibold">₹199 </p>
-                  <p className="line-through opacity-50">₹211</p>
-                  <p className="text-secondary font-semibold">5% Off</p>
+                  <p className="font-semibold">
+                    {formatAmount(product?.discountPrice)}{" "}
+                  </p>
+                  <p className="line-through opacity-50">
+                    {formatAmount(product?.price)}
+                  </p>
+                  <p className="text-secondary font-semibold">
+                    {product?.discountPercentage}% Off
+                  </p>
                 </div>
 
                 {/* Reviews */}

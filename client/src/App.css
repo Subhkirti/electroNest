@@ -63,7 +63,6 @@ input:-webkit-autofill:focus {
   box-shadow: -1px 2px 15px 3px rgba(214, 214, 214, 1);
 }
 
-
 /* admin classes */
 .admin-container {
   max-width: 1500px;
@@ -85,4 +84,15 @@ input:-webkit-autofill:focus {
   background-color: var(--purple) !important;
   color: var(--white) !important;
   border-right: 0.1px solid #9e5eff61 !important;
+}
+.react-multi-carousel-track {
+  margin-bottom: 16px !important;
+}
+.carousel-dots .react-multi-carousel-dot--active button {
+  background-color: rgb(172, 171, 171) !important;
+}
+
+.carousel-dots .react-multi-carousel-dot button {
+  padding: 6px !important;
+  border: 1px solid rgb(172, 171, 171) !important;
 }
