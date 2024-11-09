@@ -3,16 +3,17 @@ import { useLocation } from "react-router-dom";
 
 function Loader({
   fixed = false,
+  suspenseLoader = false,
   color = "secondary",
 }: {
   fixed?: boolean;
+  suspenseLoader?: boolean;
   color?: "primary" | "secondary";
 }) {
   const location = useLocation();
   const isAdminRoute = location.pathname.includes("admin");
   return (
     <div
-
       className={
         fixed
           ? isAdminRoute
@@ -21,16 +22,22 @@ function Loader({
           : "flex items-center justify-center"
       }
     >
-      <CircularProgress
-        size={"30px"}
-        style={{
-          color: isAdminRoute
-            ? "white"
-            : color === "primary"
-            ? "primary"
-            : "white",
-        }}
-      />
+      {suspenseLoader ? (
+        <div className="flex h-[70vh] items-center justify-center">
+          <div className="loader" />
+        </div>
+      ) : (
+        <CircularProgress
+          size={"30px"}
+          style={{
+            color: isAdminRoute
+              ? "white"
+              : color === "primary"
+              ? "primary"
+              : "white",
+          }}
+        />
+      )}
     </div>
   );
 }

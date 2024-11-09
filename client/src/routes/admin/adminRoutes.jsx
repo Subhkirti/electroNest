@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import adminMainRoutes from "./mainRoutes";
-import NotFound from "../../common/components/notFound";
+import PageNotFound from "../../common/components/404Page";
 import { useMediaQuery, useTheme } from "@mui/material";
 import { useState } from "react";
 import Header from "../../modules/admin/components/header/header";
@@ -34,7 +34,7 @@ function AdminRoutes() {
               }
             />
           ))}
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
       </div>
     </div>

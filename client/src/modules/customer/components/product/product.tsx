@@ -19,20 +19,16 @@ import {
   PlusIcon,
   Squares2X2Icon,
 } from "@heroicons/react/20/solid";
-import watches from "../../../../assets/productsData/watches";
 import ProductCard from "./productCard";
 import { productFilters, sortOptions } from "../../utils/productUtils";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { findProducts } from "../../../../store/customer/product/action";
 import { ProductSearchReqBody } from "../../types/productTypes";
 import Loader from "../../../../common/components/loader";
-import NoResultsFound from "../../../../common/components/noResultsFound";
-import AppIcons from "../../../../common/appIcons";
 import AppStrings from "../../../../common/appStrings";
-import { Button } from "@mui/material";
-import AppRoutes from "../../../../common/appRoutes";
+import NotFound from "../../../../common/components/notFound";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -209,7 +205,7 @@ export default function Product() {
         </Dialog>
 
         {!isLoading && !products.length ? (
-          <ProductsNotFound />
+          <NotFound message={AppStrings.productsNotFound} />
         ) : (
           <main className="mx-auto">
             <div className="flex items-baseline justify-between border-b border-gray-200 pb-6">
@@ -349,29 +345,6 @@ export default function Product() {
           </main>
         )}
       </div>
-    </div>
-  );
-}
-
-function ProductsNotFound() {
-  return (
-    <div className="flex flex-col justify-center space-y-4 items-center">
-      <img
-        width={300}
-        src={AppIcons.imgProductNotFound}
-        alt="product not found"
-      />
-      <p className=" text-slate-800 text-2xl font-semibold">
-        {AppStrings.productsNotFound}
-      </p>
-      <Link to={AppRoutes.home}>
-        <Button
-          variant="outlined"
-          className="hover:bg-primary hover:text-white transition ease-in duration-400"
-        >
-          {AppStrings.goToHome}
-        </Button>
-      </Link>
     </div>
   );
 }

@@ -348,7 +348,7 @@ const findProducts =
     }
   };
 const findProductsById =
-  (productId: number) => async (dispatch: ActionDispatch) => {
+  (productId: string | number) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.FIND_PRODUCT_BY_ID_REQUEST });
 
     try {
@@ -357,7 +357,7 @@ const findProductsById =
       dispatch({
         type: ActionTypes.FIND_PRODUCT_BY_ID_SUCCESS,
         payload:
-          res?.data?.data?.length > 0 ? productMap(res?.data?.data[0]) : {},
+          res?.data?.data?.length > 0 ? productMap(res?.data?.data[0]) : null,
       });
       res?.data?.data?.length === 0 &&
         toast.info(

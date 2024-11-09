@@ -1,3 +1,10 @@
+import AppRoutes from "../../../common/appRoutes";
+import {
+  CategoryBreadcrumbs,
+  CategoryState,
+  Product,
+} from "../types/productTypes";
+
 const productFilters = [
   {
     id: "color",
@@ -60,4 +67,52 @@ const sortOptions = [
   },
 ];
 
-export { productFilters, sortOptions };
+function loadCategoryBreadCrumbs(
+  categories: CategoryState[],
+  product: Product | null
+) {
+  const categoryBreadcrumbs: CategoryBreadcrumbs[] = [];
+  if (categories?.length && product) {
+    // Find the matching category
+    const category = categories.find(
+      (cat) => cat.categoryId === product?.categoryId
+    );
+
+    if (category) {
+      categoryBreadcrumbs.push({
+        category: category.categoryName || "",
+        path: category.categoryId ? `/${category.categoryId}` : AppRoutes.home,
+      });
+
+      // Find the matching section
+      const section = category.sections?.find(
+        (sec: any) => sec.sectionId === product?.sectionId
+      );
+
+      if (section) {
+        categoryBreadcrumbs.push({
+          category: section.sectionName || "",
+          path: section.sectionId
+            ? `/${category.categoryId}/${section.sectionId}`
+            : AppRoutes.home,
+        });
+
+        // Find the matching item
+        const item = section.items?.find(
+          (itm: any) => itm.itemId === product?.itemId
+        );
+
+        if (item) {
+          categoryBreadcrumbs.push({
+            category: item.itemName || "",
+            path: item.itemId
+              ? `/${category.categoryId}/${section.sectionId}/${item.itemId}`
+              : AppRoutes.home,
+          });
+        }
+      }
+    }
+  }
+  return categoryBreadcrumbs;
+}
+export { productFilters, sortOptions, loadCategoryBreadCrumbs };

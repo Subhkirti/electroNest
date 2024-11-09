@@ -1,6 +1,7 @@
 import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { User } from "../modules/customer/types/userTypes";
 import {
+  CategoryState,
   Product,
   SecondLevelCategories,
   ThirdLevelCategories,
@@ -37,7 +38,7 @@ interface ProductState {
   topLevelCategories: any[];
   secondLevelCategories: any[];
   thirdLevelCategories: any[];
-  categories: any[];
+  categories: CategoryState[];
   products: Product[];
   product: Product | null;
   newProduct: Product | null;

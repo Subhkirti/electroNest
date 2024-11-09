@@ -82,8 +82,18 @@ interface CategoryState {
   categoryName: string;
   sectionName: string;
   itemName: string;
+  categoryId?: string;
+  sectionId?: string;
+  itemId?: string;
+  sections?: any[];
+
+
 }
 
+interface CategoryBreadcrumbs {
+  category: string;
+  path: string;
+}
 export type {
   ProductSearchReqBody,
   ProductReqBody,
@@ -92,4 +102,5 @@ export type {
   ThirdLevelCategories,
   Product,
   CategoryState,
+  CategoryBreadcrumbs,
 };

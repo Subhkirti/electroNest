@@ -28,6 +28,14 @@ const authRoutes = [
     component: Product,
   },
   {
+    path: AppRoutes.firstLevelProduct,
+    component: Product,
+  },
+  {
+    path: AppRoutes.secondLevelProduct,
+    component: Product,
+  },
+  {
     path: AppRoutes.productDetail,
     component: ProductDetails,
   },

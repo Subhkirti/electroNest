@@ -122,7 +122,7 @@ function Categories() {
         actions={handleTopLevelActions}
       />
 
-      {topLevelCategories.length && (
+      {topLevelCategories.length > 0 && (
         <Box mt={5}>
           <SubHeader
             header={`Second Level Categories: ${secondLevelCategories.length}`}

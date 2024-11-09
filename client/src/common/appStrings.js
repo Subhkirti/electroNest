@@ -34,6 +34,8 @@ const AppStrings = {
   somethingWentWrong: "Something went wrong",
   resultsNotFound: "Results not Found!",
   productsNotFound: "Products not Found!",
+  productDetailsNotFound: "Product Details not Found!",
+
   oopsPageNotFound: "Oops! Page Not Found",
   pageNotExist: "The page you're looking for doesn't exist or has been moved.",
 

@@ -5,6 +5,7 @@ const AppRoutes = {
   cart: "/cart",
   thirdLevelProduct: "/:categoryId/:sectionId/:itemId",
   secondLevelProduct: "/:categoryId/:sectionId",
+  firstLevelProduct: "/:categoryId",
   productDetail: "/product/:productId",
   checkout: "/checkout",
   orders: "/account/orders",
