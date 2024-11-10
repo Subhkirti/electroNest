@@ -63,6 +63,7 @@ function productMap(doc: any): Product {
     productName: doc?.product_name || "",
     description: doc?.description || "",
     price: doc?.price || 0,
+    netPrice: doc?.net_price || 0,
     discountPercentage: doc?.discount_percentage || 0,
     quantity: doc?.quantity || 0,
     brand: doc?.brand || "",

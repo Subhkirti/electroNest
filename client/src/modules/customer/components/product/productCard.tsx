@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Product } from "../../types/productTypes";
+import { formatAmount, textTruncate } from "../../../admin/utils/productUtil";
 
 function ProductCard({ product }: { product: Product }) {
   const navigate = useNavigate();
@@ -18,15 +19,23 @@ function ProductCard({ product }: { product: Product }) {
         {/* description section */}
         <div>
           <p className="font-bold opacity-60">{product?.brand}</p>
-          <p className="font-medium text-black opacity-70">{product?.productName}</p>
+          <p className="font-medium text-black opacity-70">
+            {textTruncate(product?.productName, 70)}
+          </p>
         </div>
 
         {/* price section */}
         <div className="flex items-center justify-between flex-wrap">
-          <p className="font-semibold text-lg text-nowrap">₹{product?.price}</p>
-          <p className="text-grey line-through text-sm text-nowrap">₹{112}</p>
+          <p className="font-semibold text-lg text-nowrap">
+            {formatAmount(product?.netPrice)}
+          </p>
+          {product?.price > 0 && product?.price !== product?.netPrice && (
+            <p className="text-grey line-through text-sm text-nowrap">
+              {formatAmount(product?.price)}
+            </p>
+          )}
 
-          {product?.discountPercentage && (
+          {product?.discountPercentage > 0 && (
             <p className="text-secondary font-semibold text-sm text-nowrap">
               {product?.discountPercentage}% off
             </p>

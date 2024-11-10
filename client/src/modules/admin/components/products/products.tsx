@@ -51,7 +51,7 @@ const productColumns: TableColumn<Product>[] = [
     id: "price",
     label: "Price",
     render: (value: string) => (
-      <div className="whitespace-nowrap">{formatAmount(value)}</div>
+      <div className="whitespace-nowrap">{formatAmount(Number(value))}</div>
     ),
   },
   {

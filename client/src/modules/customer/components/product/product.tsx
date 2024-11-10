@@ -29,6 +29,8 @@ import { ProductSearchReqBody } from "../../types/productTypes";
 import Loader from "../../../../common/components/loader";
 import AppStrings from "../../../../common/appStrings";
 import NotFound from "../../../../common/components/notFound";
+import { FilterAltOff, FilterListOff } from "@mui/icons-material";
+import { Tooltip } from "@mui/material";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -39,11 +41,9 @@ export default function Product() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const { isLoading, products } = useSelector(
+  const { isLoading, products, totalCount } = useSelector(
     (state: RootState) => state.product
   );
-  console.log("products:", products);
-
   const params = useParams();
   const queryString = decodeURIComponent(location.search);
   const searchParams = new URLSearchParams(queryString);
@@ -53,6 +53,7 @@ export default function Product() {
   const sortValue = searchParams.get("sort");
   const pageNumber = searchParams.get("page");
   const stockValue = searchParams.get("stock");
+
   const minMaxPrices = priceValue
     ? priceValue
         .split(",")
@@ -63,6 +64,10 @@ export default function Product() {
   const maxPriceList = minMaxPrices.map(([min, max]) => max);
 
   useEffect(() => {
+    const handleBeforeUnload = (event: any) => {
+      clearFilters();
+    };
+
     const reqData: ProductSearchReqBody = {
       categoryId: params?.categoryId || "",
       sectionId: params?.sectionId || "",
@@ -81,15 +86,17 @@ export default function Product() {
       dispatch(findProducts(reqData));
     }, 10);
 
+    window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
       clearTimeout(timer);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
     // eslint-disable-next-line
   }, [
     params,
-    colorValue,
-    priceValue,
-    discountValue,
+    colorValue?.length,
+    priceValue?.length,
+    discountValue?.length,
     sortValue,
     pageNumber,
     stockValue,
@@ -115,6 +122,10 @@ export default function Product() {
       const query = searchParams.toString();
       navigate({ search: `?${query}` });
     }
+  }
+
+  function clearFilters() {
+    navigate(window.location.pathname, { replace: true });
   }
 
   return (
@@ -275,6 +286,30 @@ export default function Product() {
               <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-5">
                 {/* Web Filters */}
                 <form className="hidden lg:block">
+                  <div className="flex justify-between py-4 border-b border-black">
+                    <div className="flex flex-col">
+                      <p className="text-xl font-semibold">Filters </p>
+                      {totalCount > 0 && (
+                        <p className="text-gray-500 text-[12px] bg-gray-200 px-2 rounded-lg">
+                          {totalCount}
+                          {totalCount > 1
+                            ? totalCount > 100
+                              ? "+ products"
+                              : " products"
+                            : " product"}
+                        </p>
+                      )}
+                    </div>
+
+                    {searchParams?.size > 0 && (
+                      <Tooltip title="Clear Filters">
+                        <FilterAltOff
+                          className="cursor-pointer"
+                          onClick={clearFilters}
+                        />
+                      </Tooltip>
+                    )}
+                  </div>
                   {productFilters.map((section) => (
                     <Disclosure
                       key={section.id}

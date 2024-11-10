@@ -60,6 +60,7 @@ interface Product {
   productName: string;
   description: string;
   price: number;
+  netPrice: number;
   discountPercentage: number;
   quantity: number;
   brand: string;

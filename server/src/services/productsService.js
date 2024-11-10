@@ -229,13 +229,16 @@ app.post("/product/add", (req, res) => {
     returnPolicy,
   } = req.body;
 
+  const netPrice =
+    Number(price) - Number(price) * (Number(disPercentage) / 100);
   connection.query(
-    `INSERT INTO ${tableName} (product_name, description, price, discount_percentage, brand, color, size, images, category_id, section_id, item_id, quantity, stock, rating, reviews, warranty_info, return_policy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    `INSERT INTO ${tableName} (product_name, description, price, discount_percentage, net_price, brand, color, size, images, category_id, section_id, item_id, quantity, stock, rating, reviews, warranty_info, return_policy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       title,
       description,
       price,
       disPercentage,
+      netPrice,
       brand,
       color,
       size,
@@ -246,13 +249,13 @@ app.post("/product/add", (req, res) => {
       quantity,
       stock,
       rating,
-      JSON.stringify([]) ,
+      JSON.stringify([]),
       warrantyInfo,
       returnPolicy,
     ],
     (err, result) => {
       if (err) {
-        console.log('err:', err)
+        console.log("err:", err);
         return res
           .status(400)
           .json({ status: 400, message: "Error while adding product" });
@@ -301,18 +304,19 @@ app.post("/product/edit", (req, res) => {
     thirdLevelCategory,
     stock,
     rating,
-    reviews,
     warrantyInfo,
     returnPolicy,
   } = req.body;
-
+  const netPrice =
+  Number(price) - Number(price) * (Number(disPercentage) / 100);
   connection.query(
-    `UPDATE ${tableName} SET product_name = ?, description = ?, price = ?, discount_percentage = ?, brand = ?, color = ?, size = ?, images = ?, category_id = ?, section_id = ?, item_id = ?, quantity = ? stock = ?, rating = ?,reviews = ?, warranty_info = ?, return_policy = ? WHERE product_id = ?`,
+    `UPDATE ${tableName} SET product_name = ?, description = ?, price = ?, discount_percentage = ?, net_price = ?, brand = ?, color = ?, size = ?, images = ?, category_id = ?, section_id = ?, item_id = ?, quantity = ?, stock = ?, rating = ?, reviews = ?, warranty_info = ?, return_policy = ? WHERE product_id = ?`,
     [
       title,
       description,
       price,
       disPercentage,
+      netPrice,
       brand,
       color,
       size,
@@ -323,13 +327,14 @@ app.post("/product/edit", (req, res) => {
       quantity,
       stock,
       rating,
-      reviews,
+      JSON.stringify([]),
       warrantyInfo,
       returnPolicy,
       productId,
     ],
     (err, result) => {
       if (err) {
+        console.log("err:", err);
         return res
           .status(400)
           .json({ status: 400, message: "Error while updating product" });
@@ -1352,6 +1357,7 @@ function createProductsTable() {
         product_name VARCHAR(255) NOT NULL,
         description TEXT,
         price DECIMAL(10, 2) NOT NULL,
+        net_price DECIMAL(10, 2) NOT NULL,
         discount_percentage DECIMAL(5, 2),
         brand VARCHAR(255),
         color VARCHAR(50),

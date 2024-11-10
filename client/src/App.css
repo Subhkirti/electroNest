@@ -53,6 +53,7 @@ input:-webkit-autofill:focus {
 
 .productCard .productCardText {
   transition: transform 0.3s ease-out;
+  transform: translateY(-0.2rem);
 }
 
 .productCard:hover .productCardText {

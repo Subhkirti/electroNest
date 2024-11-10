@@ -13,11 +13,11 @@ const productStateIds = {
   topLevelCategory: "topLevelCategory",
   secondLevelCategory: "secondLevelCategory",
   thirdLevelCategory: "thirdLevelCategory",
-  stock: 'stock',
-  rating: 'rating',
-  reviews: 'reviews',
-  warrantyInfo: 'warrantyInfo',
-  returnPolicy: 'returnPolicy',
+  stock: "stock",
+  rating: "rating",
+  reviews: "reviews",
+  warrantyInfo: "warrantyInfo",
+  returnPolicy: "returnPolicy",
 };
 
 const categoryStateIds = {
@@ -74,15 +74,41 @@ const textTruncate = (text: string, length: number) => {
   return text.substring(0, length) + "...";
 };
 
-function formatAmount(amount: string) {
+function formatAmount(amount: number) {
   return (
     "₹ " +
-    Number(amount).toLocaleString("en-IN", {
+    amount.toLocaleString("en-IN", {
       style: "decimal",
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     })
   );
+}
+//Format the given input into string in suitable terms of 'k', 'M', etc.
+function formatAmountRange(amount: number) {
+  if (amount < 999) {
+    //return whatever the value it is as minimum value to represent in shorthand is 1000.
+    return amount;
+  }
+  const ranges = [
+    { divider: 1e18, suffix: "E" },
+    { divider: 1e15, suffix: "P" },
+    { divider: 1e12, suffix: "T" },
+    { divider: 1e9, suffix: "G" },
+    { divider: 1e6, suffix: "M" },
+    { divider: 1e3, suffix: "k" },
+  ];
+
+  for (let i = 0; i < ranges.length; i++) {
+    if (amount >= ranges[i].divider) {
+      const value =
+        (amount / ranges[i].divider) % 1 !== 0
+          ? (amount / ranges[i].divider).toFixed(1) // Upto only a single digit of the decimal.
+          : amount / ranges[i].divider;
+      return value + ranges[i].suffix;
+    }
+  }
+  return amount.toString();
 }
 
 const productInitState: ProductReqBody = {
@@ -124,4 +150,5 @@ export {
   textTruncate,
   formatAmount,
   stripHtml,
+  formatAmountRange,
 };

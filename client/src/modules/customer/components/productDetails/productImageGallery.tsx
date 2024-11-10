@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Carousel from "react-multi-carousel";
 import { carouselBreakpoints } from "../../../../common/constants";
 import { formatAmount } from "../../../admin/utils/productUtil";
@@ -7,9 +7,7 @@ import { Product } from "../../types/productTypes";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
 import {
-  CardTravel,
   KeyboardDoubleArrowRight,
-  ShoppingCart,
   ShoppingCartOutlined,
 } from "@mui/icons-material";
 
@@ -18,7 +16,7 @@ function ProductImageGallery({ product }: { product: Product }) {
   const navigate = useNavigate();
 
   return (
-    <section className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-10 px-4 pt-10">
+    <section className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-10 px-4 pt-4">
       {/* Image gallery */}
       <div className="flex flex-col items-center">
         <div className="overflow-hidden rounded-lg max-w-[30rem] max-h-[35rem]">
@@ -69,20 +67,67 @@ function ProductImageGallery({ product }: { product: Product }) {
           </h1>
         </div>
 
+        {/* Product meta details */}
+        <div className=" mt-4">
+          <ul className="text-md pt-1">
+            <RenderColumnStack
+              title="Stock"
+              sensitiveValue={product?.stock <= 10}
+              value={
+                product?.stock < 1
+                  ? "Item is out of stock"
+                  : product?.stock <= 10
+                  ? `Only ${product?.stock} items are left.`
+                  : product?.stock + " items"
+              }
+            />
+
+            {product?.quantity > 0 && (
+              <RenderColumnStack
+                title="Net Quantity"
+                value={product?.quantity}
+              />
+            )}
+            {product?.warrantyInfo && (
+              <RenderColumnStack
+                title="Warranty"
+                value={product?.warrantyInfo}
+              />
+            )}
+
+            {product?.returnPolicy && (
+              <RenderColumnStack
+                title="Return Policy"
+                value={product?.returnPolicy}
+              />
+            )}
+          </ul>
+        </div>
+
         {/* Price Details */}
         <div className="mt-4 lg:row-span-3 lg:mt-0">
           <h2 className="sr-only">Product information</h2>
-          <div className="flex space-x-5 items-center text-lg lg:text-xl text-gray-900 mt-6">
-            <p className="font-semibold">
-              {/* {formatAmount(product?.)} */}
-              {"1234"}
+          <div className="flex space-x-5 items-center   text-gray-900 mt-6">
+            <p className="font-semibold text-2xl">
+              {formatAmount(product?.netPrice)} {/* Saved price */}
+              {product?.price > 0 && product?.price - product?.netPrice > 0 && (
+                <span className="text-sm text-blue-500 font-normal">
+                  ( save {formatAmount(product?.price - product?.netPrice)})
+                </span>
+              )}
             </p>
-            <p className="line-through opacity-50">
-              {formatAmount(product?.price?.toString())}
-            </p>
-            <p className="text-secondary font-semibold">
-              {product?.discountPercentage}% Off
-            </p>
+
+            {product?.price > 0 && product?.price !== product?.netPrice && (
+              <p className="line-through text-lg opacity-50">
+                {formatAmount(product?.price)}
+              </p>
+            )}
+
+            {product?.discountPercentage > 0 && (
+              <p className="text-secondary text-sm font-semibold">
+                {product?.discountPercentage}% Off
+              </p>
+            )}
           </div>
 
           {/* Reviews */}
@@ -99,7 +144,7 @@ function ProductImageGallery({ product }: { product: Product }) {
           {/* CTA buttons */}
           <div className="flex space-x-10 mt-10">
             <Button
-              startIcon={<ShoppingCartOutlined  />}
+              startIcon={<ShoppingCartOutlined />}
               variant="outlined"
               onClick={() => navigate(AppRoutes.cart)}
               className=" w-[50%] px-8 py-3 shadow-none hover:shadow-none hover:bg-primary hover:text-white"
@@ -140,4 +185,28 @@ function ProductImageGallery({ product }: { product: Product }) {
   );
 }
 
+function RenderColumnStack({
+  title,
+  value,
+  sensitiveValue,
+}: {
+  title: string;
+  value: string | number;
+  sensitiveValue?: boolean;
+}) {
+  return (
+    <li className="text-slate font-medium">
+      {title}:{" "}
+      <span
+        className={
+          sensitiveValue
+            ? "text-red font-normal"
+            : "text-slate opacity-60 font-normal"
+        }
+      >
+        {value}
+      </span>
+    </li>
+  );
+}
 export default ProductImageGallery;
