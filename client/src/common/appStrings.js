@@ -7,6 +7,7 @@ const AppStrings = {
   alreadyHaveAccount: "if you already have an account?",
   products: "Products",
   goToHome: "Go to Homepage",
+  viewMore: "View More",
 
   /* admin strings */
   users: "Users",

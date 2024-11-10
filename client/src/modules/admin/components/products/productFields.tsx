@@ -79,6 +79,7 @@ const ProductFields = ({
           id={productStateIds.disPercentage}
           value={product.disPercentage}
           onChange={handleOnChange}
+          maxLength={2}
         />
       </Grid>
 

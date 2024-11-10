@@ -4,12 +4,12 @@ interface ProductSearchReqBody {
   itemId: string;
   pageNumber: number;
   pageSize: number;
-  colors: string[];
-  minPrice: number[];
-  maxPrice: number[];
-  discount: string[];
-  stock: string | null;
-  sort: string;
+  colors?: string[];
+  minPrice?: number[];
+  maxPrice?: number[];
+  discount?: string[];
+  stock?: string | null;
+  sort?: string;
 }
 
 interface ProductReqBody {

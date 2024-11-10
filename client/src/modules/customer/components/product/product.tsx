@@ -215,7 +215,7 @@ export default function Product() {
           </div>
         </Dialog>
 
-        {!isLoading && !products.length ? (
+        {!isLoading && products.length === 0 ? (
           <NotFound message={AppStrings.productsNotFound} />
         ) : (
           <main className="mx-auto">

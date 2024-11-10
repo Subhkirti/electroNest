@@ -166,19 +166,15 @@ function ProductImageGallery({ product }: { product: Product }) {
         </div>
       </div>
 
-      <div className="py-10 lg:col-span-2 lg:col-start-1 lg:pb-16 lg:pr-8 lg:pt-6">
-        {/* Description and details */}
-        <div>
-          <h3 className="sr-only">Description</h3>
-
-          <div className="space-y-6">
-            <p
-              className="text-base text-gray-900"
-              dangerouslySetInnerHTML={{
-                __html: product?.description || "",
-              }}
-            ></p>
-          </div>
+      {/* Description */}
+      <div className="py-4 lg:col-span-2 pb-16">
+        <div className="space-y-6">
+          <p
+            className="text-base text-gray-900"
+            dangerouslySetInnerHTML={{
+              __html: product?.description || "",
+            }}
+          ></p>
         </div>
       </div>
     </section>

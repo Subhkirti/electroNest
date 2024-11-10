@@ -1,51 +1,63 @@
 import { Box, Grid, LinearProgress, Rating } from "@mui/material";
 import ProductReviewCard from "./productReviewCard";
-import phones from "../../../../assets/productsData/phones";
-import HomeSectionCard from "../home/homeSectionCard";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
-import { findProductsById } from "../../../../store/customer/product/action";
+import {
+  findProducts,
+  findProductsById,
+} from "../../../../store/customer/product/action";
 import { useEffect, useState } from "react";
 import Loader from "../../../../common/components/loader";
 import { loadCategoryBreadCrumbs } from "../../utils/productUtils";
 import { CategoryBreadcrumbs } from "../../types/productTypes";
 import NotFound from "../../../../common/components/notFound";
 import AppStrings from "../../../../common/appStrings";
-import { formatAmount } from "../../../admin/utils/productUtil";
-import { carouselBreakpoints } from "../../../../common/constants";
-import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import Breadcrumbs from "./breadcrumbs";
 import ProductImageGallery from "./productImageGallery";
+import SimilarProducts from "./similarProducts";
+import ViewMoreButton from "../../../../common/components/viewMoreButton";
 
 export default function ProductDetails() {
   const params = useParams();
-  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const [categoryBreadcrumbs, setCategoryBreadcrumbs] = useState<
     CategoryBreadcrumbs[]
   >([]);
+  const [pageNumber, setPageNumber] = useState(1);
   const productId = params?.productId;
-  const { isLoading, product, categories } = useSelector(
+  const { isLoading, product, categories, products, totalCount } = useSelector(
     (state: RootState) => state.product
   );
 
   useEffect(() => {
-    // Fetch category breadcrumbs
-    categories?.length &&
-      setCategoryBreadcrumbs(loadCategoryBreadCrumbs(categories, product));
-
     // Fetch product details
     const timer = setTimeout(() => {
       productId && dispatch(findProductsById(productId));
+      productId &&
+        dispatch(
+          findProducts({
+            categoryId: product?.categoryId || "",
+            sectionId: product?.sectionId || "",
+            itemId: product?.sectionId || "",
+            pageNumber: pageNumber,
+            pageSize: 20,
+          })
+        );
     }, 10);
 
     return () => {
       clearTimeout(timer);
     };
     // eslint-disable-next-line
-  }, [productId, categories]);
+  }, [productId]);
+
+  useEffect(() => {
+    // Fetch category breadcrumbs
+    categories?.length &&
+      setCategoryBreadcrumbs(loadCategoryBreadCrumbs(categories, product));
+  }, [categories]);
 
   return (
     <div className="bg-white">
@@ -55,7 +67,7 @@ export default function ProductDetails() {
         <div className="pt-6">
           {/* Category Breadcrumbs */}
           <Breadcrumbs categoryBreadcrumbs={categoryBreadcrumbs} />
-          
+
           <ProductImageGallery product={product} />
 
           {/* Ratings & Reviews */}
@@ -152,15 +164,12 @@ export default function ProductDetails() {
           </section>
 
           {/* Similar Products */}
-          <section className="pt-10">
-            <h1 className="py-5 text-xl font-bold">Similar Products</h1>
-
-            <div className="flex flex-wrap space-y-5 space-x-4">
-              {phones.map((phone, index) => {
-                return <HomeSectionCard key={index} product={phone} />;
-              })}
-            </div>
-          </section>
+          <div className="flex flex-col justify-center space-y-3">
+            <SimilarProducts products={products} />
+            {totalCount > 0 && products.length < totalCount && (
+              <ViewMoreButton onClick={() => setPageNumber(pageNumber + 1)} />
+            )}
+          </div>
         </div>
       ) : !product ? (
         <NotFound message={AppStrings.productDetailsNotFound} />

@@ -86,9 +86,9 @@ function formatAmount(amount: number) {
 }
 //Format the given input into string in suitable terms of 'k', 'M', etc.
 function formatAmountRange(amount: number) {
-  if (amount < 999) {
+  if (amount < 50000) {
     //return whatever the value it is as minimum value to represent in shorthand is 1000.
-    return amount;
+    return `₹ ${amount}`;
   }
   const ranges = [
     { divider: 1e18, suffix: "E" },
