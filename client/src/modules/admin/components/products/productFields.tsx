@@ -2,14 +2,8 @@ import { Avatar, Grid, InputLabel, Typography } from "@mui/material";
 import InputField from "../../../../common/components/inputField";
 import { productColors, productStateIds } from "../../utils/productUtil";
 import { ProductReqBody } from "../../../customer/types/productTypes";
-import { AppDispatch, RootState } from "../../../../store/storeTypes";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import {
-  getSecondLevelCategories,
-  getThirdLevelCategories,
-  getTopLevelCategories,
-} from "../../../../store/customer/product/action";
+import { RootState } from "../../../../store/storeTypes";
+import { useSelector } from "react-redux";
 import { HighlightOff } from "@mui/icons-material";
 import RichTextEditor from "../../../../common/components/richTextEditor";
 
@@ -26,35 +20,8 @@ const ProductFields = ({
   setProduct?: (value: any) => void;
   handleOnChange?: (elementValue: any, id: string) => void;
 }) => {
-  const dispatch = useDispatch<AppDispatch>();
-
   const { topLevelCategories, secondLevelCategories, thirdLevelCategories } =
     useSelector((state: RootState) => state.product);
-  const thumbnailImg = product?.thumbnail;
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      loadCategories();
-    }, 10);
-
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line
-  }, [
-    topLevelCategories?.length,
-    secondLevelCategories?.length,
-    thirdLevelCategories?.length,
-    product.topLevelCategory,
-    product.secondLevelCategory,
-    product.thirdLevelCategory,
-  ]);
-
-  function loadCategories() {
-    if (!topLevelCategories.length) dispatch(getTopLevelCategories());
-    if (product.topLevelCategory && !secondLevelCategories.length)
-      dispatch(getSecondLevelCategories(product.topLevelCategory));
-    if (product.secondLevelCategory && !thirdLevelCategories.length)
-      dispatch(getThirdLevelCategories(product.secondLevelCategory));
-  }
 
   return (
     <>
@@ -66,7 +33,7 @@ const ProductFields = ({
           id={productStateIds.title}
           value={product.title}
           onChange={handleOnChange}
-          maxLength={70}
+          maxLength={80}
         />
       </Grid>
       <Grid item xs={12} lg={6}>
@@ -92,9 +59,7 @@ const ProductFields = ({
         />
       </Grid>
 
-      {thumbnail()}
-
-      <Grid item xs={12} lg={4}>
+      <Grid item xs={12} md={6} lg={4}>
         <InputField
           label={"Price (₹)"}
           readOnly={isViewProductPage}
@@ -105,23 +70,82 @@ const ProductFields = ({
           onChange={handleOnChange}
         />
       </Grid>
-      <Grid item xs={6} lg={4}>
-        <InputField
-          readOnly={isViewProductPage}
-          label={"Discount Price (₹)"}
-          type="number"
-          id={productStateIds.disPrice}
-          value={product.disPrice}
-          onChange={handleOnChange}
-        />
-      </Grid>
-      <Grid item xs={6} lg={4}>
+
+      <Grid item xs={12} md={6} lg={4}>
         <InputField
           readOnly={isViewProductPage}
           label={"Discount Percentage (%)"}
           type="number"
           id={productStateIds.disPercentage}
           value={product.disPercentage}
+          onChange={handleOnChange}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6} lg={4}>
+        <InputField
+          label={"Net Quantity"}
+          type="number"
+          readOnly={isViewProductPage}
+          required={true}
+          value={product.quantity}
+          id={productStateIds.quantity}
+          onChange={handleOnChange}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6} lg={4}>
+        <InputField
+          label={"Color"}
+          required={true}
+          type="dropdown"
+          readOnly={isViewProductPage}
+          value={product.color}
+          dropdownOptions={productColors}
+          id={productStateIds.color}
+          onChange={handleOnChange}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6} lg={4}>
+        <InputField
+          label={"Stock"}
+          type="number"
+          readOnly={isViewProductPage}
+          required={true}
+          value={product.stock}
+          id={productStateIds.stock}
+          onChange={handleOnChange}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6} lg={4}>
+        <InputField
+          label={"Size in Inches (w x d x h) "}
+          required={true}
+          readOnly={isViewProductPage}
+          value={product.size}
+          id={productStateIds.size}
+          onChange={handleOnChange}
+        />
+      </Grid>
+
+      <Grid item xs={12} lg={6}>
+        <InputField
+          label={"Warranty information"}
+          readOnly={isViewProductPage}
+          value={product.warrantyInfo}
+          id={productStateIds.warrantyInfo}
+          onChange={handleOnChange}
+        />
+      </Grid>
+
+      <Grid item xs={12} lg={6}>
+        <InputField
+          label={"Return Policy"}
+          readOnly={isViewProductPage}
+          value={product.returnPolicy}
+          id={productStateIds.returnPolicy}
           onChange={handleOnChange}
         />
       </Grid>
@@ -139,10 +163,10 @@ const ProductFields = ({
           onChange={handleOnChange}
         />
       </Grid>
+
       <Grid item xs={6} lg={4}>
         <InputField
           label={"Second Level Category"}
-          required={true}
           readOnly={isViewProductPage}
           type="dropdown"
           value={product.secondLevelCategory}
@@ -155,7 +179,6 @@ const ProductFields = ({
       <Grid item xs={6} lg={4}>
         <InputField
           label={"Third Level Category"}
-          required={true}
           type="dropdown"
           readOnly={isViewProductPage}
           value={product.thirdLevelCategory}
@@ -166,86 +189,9 @@ const ProductFields = ({
         />
       </Grid>
 
-      <Grid item xs={12} lg={4}>
-        <InputField
-          label={"Quantity"}
-          type="number"
-          readOnly={isViewProductPage}
-          required={true}
-          value={product.quantity}
-          id={productStateIds.quantity}
-          onChange={handleOnChange}
-        />
-      </Grid>
-
-      <Grid item xs={12} lg={4}>
-        <InputField
-          label={"Color"}
-          required={true}
-          type="dropdown"
-          readOnly={isViewProductPage}
-          value={product.color}
-          dropdownOptions={productColors}
-          id={productStateIds.color}
-          onChange={handleOnChange}
-        />
-      </Grid>
-
-      <Grid item xs={12} lg={4}>
-        <InputField
-          label={"Size in Inches (w x d x h) "}
-          required={true}
-          readOnly={isViewProductPage}
-          value={product.size}
-          id={productStateIds.size}
-          onChange={handleOnChange}
-        />
-      </Grid>
-
       {productImages()}
     </>
   );
-
-  function thumbnail() {
-    return (
-      <Grid item xs={12} lg={12}>
-        {isViewProductPage || (isEditProductPage && thumbnailImg) ? (
-          <div className="flex border-lightpurple justify-between border rounded-md p-6">
-            <div>
-              <Typography className="text-white">Thumbnail:</Typography>
-              <div className="relative">
-                {isEditProductPage && (
-                  <HighlightOff
-                    onClick={() =>
-                      setProduct && setProduct({ ...product, thumbnail: "" })
-                    }
-                    className="text-slate-300 z-10  absolute top-[-10px] right-[-10px] cursor-pointer"
-                  />
-                )}
-                <img
-                  width={200}
-                  height={200}
-                  className="mt-4"
-                  alt="thumbnail"
-                  src={thumbnailImg?.toString()}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <InputField
-            label={"Thumbnail"}
-            readOnly={isViewProductPage}
-            id={productStateIds.thumbnail}
-            type="file"
-            acceptFile="image/*"
-            value={thumbnailImg || ""}
-            onChange={handleOnChange}
-          />
-        )}
-      </Grid>
-    );
-  }
 
   function productImages() {
     return (
@@ -257,7 +203,7 @@ const ProductFields = ({
                 Product Images ({product.images?.length}):
               </Typography>
               <div className="flex p-4 space-x-4 items-center w-100 overflow-x-scroll">
-                {product.images.map((image: string | File, index) => {
+                {product.images.map((image, index) => {
                   return (
                     <div className="relative" key={index}>
                       {/* show remove icon also, if it's edit page */}
@@ -267,9 +213,9 @@ const ProductFields = ({
                             if (setProduct) {
                               setProduct({
                                 ...product,
-                                images: (
-                                  product.images as (File | string)[]
-                                )?.filter((_, i) => i !== index),
+                                images: (product.images as string[])?.filter(
+                                  (_, i) => i !== index
+                                ),
                               });
                             }
                           }}
@@ -293,13 +239,12 @@ const ProductFields = ({
         ) : (
           !isEditProductPage && (
             <InputField
-              label={"Product Images"}
+              required={true}
+              label={"Product Images Links"}
               id={productStateIds.images}
               readOnly={isViewProductPage}
-              value={product?.images || ""}
-              type="file"
-              acceptFile="image/*"
-              multiple
+              infoText="Add multiple links by separating them comma ( , )"
+              value={product?.images?.length ? product?.images : ""}
               onChange={handleOnChange}
             />
           )
@@ -307,13 +252,12 @@ const ProductFields = ({
 
         {isEditProductPage && (
           <InputField
-            label={"Product Images"}
+            required={true}
+            label={"Product Images Links"}
             id={productStateIds.images}
-            required={product.images?.length ? false : true}
-            value={product?.images || ""}
-            type="file"
-            acceptFile="image/*"
-            multiple
+            readOnly={isViewProductPage}
+            infoText="Add multiple links by separating them comma ( , )"
+            value={product?.images?.length ? product?.images : ""}
             onChange={handleOnChange}
           />
         )}

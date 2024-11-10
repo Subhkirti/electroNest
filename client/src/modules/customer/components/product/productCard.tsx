@@ -10,7 +10,7 @@ function ProductCard({ product }: { product: Product }) {
     >
       {/* image section */}
       <div className="h-[12rem] flex justify-center my-4  px-3">
-        <img src={product?.thumbnail} alt="" />
+        <img src={product?.images?.[0]} alt="" />
       </div>
 
       {/* meta details section */}
@@ -24,7 +24,7 @@ function ProductCard({ product }: { product: Product }) {
         {/* price section */}
         <div className="flex items-center justify-between flex-wrap">
           <p className="font-semibold text-lg text-nowrap">₹{product?.price}</p>
-          <p className="text-grey line-through text-sm text-nowrap">₹{product?.discountPrice}</p>
+          <p className="text-grey line-through text-sm text-nowrap">₹{112}</p>
 
           {product?.discountPercentage && (
             <p className="text-secondary font-semibold text-sm text-nowrap">

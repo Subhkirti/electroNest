@@ -133,7 +133,9 @@ function Categories() {
           <CustomTable
             fetchData={(page, size) =>
               topLevelCategories.map((category: TopLevelCategories) => {
-                dispatch(getSecondLevelCategories(category.categoryId));
+                dispatch(
+                  getSecondLevelCategories({ categoryId: category.categoryId })
+                );
               })
             }
             showPagination={false}
@@ -156,7 +158,9 @@ function Categories() {
           <CustomTable
             fetchData={(page, size) =>
               secondLevelCategories.map((category: SecondLevelCategories) => {
-                dispatch(getThirdLevelCategories(category.sectionId));
+                dispatch(
+                  getThirdLevelCategories({ sectionId: category.sectionId })
+                );
               })
             }
             showPagination={false}

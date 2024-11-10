@@ -27,11 +27,11 @@ import { TableColumn } from "../../../customer/types/userTypes";
 const productColumns: TableColumn<Product>[] = [
   { id: "productId", label: "ID" },
   {
-    id: "thumbnail",
+    id: "images",
     label: "Image",
-    render: (value: string) => (
+    render: (value: string[]) => (
       <Avatar
-        src={value}
+        src={value?.[0]}
         alt={"product-image"}
         variant="rounded"
         sx={{ width: 54, height: 54 }}

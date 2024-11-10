@@ -211,7 +211,6 @@ app.get("/product/categories", (req, res) => {
 /* Set products list */
 app.post("/product/add", (req, res) => {
   const {
-    thumbnail,
     images,
     brand,
     title,
@@ -221,32 +220,39 @@ app.post("/product/add", (req, res) => {
     price,
     quantity,
     disPercentage,
-    disPrice,
     topLevelCategory,
     secondLevelCategory,
     thirdLevelCategory,
+    stock,
+    rating,
+    warrantyInfo,
+    returnPolicy,
   } = req.body;
 
   connection.query(
-    `INSERT INTO ${tableName} (product_name, description, price, discount_price, discount_percentage, quantity, brand, color, size, thumbnail, images, category_id, section_id, item_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    `INSERT INTO ${tableName} (product_name, description, price, discount_percentage, brand, color, size, images, category_id, section_id, item_id, quantity, stock, rating, reviews, warranty_info, return_policy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       title,
       description,
       price,
-      disPrice,
       disPercentage,
-      quantity,
       brand,
       color,
       size,
-      JSON.stringify(thumbnail),
       JSON.stringify(images),
       topLevelCategory,
       secondLevelCategory,
       thirdLevelCategory,
+      quantity,
+      stock,
+      rating,
+      JSON.stringify([]) ,
+      warrantyInfo,
+      returnPolicy,
     ],
     (err, result) => {
       if (err) {
+        console.log('err:', err)
         return res
           .status(400)
           .json({ status: 400, message: "Error while adding product" });
@@ -281,7 +287,6 @@ app.post("/product/add", (req, res) => {
 app.post("/product/edit", (req, res) => {
   const productId = req.query?.id;
   const {
-    thumbnail,
     images,
     brand,
     title,
@@ -291,29 +296,36 @@ app.post("/product/edit", (req, res) => {
     price,
     quantity,
     disPercentage,
-    disPrice,
     topLevelCategory,
     secondLevelCategory,
     thirdLevelCategory,
+    stock,
+    rating,
+    reviews,
+    warrantyInfo,
+    returnPolicy,
   } = req.body;
 
   connection.query(
-    `UPDATE ${tableName} SET product_name = ?, description = ?, price = ?, discount_price = ?, discount_percentage = ?, quantity = ?, brand = ?, color = ?, size = ?, thumbnail = ?, images = ?, category_id = ?, section_id = ?, item_id = ? WHERE product_id = ?`,
+    `UPDATE ${tableName} SET product_name = ?, description = ?, price = ?, discount_percentage = ?, brand = ?, color = ?, size = ?, images = ?, category_id = ?, section_id = ?, item_id = ?, quantity = ? stock = ?, rating = ?,reviews = ?, warranty_info = ?, return_policy = ? WHERE product_id = ?`,
     [
       title,
       description,
       price,
-      disPrice,
       disPercentage,
-      quantity,
       brand,
       color,
       size,
-      JSON.stringify([thumbnail]),
       JSON.stringify(images),
       topLevelCategory,
       secondLevelCategory,
       thirdLevelCategory,
+      quantity,
+      stock,
+      rating,
+      reviews,
+      warrantyInfo,
+      returnPolicy,
       productId,
     ],
     (err, result) => {
@@ -1340,13 +1352,16 @@ function createProductsTable() {
         product_name VARCHAR(255) NOT NULL,
         description TEXT,
         price DECIMAL(10, 2) NOT NULL,
-        discount_price DECIMAL(10, 2),
         discount_percentage DECIMAL(5, 2),
-        quantity INT DEFAULT 0,
         brand VARCHAR(255),
         color VARCHAR(50),
         size VARCHAR(50),
-        thumbnail TEXT,
+        quantity INT DEFAULT 1,
+        stock INT DEFAULT 0,
+        rating DECIMAL(5, 2) DEFAULT 0,
+        reviews TEXT,
+        warranty_info VARCHAR(255),
+        return_policy VARCHAR(255),
         images TEXT,
         category_id VARCHAR(255) NOT NULL,
         section_id VARCHAR(255) NOT NULL,

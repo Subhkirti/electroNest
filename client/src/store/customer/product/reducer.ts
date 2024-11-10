@@ -177,16 +177,18 @@ function productReducer(
         ...state,
         isLoading: false,
         error: null,
-        secondLevelCategories: [
-          ...state.secondLevelCategories.filter(
-            (existingCategory) =>
-              !action.payload?.data.some(
-                (newCategory: SecondLevelCategories) =>
-                  newCategory.sectionId === existingCategory.sectionId
-              )
-          ),
-          ...action.payload?.data,
-        ],
+        secondLevelCategories: action?.payload?.newData
+          ? action.payload?.data
+          : [
+              ...state.secondLevelCategories.filter(
+                (existingCategory) =>
+                  !action.payload?.data.some(
+                    (newCategory: SecondLevelCategories) =>
+                      newCategory.sectionId === existingCategory.sectionId
+                  )
+              ),
+              ...action.payload?.data,
+            ],
         secondLCategoryCount: action.payload?.totalCount,
       };
     case ActionTypes.GET_THIRD_LEVEL_CATEGORIES_SUCCESS:
@@ -194,16 +196,18 @@ function productReducer(
         ...state,
         isLoading: false,
         error: null,
-        thirdLevelCategories: [
-          ...state.thirdLevelCategories.filter(
-            (existingCategory) =>
-              !action.payload?.data.some(
-                (newCategory: ThirdLevelCategories) =>
-                  newCategory.itemId === existingCategory.itemId
-              )
-          ),
-          ...action.payload?.data,
-        ],
+        thirdLevelCategories: action?.payload?.newData
+          ? action.payload?.data
+          : [
+              ...state.thirdLevelCategories.filter(
+                (existingCategory) =>
+                  !action.payload?.data.some(
+                    (newCategory: ThirdLevelCategories) =>
+                      newCategory.itemId === existingCategory.itemId
+                  )
+              ),
+              ...action.payload?.data,
+            ],
         thirdLCategoryCount: action.payload?.totalCount,
       };
 

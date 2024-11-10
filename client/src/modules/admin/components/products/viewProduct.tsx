@@ -1,7 +1,12 @@
 import { Grid } from "@mui/material";
 import ProductFields from "./productFields";
 import { useEffect, useState } from "react";
-import { findProductsById } from "../../../../store/customer/product/action";
+import {
+  findProductsById,
+  getSecondLevelCategories,
+  getThirdLevelCategories,
+  getTopLevelCategories,
+} from "../../../../store/customer/product/action";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { useDispatch, useSelector } from "react-redux";
 import { ProductReqBody } from "../../../customer/types/productTypes";
@@ -27,6 +32,7 @@ function ViewProduct() {
     const timer = setTimeout(() => {
       // Fetch product details
       dispatch(findProductsById(productId));
+      loadCategories();
     }, 10);
 
     return () => {
@@ -34,7 +40,7 @@ function ViewProduct() {
       dispatch(resetHeader());
     };
     // eslint-disable-next-line
-  }, [productId]);
+  }, [productId, product?.secondLevelCategory, product.topLevelCategory]);
 
   useEffect(() => {
     dispatch(
@@ -46,7 +52,6 @@ function ViewProduct() {
 
     if (!isLoading && productRes) {
       setProduct({
-        thumbnail: productRes?.thumbnail?.[0] || "",
         images: productRes?.images || [],
         brand: productRes.brand || "",
         title: productRes.productName || "",
@@ -56,15 +61,36 @@ function ViewProduct() {
         color: productRes.color || null,
         size: productRes.size || null,
         disPercentage: Number(productRes.discountPercentage) || 0,
-        disPrice: Number(productRes.discountPrice) || 0,
         topLevelCategory: productRes.categoryId || "",
         secondLevelCategory: productRes.sectionId || "",
         thirdLevelCategory: productRes.itemId || "",
+        stock: productRes?.stock,
+        rating: productRes?.rating,
+        reviews: productRes?.reviews,
+        warrantyInfo: productRes?.warrantyInfo,
+        returnPolicy: productRes?.returnPolicy,
       });
     }
     // eslint-disable-next-line
   }, [isLoading, productRes?.productName]);
 
+  function loadCategories() {
+    dispatch(getTopLevelCategories());
+    if (product.topLevelCategory)
+      dispatch(
+        getSecondLevelCategories({
+          categoryId: product.topLevelCategory,
+          newData: true,
+        })
+      );
+    if (product.secondLevelCategory)
+      dispatch(
+        getThirdLevelCategories({
+          sectionId: product.secondLevelCategory,
+          newData: true,
+        })
+      );
+  }
   return (
     <Grid container spacing={2} justifyContent={"center"}>
       {isLoading ? (

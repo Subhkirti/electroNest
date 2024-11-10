@@ -32,7 +32,9 @@ function CategoryFields({
     const timer = setTimeout(() => {
       !topLevelCategories.length && dispatch(getTopLevelCategories());
       !secondLevelCategories.length &&
-        dispatch(getSecondLevelCategories(category.categoryName));
+        dispatch(
+          getSecondLevelCategories({ categoryId: category.categoryName })
+        );
     }, 10);
 
     return () => {

@@ -1,7 +1,6 @@
 import { ProductReqBody } from "../../customer/types/productTypes";
 
 const productStateIds = {
-  thumbnail: "thumbnail",
   images: "images",
   brand: "brand",
   title: "title",
@@ -11,10 +10,14 @@ const productStateIds = {
   price: "price",
   quantity: "quantity",
   disPercentage: "disPercentage",
-  disPrice: "disPrice",
   topLevelCategory: "topLevelCategory",
   secondLevelCategory: "secondLevelCategory",
   thirdLevelCategory: "thirdLevelCategory",
+  stock: 'stock',
+  rating: 'rating',
+  reviews: 'reviews',
+  warrantyInfo: 'warrantyInfo',
+  returnPolicy: 'returnPolicy',
 };
 
 const categoryStateIds = {
@@ -71,7 +74,7 @@ const textTruncate = (text: string, length: number) => {
   return text.substring(0, length) + "...";
 };
 
-function formatAmount(amount: Float32Array | string) {
+function formatAmount(amount: string) {
   return (
     "₹ " +
     Number(amount).toLocaleString("en-IN", {
@@ -83,7 +86,6 @@ function formatAmount(amount: Float32Array | string) {
 }
 
 const productInitState: ProductReqBody = {
-  thumbnail: "",
   images: [],
   brand: "",
   title: "",
@@ -93,10 +95,14 @@ const productInitState: ProductReqBody = {
   color: null,
   size: null,
   disPercentage: null,
-  disPrice: null,
   topLevelCategory: "",
   secondLevelCategory: "",
   thirdLevelCategory: "",
+  stock: 0,
+  rating: 0,
+  reviews: [],
+  warrantyInfo: null,
+  returnPolicy: null,
 };
 
 const categoryInitState = {
