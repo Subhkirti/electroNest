@@ -40,7 +40,7 @@ export default function ProductDetails() {
           findProducts({
             categoryId: product?.categoryId || "",
             sectionId: product?.sectionId || "",
-            itemId: product?.sectionId || "",
+            itemId: product?.itemId || "",
             pageNumber: pageNumber,
             pageSize: 20,
           })
@@ -53,11 +53,12 @@ export default function ProductDetails() {
     // eslint-disable-next-line
   }, [productId]);
 
+
   useEffect(() => {
     // Fetch category breadcrumbs
     categories?.length &&
       setCategoryBreadcrumbs(loadCategoryBreadCrumbs(categories, product));
-  }, [categories]);
+  }, [categories, product]);
 
   return (
     <div className="bg-white">
@@ -165,7 +166,10 @@ export default function ProductDetails() {
 
           {/* Similar Products */}
           <div className="flex flex-col justify-center space-y-3">
-            <SimilarProducts products={products} />
+            <SimilarProducts
+              products={products}
+              productId={Number(productId)}
+            />
             {totalCount > 0 && products.length < totalCount && (
               <ViewMoreButton onClick={() => setPageNumber(pageNumber + 1)} />
             )}

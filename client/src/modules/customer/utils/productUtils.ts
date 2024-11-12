@@ -24,8 +24,10 @@ const productFilters = [
       { value: "159-399", label: "₹159 to ₹399" },
       { value: "399-999", label: "₹399 to ₹999" },
       { value: "999-1999", label: "₹999 to ₹1999" },
-      { value: "1999-2999", label: "₹1999 to ₹2999" },
-      { value: "2999-3999", label: "₹2999 to ₹3999" },
+      { value: "1999-4999", label: "₹1999 to ₹4999" },
+      { value: "4999-9999", label: "₹4999 to ₹9999" },
+      { value: "9999-49999", label: "₹9999 to ₹49999" },
+
     ],
   },
   {
@@ -67,10 +69,7 @@ const sortOptions = [
   },
 ];
 
-function loadCategoryBreadCrumbs(
-  categories: CategoryState[],
-  product: Product | null
-) {
+function loadCategoryBreadCrumbs(categories: CategoryState[], product: any) {
   const categoryBreadcrumbs: CategoryBreadcrumbs[] = [];
   if (categories?.length && product) {
     // Find the matching category
