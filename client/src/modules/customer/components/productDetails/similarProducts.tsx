@@ -14,7 +14,7 @@ function SimilarProducts({
       <div className="flex  flex-wrap  space-x-4">
         {products.map((product, index) => {
           return (
-            product?.productId != productId && (
+            product?.productId !== productId && (
               <ProductCard key={index} product={product} />
             )
           );

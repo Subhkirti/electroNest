@@ -90,6 +90,7 @@ function Products() {
     return () => {
       dispatch(resetHeader());
     };
+    // eslint-disable-next-line
   }, []);
 
   const handleFetchProducts = (page: number, size: number) => {

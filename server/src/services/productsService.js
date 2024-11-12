@@ -3,9 +3,9 @@ const tableName = "products";
 const topLevelCateTableName = "top_level_categories"; // also known as categories
 const secondLevelCateTableName = "second_level_categories"; // also known as sections
 const thirdLevelCateTableName = "third_level_categories"; // also known as items
-
 const app = require("../app");
 createProductCateSectionItemsTable();
+
 app.post("/product/categories/sections/items", (req, res) => {
   const { categories } = req.body;
 
@@ -1340,6 +1340,7 @@ function createProductCateTable() {
   });
 }
 
+// Create products table
 function createProductsTable() {
   const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
 

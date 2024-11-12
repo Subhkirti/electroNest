@@ -6,6 +6,7 @@ import {
 } from "../../../modules/customer/utils/apiUtils";
 import { ActionDispatch } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
+import { CartReqBody } from "../../../modules/customer/types/cartTypes";
 
 const getCart = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_CART_REQUEST });
@@ -23,11 +24,11 @@ const getCart = () => async (dispatch: ActionDispatch) => {
   }
 };
 
-const addItemToCart = (reqData: number) => async (dispatch: ActionDispatch) => {
+const addItemToCart = (reqData: CartReqBody) => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.ADD_ITEM_TO_CART_REQUEST });
 
   try {
-    const res = await axios.put(
+    const res = await axios.post(
       `${ApiUrls.addItemToCart}`,
       reqData,
       headersConfig
@@ -50,7 +51,7 @@ const removeItemToCart =
 
     try {
       const res = await axios.delete(
-        `${ApiUrls.cartItems}${cartItemId}`,
+        `${ApiUrls.cartItems}id=${cartItemId}`,
         headersConfig
       );
       dispatch({
@@ -71,7 +72,7 @@ const updateItemToCart =
 
     try {
       const res = await axios.put(
-        `${ApiUrls.cartItems}${cartItemId}`,
+        `${ApiUrls.cartItems}id=${cartItemId}`,
         reqData,
         headersConfig
       );

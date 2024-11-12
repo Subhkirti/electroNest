@@ -14,6 +14,8 @@ if (result.error) {
 require("./connection");
 require("./services/userService");
 require("./services/productsService");
+require("./services/cartService");
+
 
 
 const PORT = process.env.PORT;

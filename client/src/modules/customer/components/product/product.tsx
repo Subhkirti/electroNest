@@ -91,6 +91,10 @@ export default function Product() {
       dispatch(findProducts(reqData));
     }, 10);
 
+    return () => {
+      clearTimeout(timer);
+    };
+
     // eslint-disable-next-line
   }, [
     params,
@@ -112,6 +116,7 @@ export default function Product() {
           itemId: params?.itemId,
         })
       );
+    // eslint-disable-next-line
   }, [categories]);
 
   function handleOnSearchFilter(value: string, sectionId: string) {

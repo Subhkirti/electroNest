@@ -9,6 +9,7 @@ import {
 } from "../modules/customer/types/productTypes";
 import { SvgIconTypeMap } from "@mui/material";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
+import { CartItem } from "../modules/customer/types/cartTypes";
 
 interface RootState {
   auth: AuthState;
@@ -51,8 +52,8 @@ interface ProductState {
 }
 
 interface CartState {
-  cartItems: [];
-  cart: {} | null;
+  cartItems: CartItem[];
+  cart: CartItem | null;
   isLoading: boolean;
   error: string | null;
 }

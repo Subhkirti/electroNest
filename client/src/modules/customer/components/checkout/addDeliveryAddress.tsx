@@ -1,5 +1,4 @@
 import { Button, Grid, TextField } from "@mui/material";
-import React from "react";
 import AddressCard from "../addressCard/addressCard";
 
 function AddDeliveryAddress() {
@@ -18,10 +17,12 @@ function AddDeliveryAddress() {
       zipCode: data.get("zipCode"),
       phoneNumber: data.get("phoneNumber"),
     };
+
+    console.log("formData:", formData);
   }
 
   return (
-    <Grid container justifyContent={'space-between'} >
+    <Grid container justifyContent={"space-between"}>
       <Grid
         item
         xs={12}

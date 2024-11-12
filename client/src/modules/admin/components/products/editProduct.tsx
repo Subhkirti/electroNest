@@ -18,7 +18,7 @@ import {
   setHeader,
 } from "../../../../store/customer/header/action";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { productInitState, productStateIds } from "../../utils/productUtil";
+import { productInitState } from "../../utils/productUtil";
 import AdminAppRoutes from "../../../../common/adminRoutes";
 
 function EditProduct() {

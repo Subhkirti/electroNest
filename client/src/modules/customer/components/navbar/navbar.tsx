@@ -60,6 +60,7 @@ export default function Navbar() {
     return () => {
       clearTimeout(timer);
     };
+    // eslint-disable-next-line
   }, []);
 
   const handleUserClick = (event: { currentTarget: any }) => {

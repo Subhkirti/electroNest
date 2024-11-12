@@ -40,6 +40,7 @@ function CategoryFields({
     return () => {
       clearTimeout(timer);
     };
+    // eslint-disable-next-line
   }, [category.categoryName]);
 
   return (

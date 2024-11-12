@@ -1,3 +1,4 @@
+import { CartItem } from "../../../modules/customer/types/cartTypes";
 import { CartState, RootAction } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
 
@@ -32,15 +33,15 @@ function cartReducer(state = initState, action: RootAction) {
         ...state,
         isLoading: false,
         cartItems: state.cartItems.filter(
-          (item: { id: any }) => item?.id !== action?.payload
+          (item: CartItem) => item?.cartItemId !== action?.payload
         ),
       };
     case ActionTypes.UPDATE_CART_ITEM_SUCCESS:
       return {
         ...state,
         isLoading: false,
-        cartItems: state.cartItems.map((item: { id: any }) =>
-          item?.id === action?.payload?.id ? action?.payload?.data : item
+        cartItems: state.cartItems.map((item: CartItem) =>
+          item?.cartItemId === action?.payload?.id ? action?.payload?.data : item
         ),
       };
     case ActionTypes.ADD_ITEM_TO_CART_FAILURE:

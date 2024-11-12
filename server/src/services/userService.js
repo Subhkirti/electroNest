@@ -175,6 +175,7 @@ app.get("/users", (req, res) => {
   );
 });
 
+// Add user API for admins
 app.post("/user/add", (req, res) => {
   const { firstName, lastName, email, password, role, mobile } = req.body;
   connection.query(

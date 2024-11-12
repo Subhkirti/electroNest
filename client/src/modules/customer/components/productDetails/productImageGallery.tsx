@@ -40,7 +40,7 @@ function ProductImageGallery({ product }: { product: Product }) {
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
                   className={`flex justify-center m-2 py-3 rounded-lg cursor-pointer ${
-                    selectedImageIndex == index
+                    selectedImageIndex === index
                       ? "border-2 border-primary"
                       : "border"
                   }`}

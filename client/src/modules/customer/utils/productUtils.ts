@@ -1,9 +1,5 @@
 import AppRoutes from "../../../common/appRoutes";
-import {
-  CategoryBreadcrumbs,
-  CategoryState,
-  Product,
-} from "../types/productTypes";
+import { CategoryBreadcrumbs, CategoryState } from "../types/productTypes";
 
 const productFilters = [
   {
@@ -27,7 +23,6 @@ const productFilters = [
       { value: "1999-4999", label: "₹1999 to ₹4999" },
       { value: "4999-9999", label: "₹4999 to ₹9999" },
       { value: "9999-49999", label: "₹9999 to ₹49999" },
-
     ],
   },
   {
