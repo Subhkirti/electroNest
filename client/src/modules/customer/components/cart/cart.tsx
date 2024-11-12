@@ -10,6 +10,7 @@ import AppStrings from "../../../../common/appStrings";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
+import EmptyCart from "./EmptyCart";
 
 function Cart() {
   const { isLoading, cartItems, cart } = useSelector(
@@ -44,15 +45,7 @@ function Cart() {
           <PriceDetails />
         </div>
       ) : (
-        // Cart is empty
-        <div className="w-full flex flex-col space-y-1 justify-center items-center">
-          <img src={AppIcons.imgEmptyCart} alt="" />
-          <p className="text-2xl font-bold pt-10">{AppStrings.cartIsEmpty}</p>
-          <p className="pb-4">{AppStrings.justRelaxFindProducts}</p>
-          <Button onClick={() => navigate(AppRoutes.products)} variant="contained">
-            {AppStrings.startShopping}
-          </Button>
-        </div>
+        <EmptyCart />
       )}
     </div>
   );
