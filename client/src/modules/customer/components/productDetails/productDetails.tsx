@@ -53,7 +53,6 @@ export default function ProductDetails() {
     // eslint-disable-next-line
   }, [productId]);
 
-
   useEffect(() => {
     // Fetch category breadcrumbs
     categories?.length &&

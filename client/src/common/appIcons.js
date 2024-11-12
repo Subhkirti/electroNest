@@ -2,6 +2,8 @@ import imgLogo from "../assets/images/img_logo.png";
 import imgTrophy from "../assets/images/dashboard/trophy.png";
 import imgAdminProfile from "../assets/images/dashboard/admin_profile.png";
 import img404 from "../assets/images/404.png";
+import imgEmptyCart from "../assets/images/product/empty_cart.svg";
+
 import imgProductNotFound from "../assets/images/product/product_not_found.png";
 
 const AppIcons = {
@@ -9,6 +11,7 @@ const AppIcons = {
   imgTrophy,
   imgAdminProfile,
   img404,
+  imgEmptyCart,
   imgProductNotFound,
 };
 export default AppIcons;

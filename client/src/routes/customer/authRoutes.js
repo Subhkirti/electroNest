@@ -32,7 +32,7 @@ const authRoutes = [
     component: Product,
   },
   {
-    path: AppRoutes.secondLevelProduct,
+    path: AppRoutes.products,
     component: Product,
   },
   {

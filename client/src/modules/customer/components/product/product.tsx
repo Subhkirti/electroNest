@@ -365,7 +365,10 @@ export default function Product() {
 
               <div className="lg:col-span-4 w-full">
                 {dataNotAvailable ? (
-                  <NotFound message={AppStrings.productsNotFound} />
+                  <NotFound
+                    message={AppStrings.productsNotFound}
+                    isGoBack={true}
+                  />
                 ) : (
                   <div className="flex flex-wrap justify-start bg-white py-5">
                     {/* Products grid */}

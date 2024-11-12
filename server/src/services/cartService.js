@@ -39,11 +39,15 @@ app.get("/cart", (req, res) => {
 // Get cart Items
 app.get("/cart_items", (req, res) => {
   const { id } = req.query;
-  const limit = parseInt(pageSize);
-  const offset = (parseInt(pageNumber) - 1) * limit;
+
+  if (!id) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Cart Id not found in request" });
+  }
 
   connection.query(
-    `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ?`,
+    `SELECT id as cartId FROM ${cartTableName} WHERE user_id = ?`,
     [id],
     (err, result) => {
       if (err) {
@@ -52,25 +56,46 @@ app.get("/cart_items", (req, res) => {
           .json({ status: 400, message: "Error while getting cart items" });
       }
 
-      // Query to get the total count of users
-      connection.query(
-        `SELECT COUNT(*) AS totalCount FROM ${cartItemsTableName}`,
-        (countErr, countResult) => {
-          if (countErr) {
-            return res.status(400).json({
-              status: 400,
-              message: "Error while counting cart items",
-            });
-          }
-          const totalCount = countResult[0].totalCount;
+      if (!result.length) {
+        return res.status(200).json({
+          status: 200,
+          data: result,
+          totalCount: 0,
+        });
+      } else {
+        connection.query(
+          `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ?`,
+          [id],
+          (err, result) => {
+            if (err) {
+              return res.status(400).json({
+                status: 400,
+                message: "Error while getting cart items",
+              });
+            }
 
-          return res.status(200).json({
-            status: 200,
-            data: result,
-            totalCount: totalCount,
-          });
-        }
-      );
+            // Query to get the total count of users
+            connection.query(
+              `SELECT COUNT(*) AS totalCount FROM ${cartItemsTableName}`,
+              (countErr, countResult) => {
+                if (countErr) {
+                  return res.status(400).json({
+                    status: 400,
+                    message: "Error while counting cart items",
+                  });
+                }
+                const totalCount = countResult[0].totalCount;
+
+                return res.status(200).json({
+                  status: 200,
+                  data: result,
+                  totalCount: totalCount,
+                });
+              }
+            );
+          }
+        );
+      }
     }
   );
 });
@@ -149,12 +174,10 @@ app.post("/cart-items/add", (req, res) => {
             (err) => {
               if (err) {
                 console.error("Error adding product to cart:", err);
-                return res
-                  .status(400)
-                  .json({
-                    status: 400,
-                    message: "Failed to add product in cart",
-                  });
+                return res.status(400).json({
+                  status: 400,
+                  message: "Failed to add product in cart",
+                });
               } else {
                 // Return the final response
                 return res

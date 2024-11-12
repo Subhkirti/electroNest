@@ -13,6 +13,7 @@ function cartReducer(state = initState, action: RootAction) {
   switch (action.type) {
     case ActionTypes.ADD_ITEM_TO_CART_REQUEST:
     case ActionTypes.GET_CART_REQUEST:
+    case ActionTypes.GET_CART_ITEMS_REQUEST:
     case ActionTypes.REMOVE_CART_ITEM_REQUEST:
     case ActionTypes.UPDATE_CART_ITEM_REQUEST:
       return { ...state, isLoading: true, error: null };
@@ -21,6 +22,12 @@ function cartReducer(state = initState, action: RootAction) {
         ...state,
         isLoading: false,
         cart: action?.payload || null,
+      };
+    case ActionTypes.GET_CART_ITEMS_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        cartItems: action?.payload,
       };
     case ActionTypes.ADD_ITEM_TO_CART_SUCCESS:
       return {
@@ -41,11 +48,14 @@ function cartReducer(state = initState, action: RootAction) {
         ...state,
         isLoading: false,
         cartItems: state.cartItems.map((item: CartItem) =>
-          item?.cartItemId === action?.payload?.id ? action?.payload?.data : item
+          item?.cartItemId === action?.payload?.id
+            ? action?.payload?.data
+            : item
         ),
       };
-    case ActionTypes.ADD_ITEM_TO_CART_FAILURE:
     case ActionTypes.GET_CART_FAILURE:
+    case ActionTypes.GET_CART_ITEMS_FAILURE:
+    case ActionTypes.ADD_ITEM_TO_CART_FAILURE:
     case ActionTypes.REMOVE_CART_ITEM_FAILURE:
     case ActionTypes.UPDATE_CART_ITEM_FAILURE:
       return { ...state, isLoading: false, error: action?.payload || null };

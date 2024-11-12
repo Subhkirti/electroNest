@@ -2,9 +2,16 @@ import { Button } from "@mui/material";
 import AppStrings from "../appStrings";
 import AppRoutes from "../appRoutes";
 import AppIcons from "../appIcons";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-function NotFound({ message }: { message: string }) {
+function NotFound({
+  message,
+  isGoBack,
+}: {
+  message: string;
+  isGoBack?: boolean;
+}) {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col justify-center space-y-4 items-center">
       <img
@@ -13,14 +20,13 @@ function NotFound({ message }: { message: string }) {
         alt="product not found"
       />
       <p className=" text-slate-800 text-2xl font-semibold">{message}</p>
-      <Link to={AppRoutes.home}>
-        <Button
-          variant="outlined"
-          className="hover:bg-primary hover:text-white transition ease-in duration-400"
-        >
-          {AppStrings.goToHome}
-        </Button>
-      </Link>
+      <Button
+        onClick={() => (isGoBack ? navigate(-1) : navigate(AppRoutes.home))}
+        variant="outlined"
+        className="hover:bg-primary hover:text-white transition ease-in duration-400"
+      >
+        {isGoBack ? AppStrings.goBack : AppStrings.goToHome}
+      </Button>
     </div>
   );
 }

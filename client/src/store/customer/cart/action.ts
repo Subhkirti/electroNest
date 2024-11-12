@@ -7,6 +7,7 @@ import {
 import { ActionDispatch } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
 import { CartReqBody } from "../../../modules/customer/types/cartTypes";
+import { getCurrentUser } from "../../../modules/customer/utils/localStorageUtils";
 
 const getCart = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_CART_REQUEST });
@@ -24,26 +25,47 @@ const getCart = () => async (dispatch: ActionDispatch) => {
   }
 };
 
-const addItemToCart = (reqData: CartReqBody) => async (dispatch: ActionDispatch) => {
-  dispatch({ type: ActionTypes.ADD_ITEM_TO_CART_REQUEST });
-
+const getCartItems = () => async (dispatch: ActionDispatch) => {
+  dispatch({ type: ActionTypes.GET_CART_ITEMS_REQUEST });
+  const userId = getCurrentUser()?.id;
   try {
-    const res = await axios.post(
-      `${ApiUrls.addItemToCart}`,
-      reqData,
+    const res = await axios.get(
+      userId ? `${ApiUrls.getCartItems}id=${userId}` : ApiUrls.getCartItems,
       headersConfig
     );
     dispatch({
-      type: ActionTypes.ADD_ITEM_TO_CART_SUCCESS,
+      type: ActionTypes.GET_CART_ITEMS_SUCCESS,
       payload: res?.data?.data,
     });
   } catch (error) {
     handleCatchError({
       error,
-      actionType: ActionTypes.ADD_ITEM_TO_CART_FAILURE,
+      actionType: ActionTypes.GET_CART_ITEMS_FAILURE,
     });
   }
 };
+
+const addItemToCart =
+  (reqData: CartReqBody) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.ADD_ITEM_TO_CART_REQUEST });
+
+    try {
+      const res = await axios.post(
+        `${ApiUrls.addItemToCart}`,
+        reqData,
+        headersConfig
+      );
+      dispatch({
+        type: ActionTypes.ADD_ITEM_TO_CART_SUCCESS,
+        payload: res?.data?.data,
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.ADD_ITEM_TO_CART_FAILURE,
+      });
+    }
+  };
 
 const removeItemToCart =
   (cartItemId: number) => async (dispatch: ActionDispatch) => {
@@ -51,7 +73,7 @@ const removeItemToCart =
 
     try {
       const res = await axios.delete(
-        `${ApiUrls.cartItems}id=${cartItemId}`,
+        `${ApiUrls.getCartItems}id=${cartItemId}`,
         headersConfig
       );
       dispatch({
@@ -72,7 +94,7 @@ const updateItemToCart =
 
     try {
       const res = await axios.put(
-        `${ApiUrls.cartItems}id=${cartItemId}`,
+        `${ApiUrls.getCartItems}id=${cartItemId}`,
         reqData,
         headersConfig
       );
@@ -88,4 +110,10 @@ const updateItemToCart =
     }
   };
 
-export { getCart, addItemToCart, removeItemToCart, updateItemToCart };
+export {
+  getCart,
+  addItemToCart,
+  removeItemToCart,
+  updateItemToCart,
+  getCartItems,
+};

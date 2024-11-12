@@ -7,7 +7,12 @@ const AppStrings = {
   alreadyHaveAccount: "if you already have an account?",
   products: "Products",
   goToHome: "Go to Homepage",
+  goBack: "Go Back",
   viewMore: "View More",
+  cartIsEmpty: "Your cart is empty",
+  startShopping: "Start Shopping",
+  justRelaxFindProducts:
+    "Just relax, let us help you find some first-class products.",
 
   /* admin strings */
   users: "Users",
@@ -40,8 +45,8 @@ const AppStrings = {
   oopsPageNotFound: "Oops! Page Not Found",
   pageNotExist: "The page you're looking for doesn't exist or has been moved.",
 
-   /* success messages */
-   categoryAddedSuccessfully: "Category added successfully",
+  /* success messages */
+  categoryAddedSuccessfully: "Category added successfully",
 };
 
 export default AppStrings;
