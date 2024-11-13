@@ -13,7 +13,7 @@ app.get("/cart", (req, res) => {
         .status(400)
         .json({ status: 400, message: "Error while getting cart details" });
     }
- 
+
     return res.status(200).json({
       status: 200,
       data: result?.[0],
@@ -142,8 +142,8 @@ app.get("/cart_items", (req, res) => {
 
 // Add cart items
 app.post("/cart-items/add", (req, res) => {
-  const { userId, productId, price, discountPrice } = req.body;
-
+  const { userId, productId, price, discountPercentage } = req.body;
+  const discountPrice = (price * discountPercentage) / 100;
   // Step 1: Check if the user already has an active cart
   const checkCartQuery = `SELECT id FROM ${cartTableName} WHERE user_id = ? AND total_items > 0`;
 
@@ -272,9 +272,15 @@ app.post("/cart-items/add", (req, res) => {
 
 // Add in cart: Function to update the total price and total items count in the cart
 function updateCartTotal(cartId, callback) {
-  const updateCartQuery = `UPDATE ${cartTableName} SET total_price = (SELECT SUM(price * quantity) FROM cart_items WHERE cart_id = ?), total_items = (SELECT SUM(quantity) FROM cart_items WHERE cart_id = ?) WHERE id = ?`;
+  const updateCartQuery = `
+    UPDATE ${cartTableName} 
+    SET 
+      total_price = (SELECT SUM(price * quantity) FROM ${cartItemsTableName} WHERE cart_id = ?),
+      total_discount_price = (SELECT SUM(discount_price * quantity) FROM ${cartItemsTableName} WHERE cart_id = ?),
+      total_items = (SELECT SUM(quantity) FROM ${cartItemsTableName} WHERE cart_id = ?)
+    WHERE id = ?`;
 
-  connection.query(updateCartQuery, [cartId, cartId, cartId], (err) => {
+  connection.query(updateCartQuery, [cartId, cartId, cartId, cartId], (err) => {
     if (err) {
       console.error("Error updating cart totals:", err);
       return callback(err);

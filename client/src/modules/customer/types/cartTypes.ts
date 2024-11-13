@@ -4,7 +4,7 @@ interface CartReqBody {
   userId: number;
   productId: number;
   price: number;
-  discountPrice: number;
+  discountPercentage: number;
 }
 
 interface CartItem {

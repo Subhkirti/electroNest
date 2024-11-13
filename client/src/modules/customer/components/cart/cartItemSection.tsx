@@ -78,8 +78,8 @@ function CartItemSection({
                 addItemToCart({
                   userId: userId || 0,
                   productId: cartItemProduct.productId,
-                  price: cartItemProduct.netPrice,
-                  discountPrice: 0,
+                  price: cartItemProduct.price,
+                  discountPercentage: cartItemProduct.discountPercentage,
                 })
               );
             }}

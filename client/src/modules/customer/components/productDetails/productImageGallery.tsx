@@ -27,8 +27,8 @@ function ProductImageGallery({ product }: { product: Product }) {
       addItemToCart({
         userId: userId || 0,
         productId: product.productId,
-        price: product.netPrice,
-        discountPrice: 0,
+        price: product.price,
+        discountPercentage: product.discountPercentage,
       })
     );
     navigate(AppRoutes.cart);
