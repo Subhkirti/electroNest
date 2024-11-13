@@ -1,5 +1,5 @@
 import AddressCard from "../addressCard/addressCard";
-import CartItem from "../cart/cartItem";
+import CartItemSection from "../cart/cartItemSection";
 import PriceDetails from "./priceDetails";
 
 function OrderSummary() {
@@ -12,10 +12,10 @@ function OrderSummary() {
       <div>
         <div className="lg:grid grid-cols-3 relative mt-10">
           <div className="col-span-2 space-y-4">
-            <CartItem />
-            <CartItem />
-            <CartItem />
-            <CartItem />
+            {/* <CartItemSection />
+            <CartItemSection />
+            <CartItemSection />
+            <CartItemSection /> */}
           </div>
 
           <PriceDetails />

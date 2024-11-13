@@ -46,84 +46,134 @@ app.get("/cart_items", (req, res) => {
       .json({ status: 400, message: "Cart Id not found in request" });
   }
 
+  // Step 1: Get all cart items for the given cart_id
   connection.query(
-    `SELECT id as cartId FROM ${cartTableName} WHERE user_id = ?`,
+    `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ?`,
     [id],
-    (err, result) => {
+    (err, cartItems) => {
       if (err) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "Error while getting cart items" });
+        console.log("Error while getting cart items:", err);
+        return res.status(400).json({
+          status: 400,
+          message: "Error while getting cart items",
+        });
       }
 
-      if (!result.length) {
+      if (cartItems.length === 0) {
         return res.status(200).json({
           status: 200,
-          data: result,
+          data: [],
           totalCount: 0,
         });
-      } else {
-        connection.query(
-          `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ?`,
-          [id],
-          (err, result) => {
-            if (err) {
-              return res.status(400).json({
-                status: 400,
-                message: "Error while getting cart items",
-              });
-            }
+      }
 
-            // Query to get the total count of users
-            connection.query(
-              `SELECT COUNT(*) AS totalCount FROM ${cartItemsTableName}`,
-              (countErr, countResult) => {
-                if (countErr) {
-                  return res.status(400).json({
-                    status: 400,
-                    message: "Error while counting cart items",
-                  });
-                }
-                const totalCount = countResult[0].totalCount;
+      // Step 2: Get product details for each cart item (based on product_id)
+      const productIds = cartItems.map((item) => item.product_id);
 
-                return res.status(200).json({
-                  status: 200,
-                  data: result,
-                  totalCount: totalCount,
+      connection.query(
+        `SELECT * FROM products WHERE product_id IN (?)`,
+        [productIds],
+        (err, productDetails) => {
+          if (err) {
+            console.log("Error while getting product details:", err);
+            return res.status(400).json({
+              status: 400,
+              message: "Error while getting product details",
+            });
+          }
+
+          // Step 3: Map product details to each cart item
+          const cartItemsWithDetails = cartItems.map((item) => {
+            const productDetail = productDetails.find(
+              (product) => product.product_id === item.product_id
+            );
+
+            return {
+              ...item,
+              product_details: productDetail
+                ? {
+                    product_id: productDetail.product_id,
+                    product_name: productDetail.product_name,
+                    description: productDetail.description,
+                    net_price: productDetail.net_price,
+                    price: productDetail.price,
+                    discount_percentage: productDetail.discount_percentage,
+                    brand: productDetail.brand,
+                    color: productDetail.color,
+                    size: productDetail.size,
+                    stock: productDetail.stock,
+                    rating: productDetail.rating,
+                    reviews: productDetail.reviews,
+                    warranty_info: productDetail.warranty_info,
+                    return_policy: productDetail.return_policy,
+                    images: productDetail.images,
+                    category_id: productDetail.category_id,
+                    section_id: productDetail.section_id,
+                    item_id: productDetail.item_id,
+                  }
+                : null, // If no matching product found, set `product_details` to null
+            };
+          });
+
+          // Step 4: Get the total count of cart items
+          connection.query(
+            `SELECT COUNT(*) AS totalCount FROM ${cartItemsTableName} WHERE cart_id = ?`,
+            [id],
+            (countErr, countResult) => {
+              if (countErr) {
+                return res.status(400).json({
+                  status: 400,
+                  message: "Error while counting cart items",
                 });
               }
-            );
-          }
-        );
-      }
+              const totalCount = countResult[0].totalCount;
+
+              // Return the cart items along with product details in the response
+              return res.status(200).json({
+                status: 200,
+                data: cartItemsWithDetails,
+                totalCount: totalCount,
+              });
+            }
+          );
+        }
+      );
     }
   );
 });
 
 // Add cart items
 app.post("/cart-items/add", (req, res) => {
-  const { userId, productId, quantity, price, discountPrice } = req.body;
+  const { userId, productId, price, discountPrice } = req.body;
+
   // Step 1: Check if the user already has an active cart
   const checkCartQuery = `SELECT id FROM ${cartTableName} WHERE user_id = ? AND total_items > 0`;
 
   connection.query(checkCartQuery, [userId], (err, results) => {
     if (err) {
       console.error("Error checking user's cart:", err);
-      return;
+      return res.status(400).json({
+        status: 400,
+        message: "Error checking user's cart",
+      });
     }
+
     let cartId;
     if (results.length > 0) {
       // If the user already has an active cart, use the existing cart ID
       cartId = results[0].id;
+
       console.log(`Cart exists for user ${userId}, cart ID: ${cartId}`);
     } else {
       // If no active cart exists, create a new cart
       const createCartQuery = `INSERT INTO ${cartTableName} (user_id, total_price, total_items) VALUES (?, 0, 0)`;
-
       connection.query(createCartQuery, [userId], (err, result) => {
         if (err) {
           console.error("Error creating cart:", err);
-          return;
+          return res.status(400).json({
+            status: 400,
+            message: "Error creating cart",
+          });
         }
         cartId = result.insertId;
         console.log(`Cart created for user ${userId}, cart ID: ${cartId}`);
@@ -131,7 +181,7 @@ app.post("/cart-items/add", (req, res) => {
     }
 
     // Step 2: Check if the product is already in the user's cart
-    const checkProductInCartQuery = ` SELECT id, quantity FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
+    const checkProductInCartQuery = `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
 
     connection.query(
       checkProductInCartQuery,
@@ -139,7 +189,10 @@ app.post("/cart-items/add", (req, res) => {
       (err, results) => {
         if (err) {
           console.error("Error checking product in cart:", err);
-          return;
+          return res.status(400).json({
+            status: 400,
+            message: "Error checking product in cart",
+          });
         }
 
         if (results.length > 0) {
@@ -153,14 +206,32 @@ app.post("/cart-items/add", (req, res) => {
 
           connection.query(
             updateCartItemQuery,
-            [existingQuantity + quantity, discountPrice, results[0].id],
+            [existingQuantity + 1, discountPrice, results[0].id],
             (err) => {
               if (err) {
                 console.error("Error updating cart item quantity:", err);
+                return res.status(400).json({
+                  status: 400,
+                  message: "Error updating cart item quantity",
+                });
               } else {
                 console.log(
                   `Updated cart item quantity for product ID ${productId}`
                 );
+                // Now, return a single response after the update
+                updateCartTotal(cartId, (err) => {
+                  if (err) {
+                    console.error("Error updating cart totals:", err);
+                    return res.status(400).json({
+                      status: 400,
+                      message: "Error updating cart totals",
+                    });
+                  }
+                  res.status(200).json({
+                    status: 200,
+                    message: "Cart item updated successfully",
+                  });
+                });
               }
             }
           );
@@ -170,8 +241,8 @@ app.post("/cart-items/add", (req, res) => {
 
           connection.query(
             addCartItemQuery,
-            [cartId, productId, quantity, price, discountPrice],
-            (err) => {
+            [cartId, productId, 1, price, discountPrice],
+            (err, results) => {
               if (err) {
                 console.error("Error adding product to cart:", err);
                 return res.status(400).json({
@@ -179,31 +250,39 @@ app.post("/cart-items/add", (req, res) => {
                   message: "Failed to add product in cart",
                 });
               } else {
-                // Return the final response
-                return res
-                  .status(200)
-                  .json({ status: 200, data: allCategories });
+                // Now, update the cart totals after adding the new item
+                updateCartTotal(cartId, (err) => {
+                  if (err) {
+                    console.error("Error updating cart totals:", err);
+                    return res.status(400).json({
+                      status: 400,
+                      message: "Error updating cart totals",
+                    });
+                  }
+                  res
+                    .status(200)
+                    .json({ status: 200, message: "Product added to cart" });
+                });
               }
             }
           );
         }
-
-        // Step 3: Update the cart total price and item count
-        updateCartTotal(cartId);
       }
     );
   });
 });
 
 // Add in cart: Function to update the total price and total items count in the cart
-function updateCartTotal(cartId) {
+function updateCartTotal(cartId, callback) {
   const updateCartQuery = `UPDATE ${cartTableName} SET total_price = (SELECT SUM(price * quantity) FROM cart_items WHERE cart_id = ?), total_items = (SELECT SUM(quantity) FROM cart_items WHERE cart_id = ?) WHERE id = ?`;
 
   connection.query(updateCartQuery, [cartId, cartId, cartId], (err) => {
     if (err) {
       console.error("Error updating cart totals:", err);
+      return callback(err);
     } else {
-      res.console.log("Cart totals updated successfully.");
+      console.log("Cart totals updated successfully.");
+      callback(null);
     }
   });
 }

@@ -8,6 +8,7 @@ import { ActionDispatch } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
 import { CartReqBody } from "../../../modules/customer/types/cartTypes";
 import { getCurrentUser } from "../../../modules/customer/utils/localStorageUtils";
+import { cartItemsMap } from "../../../modules/customer/mappers/cartMapper";
 
 const getCart = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_CART_REQUEST });
@@ -35,7 +36,8 @@ const getCartItems = () => async (dispatch: ActionDispatch) => {
     );
     dispatch({
       type: ActionTypes.GET_CART_ITEMS_SUCCESS,
-      payload: res?.data?.data,
+      payload:
+        res?.data?.data?.length > 0 ? res?.data?.data.map(cartItemsMap) : [],
     });
   } catch (error) {
     handleCatchError({
@@ -51,7 +53,7 @@ const addItemToCart =
 
     try {
       const res = await axios.post(
-        `${ApiUrls.addItemToCart}`,
+        ApiUrls.addItemToCart,
         reqData,
         headersConfig
       );

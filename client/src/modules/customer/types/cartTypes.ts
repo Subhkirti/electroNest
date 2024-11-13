@@ -1,7 +1,8 @@
+import { Product } from "./productTypes";
+
 interface CartReqBody {
   userId: number;
   productId: number;
-  quantity: number;
   price: number;
   discountPrice: number;
 }
@@ -15,6 +16,7 @@ interface CartItem {
   discountPrice: number;
   createdAt: number;
   updatedAt: number;
+  productDetails: Product | null;
 }
 
 export type { CartReqBody, CartItem };

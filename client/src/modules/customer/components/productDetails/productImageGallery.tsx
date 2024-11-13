@@ -10,11 +10,29 @@ import {
   KeyboardDoubleArrowRight,
   ShoppingCartOutlined,
 } from "@mui/icons-material";
+import AppStrings from "../../../../common/appStrings";
+import { useDispatch } from "react-redux";
+import { addItemToCart } from "../../../../store/customer/cart/action";
+import { getCurrentUser } from "../../utils/localStorageUtils";
+import { AppDispatch } from "../../../../store/storeTypes";
 
 function ProductImageGallery({ product }: { product: Product }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const userId = getCurrentUser()?.id;
 
+  function addToCart() {
+    dispatch(
+      addItemToCart({
+        userId: userId || 0,
+        productId: product.productId,
+        price: product.netPrice,
+        discountPrice: 0,
+      })
+    );
+    navigate(AppRoutes.cart);
+  }
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-10 px-4 pt-4">
       {/* Image gallery */}
@@ -142,14 +160,14 @@ function ProductImageGallery({ product }: { product: Product }) {
           </div>
 
           {/* CTA buttons */}
-          <div className="flex space-x-10 mt-10">
+          <div className="flex flex-col space-y-4 lg:flex-row lg:space-x-10 lg:space-y-0  mt-10">
             <Button
               startIcon={<ShoppingCartOutlined />}
               variant="outlined"
-              onClick={() => navigate(AppRoutes.cart)}
-              className=" w-[50%] px-8 py-3 shadow-none hover:shadow-none hover:bg-primary hover:text-white"
+              onClick={addToCart}
+              className=" lg:w-[50%] px-8 py-3 shadow-none hover:shadow-none hover:bg-primary hover:text-white"
             >
-              Add to cart
+              {AppStrings.addToCart}
             </Button>
 
             <Button
@@ -158,9 +176,9 @@ function ProductImageGallery({ product }: { product: Product }) {
                 <KeyboardDoubleArrowRight style={{ fontSize: "26px" }} />
               }
               onClick={() => navigate(AppRoutes.cart)}
-              className="w-[50%]  px-8 py-3 shadow-none hover:shadow-none"
+              className="lg:w-[50%]  px-8 py-3 shadow-none hover:shadow-none"
             >
-              Buy now
+              {AppStrings.buyNow}
             </Button>
           </div>
         </div>
