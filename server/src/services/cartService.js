@@ -225,10 +225,24 @@ app.post("/cart-items/add", (req, res) => {
                       message: "Error updating cart totals",
                     });
                   }
-                  res.status(200).json({
-                    status: 200,
-                    message: "Cart item updated successfully",
-                  });
+                  connection.query(
+                    `SELECT * FROM ${cartItemsTableName} WHERE id = ?`,
+                    [results?.[0]?.id],
+                    (err, results) => {
+                      if (err) {
+                        console.error("Error finding cart items details:", err);
+                        return res.status(400).json({
+                          status: 400,
+                          message: "Error finding cart items details",
+                        });
+                      }
+                      res.status(200).json({
+                        status: 200,
+                        data: results,
+                        message: "Cart item added successfully",
+                      });
+                    }
+                  );
                 });
               }
             }
@@ -240,7 +254,7 @@ app.post("/cart-items/add", (req, res) => {
           connection.query(
             addCartItemQuery,
             [cartId, productId, 1, price, discountPrice],
-            (err, results) => {
+            (err, cartItemsResults) => {
               if (err) {
                 console.error("Error adding product to cart:", err);
                 return res.status(400).json({
@@ -257,9 +271,26 @@ app.post("/cart-items/add", (req, res) => {
                       message: "Error updating cart totals",
                     });
                   }
-                  res
-                    .status(200)
-                    .json({ status: 200, message: "Product added to cart" });
+                  console.log("cartItemsResults:", cartItemsResults.id);
+
+                  connection.query(
+                    `SELECT * FROM ${cartItemsTableName} WHERE id = ?`,
+                    [cartItemsResults?.id],
+                    (err, results) => {
+                      if (err) {
+                        console.error("Error finding cart items details:", err);
+                        return res.status(400).json({
+                          status: 400,
+                          message: "Error finding cart items details",
+                        });
+                      }
+                      res.status(200).json({
+                        status: 200,
+                        data: results,
+                        message: "Cart item added successfully",
+                      });
+                    }
+                  );
                 });
               }
             }
@@ -341,33 +372,36 @@ app.post("/cart-items/remove", (req, res) => {
         // Step 3: Remove the product from the cart
         const removeCartItemQuery = `DELETE FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
 
-        connection.query(removeCartItemQuery, [cartId, productId], (err, results) => {
-          console.log('results:', results);
-          if (err) {
-            console.error("Error removing product from cart:", err);
-            return res.status(400).json({
-              status: 400,
-              message: "Error removing product from cart",
-            });
-          }
-
-          // Step 4: Update the cart totals after removal
-          updateCartTotal(cartId, (err) => {
+        connection.query(
+          removeCartItemQuery,
+          [cartId, productId],
+          (err, results) => {
             if (err) {
-              console.error("Error updating cart totals:", err);
+              console.error("Error removing product from cart:", err);
               return res.status(400).json({
                 status: 400,
-                message: "Error updating cart totals",
+                message: "Error removing product from cart",
               });
             }
 
-            res.status(200).json({
-              status: 200,
-              data: cartItemId,
-              message: "Product removed from cart successfully",
+            // Step 4: Update the cart totals after removal
+            updateCartTotal(cartId, (err) => {
+              if (err) {
+                console.error("Error updating cart totals:", err);
+                return res.status(400).json({
+                  status: 400,
+                  message: "Error updating cart totals",
+                });
+              }
+
+              res.status(200).json({
+                status: 200,
+                data: cartItemId,
+                message: "Product removed from cart successfully",
+              });
             });
-          });
-        });
+          }
+        );
       }
     );
   });
