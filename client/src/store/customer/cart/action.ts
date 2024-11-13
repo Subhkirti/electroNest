@@ -8,8 +8,12 @@ import { ActionDispatch } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
 import { CartReqBody } from "../../../modules/customer/types/cartTypes";
 import { getCurrentUser } from "../../../modules/customer/utils/localStorageUtils";
-import { cartItemsMap, cartMap } from "../../../modules/customer/mappers/cartMapper";
+import {
+  cartItemsMap,
+  cartMap,
+} from "../../../modules/customer/mappers/cartMapper";
 
+const userId = getCurrentUser()?.id;
 const getCart = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_CART_REQUEST });
   try {
@@ -28,7 +32,6 @@ const getCart = () => async (dispatch: ActionDispatch) => {
 
 const getCartItems = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_CART_ITEMS_REQUEST });
-  const userId = getCurrentUser()?.id;
   try {
     const res = await axios.get(
       userId ? `${ApiUrls.getCartItems}id=${userId}` : ApiUrls.getCartItems,
@@ -57,6 +60,8 @@ const addItemToCart =
         reqData,
         headersConfig
       );
+      console.log('res?.data:', res?.data)
+
       dispatch({
         type: ActionTypes.ADD_ITEM_TO_CART_SUCCESS,
         payload: res?.data?.data,
@@ -69,18 +74,19 @@ const addItemToCart =
     }
   };
 
-const removeItemToCart =
-  (cartItemId: number) => async (dispatch: ActionDispatch) => {
+const removeItemFromCart =
+  (productId: number) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.REMOVE_CART_ITEM_REQUEST });
 
     try {
-      const res = await axios.delete(
-        `${ApiUrls.getCartItems}id=${cartItemId}`,
+      const res = await axios.post(
+        `${ApiUrls.removeItemFromCart}`,
+        { productId, userId },
         headersConfig
       );
       dispatch({
         type: ActionTypes.REMOVE_CART_ITEM_SUCCESS,
-        payload:  res?.data?.data,
+        payload: res?.data?.data,
       });
     } catch (error) {
       handleCatchError({
@@ -115,7 +121,7 @@ const updateItemToCart =
 export {
   getCart,
   addItemToCart,
-  removeItemToCart,
+  removeItemFromCart,
   updateItemToCart,
   getCartItems,
 };

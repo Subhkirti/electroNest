@@ -6,7 +6,10 @@ import { useState } from "react";
 import { AppDispatch } from "../../../../store/storeTypes";
 import { useDispatch } from "react-redux";
 import { getCurrentUser } from "../../utils/localStorageUtils";
-import { addItemToCart } from "../../../../store/customer/cart/action";
+import {
+  addItemToCart,
+  removeItemFromCart,
+} from "../../../../store/customer/cart/action";
 
 function CartItemSection({
   cartItemProduct,
@@ -88,7 +91,13 @@ function CartItemSection({
           </IconButton>
         </div>
 
-        <Button>Remove</Button>
+        <Button
+          onClick={() => {
+            dispatch(removeItemFromCart(cartItemProduct.productId));
+          }}
+        >
+          Remove
+        </Button>
       </div>
     </div>
   );

@@ -291,6 +291,205 @@ function updateCartTotal(cartId, callback) {
   });
 }
 
+// Remove an item from the cart
+app.post("/cart-items/remove", (req, res) => {
+  const { userId, productId } = req.body;
+
+  // Step 1: Check if the user has an active cart
+  const checkCartQuery = `SELECT id FROM ${cartTableName} WHERE user_id = ? AND total_items > 0`;
+
+  connection.query(checkCartQuery, [userId], (err, results) => {
+    if (err) {
+      console.error("Error checking user's cart:", err);
+      return res.status(400).json({
+        status: 400,
+        message: "Error checking user's cart",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        status: 404,
+        message: "No active cart found for the user",
+      });
+    }
+
+    const cartId = results?.[0]?.id || 0;
+
+    // Step 2: Check if the product exists in the user's cart
+    const checkProductInCartQuery = `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
+
+    connection.query(
+      checkProductInCartQuery,
+      [cartId, productId],
+      (err, results) => {
+        if (err) {
+          console.error("Error checking product in cart:", err);
+          return res.status(400).json({
+            status: 400,
+            message: "Error checking product in cart",
+          });
+        }
+
+        if (results.length === 0) {
+          return res.status(404).json({
+            status: 404,
+            message: "Product not found in the cart",
+          });
+        }
+        const cartItemId = results?.[0]?.id || 0;
+        // Step 3: Remove the product from the cart
+        const removeCartItemQuery = `DELETE FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
+
+        connection.query(removeCartItemQuery, [cartId, productId], (err, results) => {
+          console.log('results:', results);
+          if (err) {
+            console.error("Error removing product from cart:", err);
+            return res.status(400).json({
+              status: 400,
+              message: "Error removing product from cart",
+            });
+          }
+
+          // Step 4: Update the cart totals after removal
+          updateCartTotal(cartId, (err) => {
+            if (err) {
+              console.error("Error updating cart totals:", err);
+              return res.status(400).json({
+                status: 400,
+                message: "Error updating cart totals",
+              });
+            }
+
+            res.status(200).json({
+              status: 200,
+              data: cartItemId,
+              message: "Product removed from cart successfully",
+            });
+          });
+        });
+      }
+    );
+  });
+});
+
+// Reduce the quantity of an item in the cart
+app.post("/cart-items/reduce", (req, res) => {
+  const { userId, productId } = req.body;
+
+  // Step 1: Check if the user has an active cart
+  const checkCartQuery = `SELECT id FROM ${cartTableName} WHERE user_id = ? AND total_items > 0`;
+
+  connection.query(checkCartQuery, [userId], (err, results) => {
+    if (err) {
+      console.error("Error checking user's cart:", err);
+      return res.status(400).json({
+        status: 400,
+        message: "Error checking user's cart",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        status: 404,
+        message: "No active cart found for the user",
+      });
+    }
+
+    const cartId = results[0].id;
+
+    // Step 2: Check if the product exists in the user's cart
+    const checkProductInCartQuery = `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
+
+    connection.query(
+      checkProductInCartQuery,
+      [cartId, productId],
+      (err, results) => {
+        if (err) {
+          console.error("Error checking product in cart:", err);
+          return res.status(400).json({
+            status: 400,
+            message: "Error checking product in cart",
+          });
+        }
+
+        if (results.length === 0) {
+          return res.status(404).json({
+            status: 404,
+            message: "Product not found in the cart",
+          });
+        }
+
+        const cartItem = results[0];
+        const currentQuantity = cartItem.quantity;
+
+        if (currentQuantity <= 1) {
+          // If quantity is 1, remove the product from the cart
+          const removeCartItemQuery = `DELETE FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
+
+          connection.query(removeCartItemQuery, [cartId, productId], (err) => {
+            if (err) {
+              console.error("Error removing product from cart:", err);
+              return res.status(400).json({
+                status: 400,
+                message: "Error removing product from cart",
+              });
+            }
+
+            // Update cart totals after removal
+            updateCartTotal(cartId, (err) => {
+              if (err) {
+                console.error("Error updating cart totals:", err);
+                return res.status(400).json({
+                  status: 400,
+                  message: "Error updating cart totals",
+                });
+              }
+
+              res.status(200).json({
+                status: 200,
+                message: "Product removed from cart",
+              });
+            });
+          });
+        } else {
+          // If quantity is greater than 1, reduce the quantity by 1
+          const updateCartItemQuery = `
+          UPDATE ${cartItemsTableName} 
+          SET quantity = quantity - 1 
+          WHERE cart_id = ? AND product_id = ?`;
+
+          connection.query(updateCartItemQuery, [cartId, productId], (err) => {
+            if (err) {
+              console.error("Error reducing cart item quantity:", err);
+              return res.status(400).json({
+                status: 400,
+                message: "Error reducing cart item quantity",
+              });
+            }
+
+            // Update cart totals after quantity reduction
+            updateCartTotal(cartId, (err) => {
+              if (err) {
+                console.error("Error updating cart totals:", err);
+                return res.status(400).json({
+                  status: 400,
+                  message: "Error updating cart totals",
+                });
+              }
+
+              res.status(200).json({
+                status: 200,
+                message: "Product quantity reduced successfully",
+              });
+            });
+          });
+        }
+      }
+    );
+  });
+});
+
 function checkCartTableExistence() {
   // Checked and created users table if it does not exist
   const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;

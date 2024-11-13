@@ -12,6 +12,7 @@ function Cart() {
     (state: RootState) => state.cart
   );
   const dispatch = useDispatch<AppDispatch>();
+  console.log('cartItems:', cartItems)
 
   useEffect(() => {
     const timer = setTimeout(() => {
