@@ -13,14 +13,10 @@ app.get("/cart", (req, res) => {
         .status(400)
         .json({ status: 400, message: "Error while getting cart details" });
     }
-    if (!result?.length) {
-      return res
-        .status(400)
-        .json({ status: 400, message: "Error while getting cart details" });
-    }
+ 
     return res.status(200).json({
       status: 200,
-      data: result[0],
+      data: result?.[0],
     });
   });
 });
@@ -28,101 +24,114 @@ app.get("/cart", (req, res) => {
 // Get cart Items
 app.get("/cart_items", (req, res) => {
   const { id } = req.query;
-
+  let cartId;
   if (!id) {
     return res
       .status(400)
       .json({ status: 400, message: "Cart Id not found in request" });
   }
-
-  // Step 1: Get all cart items for the given cart_id
   connection.query(
-    `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ?`,
+    `SELECT * FROM ${cartTableName} WHERE user_id = ?`,
     [id],
-    (err, cartItems) => {
+    (err, results) => {
       if (err) {
-        console.log("Error while getting cart items:", err);
+        console.log("Error while getting cart details:", err);
         return res.status(400).json({
           status: 400,
-          message: "Error while getting cart items",
+          message: "Error while getting cart details",
         });
       }
-
-      if (cartItems.length === 0) {
-        return res.status(200).json({
-          status: 200,
-          data: [],
-          totalCount: 0,
-        });
-      }
-
-      // Step 2: Get product details for each cart item (based on product_id)
-      const productIds = cartItems.map((item) => item.product_id);
-
+      cartId = results[0]?.id || 0;
+      // Step 1: Get all cart items for the given cart_id
       connection.query(
-        `SELECT * FROM products WHERE product_id IN (?)`,
-        [productIds],
-        (err, productDetails) => {
+        `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ?`,
+        [cartId],
+        (err, cartItems) => {
           if (err) {
-            console.log("Error while getting product details:", err);
+            console.log("Error while getting cart items:", err);
             return res.status(400).json({
               status: 400,
-              message: "Error while getting product details",
+              message: "Error while getting cart items",
             });
           }
 
-          // Step 3: Map product details to each cart item
-          const cartItemsWithDetails = cartItems.map((item) => {
-            const productDetail = productDetails.find(
-              (product) => product.product_id === item.product_id
-            );
+          if (cartItems.length === 0) {
+            return res.status(200).json({
+              status: 200,
+              data: [],
+              totalCount: 0,
+            });
+          }
 
-            return {
-              ...item,
-              product_details: productDetail
-                ? {
-                    product_id: productDetail.product_id,
-                    product_name: productDetail.product_name,
-                    description: productDetail.description,
-                    net_price: productDetail.net_price,
-                    price: productDetail.price,
-                    discount_percentage: productDetail.discount_percentage,
-                    brand: productDetail.brand,
-                    color: productDetail.color,
-                    size: productDetail.size,
-                    stock: productDetail.stock,
-                    rating: productDetail.rating,
-                    reviews: productDetail.reviews,
-                    warranty_info: productDetail.warranty_info,
-                    return_policy: productDetail.return_policy,
-                    images: productDetail.images,
-                    category_id: productDetail.category_id,
-                    section_id: productDetail.section_id,
-                    item_id: productDetail.item_id,
-                  }
-                : null, // If no matching product found, set `product_details` to null
-            };
-          });
+          // Step 2: Get product details for each cart item (based on product_id)
+          const productIds = cartItems.map((item) => item.product_id);
 
-          // Step 4: Get the total count of cart items
           connection.query(
-            `SELECT COUNT(*) AS totalCount FROM ${cartItemsTableName} WHERE cart_id = ?`,
-            [id],
-            (countErr, countResult) => {
-              if (countErr) {
+            `SELECT * FROM products WHERE product_id IN (?)`,
+            [productIds],
+            (err, productDetails) => {
+              if (err) {
+                console.log("Error while getting product details:", err);
                 return res.status(400).json({
                   status: 400,
-                  message: "Error while counting cart items",
+                  message: "Error while getting product details",
                 });
               }
-              const totalCount = countResult[0].totalCount;
 
-              // Return the cart items along with product details in the response
-              return res.status(200).json({
-                status: 200,
-                data: cartItemsWithDetails,
-                totalCount: totalCount,
+              // Step 3: Map product details to each cart item
+              const cartItemsWithDetails = cartItems.map((item) => {
+                const productDetail = productDetails.find(
+                  (product) => product.product_id === item.product_id
+                );
+
+                return {
+                  ...item,
+                  product_details: productDetail
+                    ? {
+                        product_id: productDetail.product_id,
+                        product_name: productDetail.product_name,
+                        description: productDetail.description,
+                        net_price: productDetail.net_price,
+                        price: productDetail.price,
+                        discount_percentage: productDetail.discount_percentage,
+                        brand: productDetail.brand,
+                        color: productDetail.color,
+                        size: productDetail.size,
+                        stock: productDetail.stock,
+                        rating: productDetail.rating,
+                        reviews: productDetail.reviews,
+                        warranty_info: productDetail.warranty_info,
+                        return_policy: productDetail.return_policy,
+                        images: productDetail.images,
+                        category_id: productDetail.category_id,
+                        section_id: productDetail.section_id,
+                        item_id: productDetail.item_id,
+                      }
+                    : null, // If no matching product found, set `product_details` to null
+                };
               });
+
+              // Step 4: Get the total count of cart items
+              connection.query(
+                `SELECT COUNT(*) AS totalCount FROM ${cartItemsTableName} WHERE cart_id = ?`,
+                [id],
+                (countErr, countResult) => {
+                  if (countErr) {
+                    return res.status(400).json({
+                      status: 400,
+                      message: "Error while counting cart items",
+                    });
+                  }
+                  const totalCount = countResult[0].totalCount;
+
+                  // Return the cart items along with product details in the response
+                  return res.status(200).json({
+                    status: 200,
+                    data: cartItemsWithDetails,
+                    totalCount: totalCount,
+                  });
+                }
+              );
             }
           );
         }

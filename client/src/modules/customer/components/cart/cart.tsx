@@ -44,7 +44,7 @@ function Cart() {
             })}
           </div>
 
-          <PriceDetails />
+          <PriceDetails  />
         </div>
       ) : (
         <EmptyCart />

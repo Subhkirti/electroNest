@@ -18,7 +18,7 @@ function OrderSummary() {
             <CartItemSection /> */}
           </div>
 
-          <PriceDetails />
+          {/* <PriceDetails /> */}
         </div>
       </div>
     </div>
