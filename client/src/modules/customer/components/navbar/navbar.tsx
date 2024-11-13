@@ -30,6 +30,7 @@ import AdminAppRoutes from "../../../../common/adminRoutes";
 import { getAllCategories } from "../../../../store/customer/product/action";
 import { ExpandMore } from "@mui/icons-material";
 import { CategoryState } from "../../types/productTypes";
+import { getCart } from "../../../../store/customer/cart/action";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -44,6 +45,8 @@ export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const { categories } = useSelector((state: RootState) => state.product);
+  const { cart } = useSelector((state: RootState) => state.cart);
+
   const openUserMenu = Boolean(anchorEl);
   const user = getCurrentUser();
   const authText = user
@@ -55,6 +58,7 @@ export default function Navbar() {
   useEffect(() => {
     const timer = setTimeout(() => {
       !categories?.length && dispatch(getAllCategories());
+      !cart && dispatch(getCart());
     }, 10);
 
     return () => {
@@ -462,11 +466,13 @@ export default function Navbar() {
                     className="group -m-2 flex items-center p-2"
                   >
                     <ShoppingBagIcon
-                      className="h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
+                      className="h-6 w-6  flex-shrink-0 text-gray-400 group-hover:text-gray-500"
                       aria-hidden="true"
                     />
-                    <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                      {0}
+                    <span className="-ml-3 mb-3 bg-yellow-300 p-0.5 px-1.5 rounded-full text-[12px] font-medium text-gray-700 group-hover:text-gray-800">
+                      {cart?.totalItems && cart?.totalItems > 0
+                        ? cart?.totalItems
+                        : ""}
                     </span>
                     <span className="sr-only">items in cart, view bag</span>
                   </Button>

@@ -21,13 +21,13 @@ function CartItemSection({
 
   return (
     <div className="p-5 shadow-lg border rounded-md bg-white">
-      <div className="flex items-center">
-        <div className="w-[5rem] h-[5rem] lg:w-[9rem] lg:h-[9rem]">
+      <div className="flex flex-col lg:flex-row items-center">
+        <div className="w-[12rem] h-[12rem] lg:w-[9rem] lg:h-[9rem]">
           <img src={cartItemProduct?.images?.[0]} alt="product-image" />
         </div>
 
         {/* product description */}
-        <div className="ml-5 space-y-1">
+        <div className="lg:ml-5 space-y-1">
           <p className="font-semibold">{cartItemProduct?.productName}</p>
           <p className="opacity-70 capitalize">
             Size: {cartItemProduct?.size}, {cartItemProduct?.color}
@@ -57,7 +57,7 @@ function CartItemSection({
           </div>
         </div>
       </div>
-      <div className="lg:flex items-center lg:space-x-10 pt-4">
+      <div className="flex items-center lg:space-x-10 pt-4">
         <div className="flex items-center space-x-2">
           <IconButton
             color="primary"

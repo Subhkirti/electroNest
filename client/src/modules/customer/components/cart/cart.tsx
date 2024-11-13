@@ -3,31 +3,30 @@ import PriceDetails from "../checkout/priceDetails";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
-import { getCartItems } from "../../../../store/customer/cart/action";
+import { getCart, getCartItems } from "../../../../store/customer/cart/action";
 import Loader from "../../../../common/components/loader";
-import { useNavigate } from "react-router-dom";
 import EmptyCart from "./EmptyCart";
 
 function Cart() {
-  const { isLoading, cartItems, cart } = useSelector(
+  const { isLoading, cartItems } = useSelector(
     (state: RootState) => state.cart
   );
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
-  console.log("cartItems:", cartItems);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       dispatch(getCartItems());
+      dispatch(getCart());
     }, 10);
 
     return () => {
       clearTimeout(timer);
     };
-  }, []);
+  }, [cartItems?.length]);
+
   return (
     <div>
-      {isLoading ? (
+      {isLoading && !cartItems.length ? (
         <Loader suspenseLoader={true} />
       ) : cartItems.length > 0 ? (
         <div className="lg:grid grid-cols-3 relative">
@@ -36,7 +35,7 @@ function Cart() {
               return (
                 cartItem?.productDetails && (
                   <CartItemSection
-                  quantity={cartItem.quantity}
+                    quantity={cartItem.quantity}
                     cartItemProduct={cartItem.productDetails}
                     key={index}
                   />

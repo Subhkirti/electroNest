@@ -13,26 +13,15 @@ app.get("/cart", (req, res) => {
         .status(400)
         .json({ status: 400, message: "Error while getting cart details" });
     }
-
-    // Query to get the total count of users
-    connection.query(
-      `SELECT COUNT(*) AS totalCount FROM ${cartTableName}`,
-      (countErr, countResult) => {
-        if (countErr) {
-          return res.status(400).json({
-            status: 400,
-            message: "Error while counting cart details",
-          });
-        }
-        const totalCount = countResult[0].totalCount;
-
-        return res.status(200).json({
-          status: 200,
-          data: result,
-          totalCount: totalCount,
-        });
-      }
-    );
+    if (!result?.length) {
+      return res
+        .status(400)
+        .json({ status: 400, message: "Error while getting cart details" });
+    }
+    return res.status(200).json({
+      status: 200,
+      data: result[0],
+    });
   });
 });
 

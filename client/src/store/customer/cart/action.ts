@@ -8,7 +8,7 @@ import { ActionDispatch } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
 import { CartReqBody } from "../../../modules/customer/types/cartTypes";
 import { getCurrentUser } from "../../../modules/customer/utils/localStorageUtils";
-import { cartItemsMap } from "../../../modules/customer/mappers/cartMapper";
+import { cartItemsMap, cartMap } from "../../../modules/customer/mappers/cartMapper";
 
 const getCart = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_CART_REQUEST });
@@ -16,7 +16,7 @@ const getCart = () => async (dispatch: ActionDispatch) => {
     const res = await axios.get(`${ApiUrls.getCart}`, headersConfig);
     dispatch({
       type: ActionTypes.GET_CART_SUCCESS,
-      payload: res?.data?.data,
+      payload: res?.data?.data ? cartMap(res?.data?.data) : null,
     });
   } catch (error) {
     handleCatchError({
@@ -80,7 +80,7 @@ const removeItemToCart =
       );
       dispatch({
         type: ActionTypes.REMOVE_CART_ITEM_SUCCESS,
-        payload: res?.data?.data,
+        payload:  res?.data?.data,
       });
     } catch (error) {
       handleCatchError({

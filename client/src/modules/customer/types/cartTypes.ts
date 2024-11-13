@@ -14,9 +14,20 @@ interface CartItem {
   quantity: number;
   price: number;
   discountPrice: number;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: Date;
+  updatedAt: Date;
   productDetails: Product | null;
 }
 
-export type { CartReqBody, CartItem };
+interface Cart {
+  createdAt: Date;
+  updatedAt: Date;
+  userId: number;
+  discount: number;
+  cartId: number;
+  totalDiscountPrice: number;
+  totalItems: number;
+  totalPrice: number;
+}
+
+export type { CartReqBody, CartItem, Cart };

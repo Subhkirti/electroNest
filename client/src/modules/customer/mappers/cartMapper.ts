@@ -1,4 +1,4 @@
-import { CartItem } from "../types/cartTypes";
+import { Cart, CartItem } from "../types/cartTypes";
 import { productMap } from "./productsMapper";
 
 function cartItemsMap(doc: any): CartItem {
@@ -16,4 +16,17 @@ function cartItemsMap(doc: any): CartItem {
       : null,
   };
 }
-export { cartItemsMap };
+
+function cartMap(doc: any): Cart {
+  return {
+    createdAt: doc?.created_at || new Date(),
+    updatedAt: doc?.updated_at || new Date(),
+    userId: doc?.user_id || 0,
+    discount: doc?.discount || 0,
+    cartId: doc?.d || 0,
+    totalDiscountPrice: doc?.total_discount_price || 0,
+    totalItems: doc?.total_items || 0,
+    totalPrice: doc?.total_price || 0,
+  };
+}
+export { cartItemsMap, cartMap };
