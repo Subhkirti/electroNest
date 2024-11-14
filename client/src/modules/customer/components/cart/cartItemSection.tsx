@@ -10,6 +10,7 @@ import {
   addItemToCart,
   removeItemFromCart,
 } from "../../../../store/customer/cart/action";
+import { useNavigate } from "react-router-dom";
 
 function CartItemSection({
   cartItemProduct,
@@ -20,18 +21,27 @@ function CartItemSection({
 }) {
   const [cartQuantity, setCartQuantity] = useState(quantity);
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const userId = getCurrentUser()?.id;
 
   return (
     <div className="p-5 shadow-lg border rounded-md bg-white">
-      <div className="flex flex-col lg:flex-row items-center">
-        <div className="w-[12rem] h-[12rem] lg:w-[9rem] lg:h-[9rem]">
+      <div className="flex flex-col lg:flex-row ">
+        <div
+          className="w-[12rem] h-[12rem] lg:w-[9rem] self-center lg:h-[9rem] cursor-pointer"
+          onClick={() => navigate(`/product/${cartItemProduct?.productId}`)}
+        >
           <img src={cartItemProduct?.images?.[0]} alt="product-image" />
         </div>
 
         {/* product description */}
-        <div className="lg:ml-5 space-y-1">
-          <p className="font-semibold">{cartItemProduct?.productName}</p>
+        <div className="lg:ml-5 space-y-1 align-baseline">
+          <p
+            className="font-semibold cursor-pointer"
+            onClick={() => navigate(`/product/${cartItemProduct?.productId}`)}
+          >
+            {cartItemProduct?.productName}
+          </p>
           <p className="opacity-70 capitalize">
             Size: {cartItemProduct?.size}, {cartItemProduct?.color}
           </p>

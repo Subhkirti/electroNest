@@ -8,11 +8,10 @@ import Loader from "../../../../common/components/loader";
 import EmptyCart from "./EmptyCart";
 
 function Cart() {
-  const { isLoading, cartItems } = useSelector(
+  const { isLoading, cartItems, cart } = useSelector(
     (state: RootState) => state.cart
   );
   const dispatch = useDispatch<AppDispatch>();
-  console.log('cartItems:', cartItems)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -23,7 +22,7 @@ function Cart() {
     return () => {
       clearTimeout(timer);
     };
-  }, [cartItems?.length]);
+  }, [cartItems.length, cart?.totalItems]);
 
   return (
     <div>
@@ -45,7 +44,7 @@ function Cart() {
             })}
           </div>
 
-          <PriceDetails  />
+          <PriceDetails />
         </div>
       ) : (
         <EmptyCart />

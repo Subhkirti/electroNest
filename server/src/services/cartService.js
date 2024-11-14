@@ -7,18 +7,29 @@ checkCartItemsTable();
 
 // Get cart details
 app.get("/cart", (req, res) => {
-  connection.query(`SELECT * FROM ${cartTableName}`, (err, result) => {
-    if (err) {
-      return res
-        .status(400)
-        .json({ status: 400, message: "Error while getting cart details" });
-    }
+  const { id } = req.query;
+  if (!id) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "User Id not found in request" });
+  }
 
-    return res.status(200).json({
-      status: 200,
-      data: result?.[0],
-    });
-  });
+  connection.query(
+    `SELECT * FROM ${cartTableName} WHERE user_id = ?`,
+    [id],
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Error while getting cart details" });
+      }
+
+      return res.status(200).json({
+        status: 200,
+        data: result?.[0],
+      });
+    }
+  );
 });
 
 // Get cart Items
@@ -30,6 +41,7 @@ app.get("/cart_items", (req, res) => {
       .status(400)
       .json({ status: 400, message: "Cart Id not found in request" });
   }
+
   connection.query(
     `SELECT * FROM ${cartTableName} WHERE user_id = ?`,
     [id],

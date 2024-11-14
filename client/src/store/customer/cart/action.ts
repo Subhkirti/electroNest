@@ -13,11 +13,11 @@ import {
   cartMap,
 } from "../../../modules/customer/mappers/cartMapper";
 
-const userId = getCurrentUser()?.id;
+const userId = getCurrentUser()?.id || 0;
 const getCart = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_CART_REQUEST });
   try {
-    const res = await axios.get(`${ApiUrls.getCart}`, headersConfig);
+    const res = await axios.get(`${ApiUrls.getCart}?id=${userId}`, headersConfig);
     dispatch({
       type: ActionTypes.GET_CART_SUCCESS,
       payload: res?.data?.data ? cartMap(res?.data?.data) : null,
@@ -60,7 +60,6 @@ const addItemToCart =
         reqData,
         headersConfig
       );
-      console.log('res?.data:', res?.data)
 
       dispatch({
         type: ActionTypes.ADD_ITEM_TO_CART_SUCCESS,
