@@ -58,8 +58,6 @@ interface CartState {
   error: string | null;
 }
 
-
-
 interface OrderState {
   orders: [];
   order: {} | null;

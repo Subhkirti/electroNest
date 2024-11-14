@@ -17,7 +17,10 @@ const userId = getCurrentUser()?.id || 0;
 const getCart = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_CART_REQUEST });
   try {
-    const res = await axios.get(`${ApiUrls.getCart}?id=${userId}`, headersConfig);
+    const res = await axios.get(
+      `${ApiUrls.getCart}?id=${userId}`,
+      headersConfig
+    );
     dispatch({
       type: ActionTypes.GET_CART_SUCCESS,
       payload: res?.data?.data ? cartMap(res?.data?.data) : null,
@@ -95,6 +98,29 @@ const removeItemFromCart =
     }
   };
 
+const reduceItemFromCart =
+  (productId: number) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.REDUCE_CART_ITEM_REQUEST });
+
+    try {
+      const res = await axios.post(
+        `${ApiUrls.reduceItemFromCart}`,
+        { userId, productId },
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.REDUCE_CART_ITEM_SUCCESS,
+        payload: res?.data?.data,
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.REDUCE_CART_ITEM_FAILURE,
+      });
+    }
+  };
+
 const updateItemToCart =
   (cartItemId: number, reqData: any) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.UPDATE_CART_ITEM_REQUEST });
@@ -121,6 +147,7 @@ export {
   getCart,
   addItemToCart,
   removeItemFromCart,
+  reduceItemFromCart,
   updateItemToCart,
   getCartItems,
 };

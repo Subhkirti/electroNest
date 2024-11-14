@@ -527,6 +527,7 @@ app.post("/cart-items/reduce", (req, res) => {
               res.status(200).json({
                 status: 200,
                 message: "Product quantity reduced successfully",
+                data: cartId,
               });
             });
           });

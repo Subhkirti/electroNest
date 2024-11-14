@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { getCurrentUser } from "../../utils/localStorageUtils";
 import {
   addItemToCart,
+  reduceItemFromCart,
   removeItemFromCart,
 } from "../../../../store/customer/cart/action";
 import { useNavigate } from "react-router-dom";
@@ -71,18 +72,22 @@ function CartItemSection({
         </div>
       </div>
       <div className="flex items-center lg:space-x-10 pt-4">
+        {/* reduce item from cart-items */}
         <div className="flex items-center space-x-2">
           <IconButton
             color="primary"
             disabled={cartQuantity === 1}
             onClick={() => {
               setCartQuantity(cartQuantity - 1);
+              dispatch(reduceItemFromCart(cartItemProduct.productId));
             }}
           >
             <RemoveCircleOutline />
           </IconButton>
 
           <span className="py-1 px-6 border rounded-md">{cartQuantity}</span>
+
+          {/* add item to cart-items */}
           <IconButton
             color="primary"
             onClick={() => {

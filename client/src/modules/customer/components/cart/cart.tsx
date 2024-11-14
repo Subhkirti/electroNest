@@ -11,6 +11,7 @@ function Cart() {
   const { isLoading, cartItems, cart } = useSelector(
     (state: RootState) => state.cart
   );
+
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
