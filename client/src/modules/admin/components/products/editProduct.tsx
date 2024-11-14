@@ -75,6 +75,7 @@ function EditProduct() {
         reviews: productRes?.reviews,
         warrantyInfo: productRes?.warrantyInfo,
         returnPolicy: productRes?.returnPolicy,
+        deliveryCharges: productRes?.deliveryCharges,
       });
     }
     // eslint-disable-next-line

@@ -21,7 +21,7 @@ function ProductImageGallery({ product }: { product: Product }) {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const userId = getCurrentUser()?.id;
-
+  const isItemOutOfStock = product?.stock < 1;
   function addToCart() {
     dispatch(
       addItemToCart({
@@ -29,6 +29,7 @@ function ProductImageGallery({ product }: { product: Product }) {
         productId: product.productId,
         price: product.price,
         discountPercentage: product.discountPercentage,
+        deliveryCharges: product.deliveryCharges
       })
     );
     navigate(AppRoutes.cart);
@@ -92,7 +93,7 @@ function ProductImageGallery({ product }: { product: Product }) {
               title="Stock"
               sensitiveValue={product?.stock <= 10}
               value={
-                product?.stock < 1
+                isItemOutOfStock
                   ? "Item is out of stock"
                   : product?.stock <= 10
                   ? `Only ${product?.stock} items are left.`
@@ -119,6 +120,16 @@ function ProductImageGallery({ product }: { product: Product }) {
                 value={product?.returnPolicy}
               />
             )}
+
+            <RenderColumnStack
+              title="Delivery Charges"
+              highlightValue={product?.deliveryCharges <= 0}
+              value={
+                product?.deliveryCharges <= 0
+                  ? "Free"
+                  : formatAmount(product?.deliveryCharges)
+              }
+            />
           </ul>
         </div>
 
@@ -160,27 +171,29 @@ function ProductImageGallery({ product }: { product: Product }) {
           </div>
 
           {/* CTA buttons */}
-          <div className="flex flex-col space-y-4 lg:flex-row lg:space-x-10 lg:space-y-0  mt-10">
-            <Button
-              startIcon={<ShoppingCartOutlined />}
-              variant="outlined"
-              onClick={addToCart}
-              className=" lg:w-[50%] px-8 py-3 shadow-none hover:shadow-none hover:bg-primary hover:text-white"
-            >
-              {AppStrings.addToCart}
-            </Button>
+          {!isItemOutOfStock && (
+            <div className="flex flex-col space-y-4 lg:flex-row lg:space-x-10 lg:space-y-0  mt-10">
+              <Button
+                startIcon={<ShoppingCartOutlined />}
+                variant="outlined"
+                onClick={addToCart}
+                className="lg:w-[50%] px-8 py-3 shadow-none hover:shadow-none hover:bg-primary hover:border-transparent hover:bg-opacity-10"
+              >
+                {AppStrings.addToCart}
+              </Button>
 
-            <Button
-              variant="contained"
-              startIcon={
-                <KeyboardDoubleArrowRight style={{ fontSize: "26px" }} />
-              }
-              onClick={() => navigate(AppRoutes.cart)}
-              className="lg:w-[50%]  px-8 py-3 shadow-none hover:shadow-none"
-            >
-              {AppStrings.buyNow}
-            </Button>
-          </div>
+              <Button
+                variant="contained"
+                startIcon={
+                  <KeyboardDoubleArrowRight style={{ fontSize: "26px" }} />
+                }
+                onClick={() => navigate(AppRoutes.cart)}
+                className="lg:w-[50%]  px-8 py-3 shadow-none hover:shadow-none"
+              >
+                {AppStrings.buyNow}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -203,17 +216,21 @@ function RenderColumnStack({
   title,
   value,
   sensitiveValue,
+  highlightValue,
 }: {
   title: string;
   value: string | number;
   sensitiveValue?: boolean;
+  highlightValue?: boolean;
 }) {
   return (
     <li className="text-slate font-medium">
       {title}:{" "}
       <span
         className={
-          sensitiveValue
+          highlightValue
+            ? "text-secondary font-bold"
+            : sensitiveValue
             ? "text-red font-normal"
             : "text-slate opacity-60 font-normal"
         }

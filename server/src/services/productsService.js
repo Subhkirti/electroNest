@@ -227,12 +227,13 @@ app.post("/product/add", (req, res) => {
     rating,
     warrantyInfo,
     returnPolicy,
+    deliveryCharges,
   } = req.body;
 
   const netPrice =
     Number(price) - Number(price) * (Number(disPercentage) / 100);
   connection.query(
-    `INSERT INTO ${tableName} (product_name, description, price, discount_percentage, net_price, brand, color, size, images, category_id, section_id, item_id, quantity, stock, rating, reviews, warranty_info, return_policy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    `INSERT INTO ${tableName} (product_name, description, price, discount_percentage, net_price, brand, color, size, images, category_id, section_id, item_id, quantity, stock, rating, reviews, warranty_info, return_policy, delivery_charges) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       title,
       description,
@@ -252,6 +253,7 @@ app.post("/product/add", (req, res) => {
       JSON.stringify([]),
       warrantyInfo,
       returnPolicy,
+      deliveryCharges,
     ],
     (err, result) => {
       if (err) {
@@ -306,11 +308,12 @@ app.post("/product/edit", (req, res) => {
     rating,
     warrantyInfo,
     returnPolicy,
+    deliveryCharges,
   } = req.body;
   const netPrice =
-  Number(price) - Number(price) * (Number(disPercentage) / 100);
+    Number(price) - Number(price) * (Number(disPercentage) / 100);
   connection.query(
-    `UPDATE ${tableName} SET product_name = ?, description = ?, price = ?, discount_percentage = ?, net_price = ?, brand = ?, color = ?, size = ?, images = ?, category_id = ?, section_id = ?, item_id = ?, quantity = ?, stock = ?, rating = ?, reviews = ?, warranty_info = ?, return_policy = ? WHERE product_id = ?`,
+    `UPDATE ${tableName} SET product_name = ?, description = ?, price = ?, discount_percentage = ?, net_price = ?, brand = ?, color = ?, size = ?, images = ?, category_id = ?, section_id = ?, item_id = ?, quantity = ?, stock = ?, rating = ?, reviews = ?, warranty_info = ?, return_policy = ?, delivery_charges = ? WHERE product_id = ?`,
     [
       title,
       description,
@@ -331,6 +334,7 @@ app.post("/product/edit", (req, res) => {
       warrantyInfo,
       returnPolicy,
       productId,
+      deliveryCharges,
     ],
     (err, result) => {
       if (err) {
@@ -1369,6 +1373,7 @@ function createProductsTable() {
         reviews TEXT,
         warranty_info VARCHAR(255),
         return_policy VARCHAR(255),
+        delivery_charges DECIMAL(5, 2) DEFAULT 0,
         images TEXT,
         category_id VARCHAR(255) NOT NULL,
         section_id VARCHAR(255) NOT NULL,

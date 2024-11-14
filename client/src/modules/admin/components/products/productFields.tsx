@@ -131,7 +131,7 @@ const ProductFields = ({
         />
       </Grid>
 
-      <Grid item xs={12} lg={6}>
+      <Grid item xs={12} md={6} lg={4}>
         <InputField
           label={"Warranty information"}
           readOnly={isViewProductPage}
@@ -140,8 +140,18 @@ const ProductFields = ({
           onChange={handleOnChange}
         />
       </Grid>
+      <Grid item xs={12} md={6} lg={4}>
+        <InputField
+          label={"Delivery Charges"}
+          readOnly={isViewProductPage}
+          type="number"
+          id={productStateIds.deliveryCharges}
+          value={product.deliveryCharges}
+          onChange={handleOnChange}
+        />
+      </Grid>
 
-      <Grid item xs={12} lg={6}>
+      <Grid item xs={12} md={6} lg={4}>
         <InputField
           label={"Return Policy"}
           readOnly={isViewProductPage}
@@ -151,7 +161,7 @@ const ProductFields = ({
         />
       </Grid>
 
-      <Grid item xs={12} lg={4}>
+      <Grid item xs={12} md={6} lg={4}>
         <InputField
           label={"Top Level Category"}
           required={true}
@@ -165,7 +175,7 @@ const ProductFields = ({
         />
       </Grid>
 
-      <Grid item xs={6} lg={4}>
+      <Grid item xs={12} md={6} lg={4}>
         <InputField
           label={"Second Level Category"}
           readOnly={isViewProductPage}
@@ -177,7 +187,7 @@ const ProductFields = ({
           onChange={handleOnChange}
         />
       </Grid>
-      <Grid item xs={6} lg={4}>
+      <Grid item xs={12} md={6} lg={4}>
         <InputField
           label={"Third Level Category"}
           type="dropdown"

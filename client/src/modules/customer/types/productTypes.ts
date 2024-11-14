@@ -30,6 +30,7 @@ interface ProductReqBody {
   reviews: Review[];
   warrantyInfo: string | null;
   returnPolicy: string | null;
+  deliveryCharges: number;
 }
 
 interface TopLevelCategories {
@@ -77,6 +78,7 @@ interface Product {
   reviews: Review[];
   warrantyInfo: string | null;
   returnPolicy: string | null;
+  deliveryCharges: number;
 }
 
 interface Review {

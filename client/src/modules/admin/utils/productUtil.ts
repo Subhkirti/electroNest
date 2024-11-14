@@ -18,6 +18,7 @@ const productStateIds = {
   reviews: "reviews",
   warrantyInfo: "warrantyInfo",
   returnPolicy: "returnPolicy",
+  deliveryCharges: "deliveryCharges",
 };
 
 const categoryStateIds = {
@@ -129,6 +130,7 @@ const productInitState: ProductReqBody = {
   reviews: [],
   warrantyInfo: null,
   returnPolicy: null,
+  deliveryCharges: 0,
 };
 
 const categoryInitState = {

@@ -98,6 +98,7 @@ function CartItemSection({
                   productId: cartItemProduct.productId,
                   price: cartItemProduct.price,
                   discountPercentage: cartItemProduct.discountPercentage,
+                  deliveryCharges: cartItemProduct.deliveryCharges,
                 })
               );
             }}
