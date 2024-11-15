@@ -15,6 +15,7 @@ interface CartItem {
   quantity: number;
   price: number;
   discountPrice: number;
+  deliveryCharges: number;
   createdAt: Date;
   updatedAt: Date;
   productDetails: Product | null;
@@ -27,6 +28,7 @@ interface Cart {
   discount: number;
   cartId: number;
   totalDiscountPrice: number;
+  totalDeliveryCharges: number;
   totalItems: number;
   totalPrice: number;
 }

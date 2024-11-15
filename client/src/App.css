@@ -59,6 +59,32 @@ input:-webkit-autofill:focus {
 .productCard:hover .productCardText {
   transform: translateY(-1rem);
 }
+.ribbon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: var(--yellow);
+  padding: 8px 70px 8px 4px;
+  text-align: center;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  z-index: 1;
+  clip-path: polygon(75% 0%, 57% 49%, 75% 100%, 0% 100%, 0 50%, 0% 0%);
+
+}
+
+.ribbon::before,
+.ribbon::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  height: 100%;
+  border-style: solid;
+  z-index: -1;
+}
+
+
 
 .productCard:hover {
   box-shadow: -1px 2px 15px 3px rgba(214, 214, 214, 1);

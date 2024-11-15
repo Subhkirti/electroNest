@@ -1,4 +1,8 @@
-import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
+import {
+  AddCircleOutline,
+  LocalShipping,
+  RemoveCircleOutline,
+} from "@mui/icons-material";
 import { IconButton, Button } from "@mui/material";
 import { Product } from "../../types/productTypes";
 import { formatAmount } from "../../../admin/utils/productUtil";
@@ -24,9 +28,16 @@ function CartItemSection({
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const userId = getCurrentUser()?.id;
+  console.log('cartItemProduct:', cartItemProduct)
 
   return (
-    <div className="p-5 shadow-lg border rounded-md bg-white">
+    <div className="p-5 shadow-lg border rounded-md relative bg-white">
+      <div className="absolute ribbon top-0 left-0 font-bold text-sm">
+        <LocalShipping sx={{ fontSize: "16px" }} />
+        {cartItemProduct.deliveryCharges > 0
+          ? formatAmount(cartItemProduct.deliveryCharges)
+          : "Free"}
+      </div>
       <div className="flex flex-col lg:flex-row ">
         <div
           className="w-[12rem] h-[12rem] lg:w-[9rem] self-center lg:h-[9rem] cursor-pointer"

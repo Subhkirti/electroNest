@@ -11,6 +11,7 @@ function cartItemsMap(doc: any): CartItem {
     discountPrice: doc?.discount_price || 0,
     createdAt: doc?.created_at || new Date(),
     updatedAt: doc?.updated_at || new Date(),
+    deliveryCharges: doc?.delivery_charges || 0,
     productDetails: doc?.product_details
       ? productMap(doc?.product_details)
       : null,
@@ -27,6 +28,7 @@ function cartMap(doc: any): Cart {
     totalDiscountPrice: doc?.total_discount_price || 0,
     totalItems: doc?.total_items || 0,
     totalPrice: doc?.total_price || 0,
+    totalDeliveryCharges: doc?.total_delivery_charges || 0
   };
 }
 export { cartItemsMap, cartMap };

@@ -53,6 +53,7 @@ const ProductFields = ({
           {"Description"}
         </InputLabel>
         <RichTextEditor
+          readOnly={isViewProductPage}
           value={product.description}
           onChange={handleOnChange}
           id={productStateIds.description}

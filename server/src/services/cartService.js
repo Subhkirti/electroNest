@@ -32,6 +32,7 @@ app.get("/cart", (req, res) => {
   );
 });
 
+
 // Get cart Items
 app.get("/cart_items", (req, res) => {
   const { id } = req.query;
@@ -118,6 +119,7 @@ app.get("/cart_items", (req, res) => {
                         category_id: productDetail.category_id,
                         section_id: productDetail.section_id,
                         item_id: productDetail.item_id,
+                        delivery_charges: productDetail.delivery_charges
                       }
                     : null, // If no matching product found, set `product_details` to null
                 };
@@ -172,11 +174,10 @@ app.post("/cart-items/add", (req, res) => {
     if (results.length > 0) {
       // If the user already has an active cart, use the existing cart ID
       cartId = results[0].id;
-
       console.log(`Cart exists for user ${userId}, cart ID: ${cartId}`);
     } else {
       // If no active cart exists, create a new cart
-      const createCartQuery = `INSERT INTO ${cartTableName} (user_id, total_price, total_items) VALUES (?, 0, 0)`;
+      const createCartQuery = `INSERT INTO ${cartTableName} (user_id, total_price, total_items, total_delivery_charges) VALUES (?, 0, 0, 0)`;
       connection.query(createCartQuery, [userId], (err, result) => {
         if (err) {
           console.error("Error creating cart:", err);
@@ -210,13 +211,13 @@ app.post("/cart-items/add", (req, res) => {
           const existingQuantity = results[0].quantity;
           const updateCartItemQuery = `
               UPDATE ${cartItemsTableName} 
-              SET quantity = ?, discount_price = ?
+              SET quantity = ?, discount_price = ?, delivery_charges = ?
               WHERE id = ?
           `;
 
           connection.query(
             updateCartItemQuery,
-            [existingQuantity + 1, discountPrice, results[0].id],
+            [existingQuantity + 1, discountPrice, deliveryCharges, results[0].id],
             (err) => {
               if (err) {
                 console.error("Error updating cart item quantity:", err);
@@ -261,11 +262,11 @@ app.post("/cart-items/add", (req, res) => {
           );
         } else {
           // If the product is not in the cart, add it
-          const addCartItemQuery = `INSERT INTO ${cartItemsTableName} (cart_id, product_id, quantity, price, discount_price) VALUES (?, ?, ?, ?, ?)`;
+          const addCartItemQuery = `INSERT INTO ${cartItemsTableName} (cart_id, product_id, quantity, price, discount_price, delivery_charges) VALUES (?, ?, ?, ?, ?, ?)`;
 
           connection.query(
             addCartItemQuery,
-            [cartId, productId, 1, price, discountPrice],
+            [cartId, productId, 1, price, discountPrice, deliveryCharges],
             (err, cartItemsResults) => {
               if (err) {
                 console.error("Error adding product to cart:", err);
@@ -314,169 +315,26 @@ app.post("/cart-items/add", (req, res) => {
 });
 
 // Add in cart: Function to update the total price and total items count in the cart
-app.post("/cart-items/add", (req, res) => {
-  const {
-    userId,
-    productId,
-    price,
-    discountPercentage,
-    deliveryCharges,
-  } = req.body;
-  const discountPrice = (price * discountPercentage) / 100;
-
-  // Step 1: Check if the user already has an active cart
-  const checkCartQuery = `SELECT id, delivery_charges FROM ${cartTableName} WHERE user_id = ? AND total_items > 0`;
-
-  connection.query(checkCartQuery, [userId], (err, results) => {
-    if (err) {
-      console.error("Error checking user's cart:", err);
-      return res.status(400).json({
-        status: 400,
-        message: "Error checking user's cart",
-      });
-    }
-
-    let cartId;
-    if (results.length > 0) {
-      // If the user already has an active cart, use the existing cart ID
-      cartId = results[0].id;
-      console.log(`Cart exists for user ${userId}, cart ID: ${cartId}`);
-    } else {
-      // If no active cart exists, create a new cart with deliveryCharges
-      const createCartQuery = `
-        INSERT INTO ${cartTableName} (user_id, total_price, total_items, delivery_charges) 
-        VALUES (?, 0, 0, ?)
-      `;
-      connection.query(createCartQuery, [userId, deliveryCharges], (err, result) => {
-        if (err) {
-          console.error("Error creating cart:", err);
-          return res.status(400).json({
-            status: 400,
-            message: "Error creating cart",
-          });
-        }
-        cartId = result.insertId;
-        console.log(`Cart created for user ${userId}, cart ID: ${cartId}`);
-      });
-    }
-
-    // Step 2: Check if the product is already in the user's cart
-    const checkProductInCartQuery = `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
-
-    connection.query(
-      checkProductInCartQuery,
-      [cartId, productId],
-      (err, results) => {
-        if (err) {
-          console.error("Error checking product in cart:", err);
-          return res.status(400).json({
-            status: 400,
-            message: "Error checking product in cart",
-          });
-        }
-
-        if (results.length > 0) {
-          // If product already exists in the cart, update the quantity
-          const existingQuantity = results[0].quantity;
-          const updateCartItemQuery = `
-              UPDATE ${cartItemsTableName} 
-              SET quantity = ?, discount_price = ?
-              WHERE id = ?
-          `;
-
-          connection.query(
-            updateCartItemQuery,
-            [existingQuantity + 1, discountPrice, results[0].id],
-            (err) => {
-              if (err) {
-                console.error("Error updating cart item quantity:", err);
-                return res.status(400).json({
-                  status: 400,
-                  message: "Error updating cart item quantity",
-                });
-              } else {
-                console.log(
-                  `Updated cart item quantity for product ID ${productId}`
-                );
-                updateCartTotal(cartId, deliveryCharges, (err) => {
-                  if (err) {
-                    console.error("Error updating cart totals:", err);
-                    return res.status(400).json({
-                      status: 400,
-                      message: "Error updating cart totals",
-                    });
-                  }
-                  res.status(200).json({
-                    status: 200,
-                    message: "Cart item updated successfully",
-                  });
-                });
-              }
-            }
-          );
-        } else {
-          // If the product is not in the cart, add it
-          const addCartItemQuery = `INSERT INTO ${cartItemsTableName} (cart_id, product_id, quantity, price, discount_price) VALUES (?, ?, ?, ?, ?)`;
-
-          connection.query(
-            addCartItemQuery,
-            [cartId, productId, 1, price, discountPrice],
-            (err) => {
-              if (err) {
-                console.error("Error adding product to cart:", err);
-                return res.status(400).json({
-                  status: 400,
-                  message: "Failed to add product in cart",
-                });
-              }
-              updateCartTotal(cartId, deliveryCharges, (err) => {
-                if (err) {
-                  console.error("Error updating cart totals:", err);
-                  return res.status(400).json({
-                    status: 400,
-                    message: "Error updating cart totals",
-                  });
-                }
-                res.status(200).json({
-                  status: 200,
-                  message: "Cart item added successfully",
-                });
-              });
-            }
-          );
-        }
-      }
-    );
-  });
-});
-
-// Helper function to update the cart total
-function updateCartTotal(cartId, deliveryCharges, callback) {
+function updateCartTotal(cartId, callback) {
   const updateCartQuery = `
     UPDATE ${cartTableName} 
-    SET total_price = (
-      SELECT SUM((price - discount_price) * quantity) 
-      FROM ${cartItemsTableName} 
-      WHERE cart_id = ?
-    ) + ?, total_items = (
-      SELECT SUM(quantity) FROM ${cartItemsTableName} WHERE cart_id = ?
-    )
-    WHERE id = ?
-  `;
+    SET 
+      total_price = (SELECT SUM(price * quantity) FROM ${cartItemsTableName} WHERE cart_id = ?),
+      total_delivery_charges = (SELECT SUM(delivery_charges * quantity) FROM ${cartItemsTableName} WHERE cart_id = ?),
+      total_discount_price = (SELECT SUM(discount_price * quantity) FROM ${cartItemsTableName} WHERE cart_id = ?),
+      total_items = (SELECT SUM(quantity) FROM ${cartItemsTableName} WHERE cart_id = ?)
+    WHERE id = ?`;
 
-  connection.query(
-    updateCartQuery,
-    [cartId, deliveryCharges, cartId, cartId],
-    (err) => {
-      if (err) {
-        console.error("Error updating cart totals:", err);
-        return callback(err);
-      }
+  connection.query(updateCartQuery, [cartId, cartId, cartId, cartId, cartId], (err) => {
+    if (err) {
+      console.error("Error updating cart totals:", err);
+      return callback(err);
+    } else {
+      console.log("Cart totals updated successfully.");
       callback(null);
     }
-  );
+  });
 }
-
 
 // Remove an item from the cart
 app.post("/cart-items/remove", (req, res) => {
@@ -694,7 +552,7 @@ function checkCartTableExistence() {
     // If the table does not exist, create it
     if (results && results?.length && results[0].count === 0) {
       // Table creation query
-      const createQuery = `CREATE TABLE ${cartTableName} (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, total_price DECIMAL(10, 2) DEFAULT 0.00, total_items INT DEFAULT 0,total_discount_price DECIMAL(10, 2) DEFAULT 0.00, discount INT DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id)
+      const createQuery = `CREATE TABLE ${cartTableName} (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, total_price DECIMAL(10, 2) DEFAULT 0.00, total_delivery_charges DECIMAL(10, 2) DEFAULT 0.00, total_items INT DEFAULT 0,total_discount_price DECIMAL(10, 2) DEFAULT 0.00, discount INT DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id)
 )`;
 
       connection.query(createQuery, (err) => {
@@ -734,6 +592,7 @@ function checkCartItemsTable() {
           product_id INT NOT NULL,
           quantity INT DEFAULT 1,
           price DECIMAL(10, 2) NOT NULL,
+          delivery_charges DECIMAL(10, 2) DEFAULT 0.00,
           discount_price DECIMAL(10, 2) DEFAULT 0.00,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

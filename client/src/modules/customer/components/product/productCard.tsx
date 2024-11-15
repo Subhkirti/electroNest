@@ -1,21 +1,29 @@
 import { useNavigate } from "react-router-dom";
 import { Product } from "../../types/productTypes";
 import {
+  formatAmount,
   formatAmountRange,
   textTruncate,
 } from "../../../admin/utils/productUtil";
+import { LocalShipping } from "@mui/icons-material";
 
 function ProductCard({ product }: { product: Product }) {
   const navigate = useNavigate();
   return product.productId ? (
     <div
       onClick={() => navigate(`/product/${product.productId}`)}
-      className="productCard border rounded-md w-[16rem] bg-white m-2 transition-all cursor-pointer"
+      className="productCard relative border rounded-md w-[16rem] bg-white m-2 transition-all cursor-pointer"
     >
       {/* image section */}
       <div className="h-[12rem] flex justify-center my-4  px-3">
         <img src={product?.images?.[0]} alt="" />
       </div>
+      {product.deliveryCharges <= 0 && (
+        <div className="absolute ribbon top-0 left-0 font-bold text-sm">
+          <LocalShipping sx={{ fontSize: "16px" }} />
+          Free
+        </div>
+      )}
 
       {/* meta details section */}
       <div className="productCardText bg-white p-3">

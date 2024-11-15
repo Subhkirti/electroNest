@@ -233,7 +233,7 @@ app.post("/product/add", (req, res) => {
   const netPrice =
     Number(price) - Number(price) * (Number(disPercentage) / 100);
   connection.query(
-    `INSERT INTO ${tableName} (product_name, description, price, discount_percentage, net_price, brand, color, size, images, category_id, section_id, item_id, quantity, stock, rating, reviews, warranty_info, return_policy, delivery_charges) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    `INSERT INTO ${tableName} (product_name, description, price, discount_percentage, net_price, brand, color, size, images, category_id, section_id, item_id, quantity, stock, rating, reviews, warranty_info, return_policy, delivery_charges) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       title,
       description,
@@ -333,12 +333,11 @@ app.post("/product/edit", (req, res) => {
       JSON.stringify([]),
       warrantyInfo,
       returnPolicy,
-      productId,
       deliveryCharges,
+      productId,
     ],
     (err, result) => {
       if (err) {
-        console.log("err:", err);
         return res
           .status(400)
           .json({ status: 400, message: "Error while updating product" });
