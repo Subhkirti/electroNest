@@ -34,15 +34,33 @@ function cartReducer(state = initState, action: RootAction) {
       return {
         ...state,
         isLoading: false,
-        cartItems: [...state.cartItems, action?.payload],
+        cartItems:
+          action?.payload?.length > 0
+            ? [...state.cartItems, ...action?.payload]
+            : state.cartItems,
+
+        cart:
+          action?.payload?.length > 0
+            ? {
+                ...state.cart,
+                totalItems: state?.cart?.totalItems
+                  ? state?.cart?.totalItems + 1
+                  : 1,
+              }
+            : state.cart,
       };
     case ActionTypes.REMOVE_CART_ITEM_SUCCESS:
       return {
         ...state,
         isLoading: false,
         cartItems: state.cartItems.filter(
-          (item: CartItem) => item?.cartItemId !== action?.payload
+          (item: CartItem) => item?.cartItemId !== action?.payload?.cartItemId
         ),
+        cart:
+          state.cart?.cartId === action?.payload?.cartId &&
+          state.cart?.userId === action?.payload?.userId
+            ? null
+            : state.cart,
       };
     case ActionTypes.REDUCE_CART_ITEM_SUCCESS:
       return {

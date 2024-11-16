@@ -29,10 +29,9 @@ function ProductImageGallery({ product }: { product: Product }) {
         productId: product.productId,
         price: product.price,
         discountPercentage: product.discountPercentage,
-        deliveryCharges: product.deliveryCharges
+        deliveryCharges: product.deliveryCharges,
       })
     );
-    navigate(AppRoutes.cart);
   }
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-10 px-4 pt-4">
@@ -146,12 +145,14 @@ function ProductImageGallery({ product }: { product: Product }) {
               )}
             </p>
 
+            {/* price */}
             {product?.price > 0 && product?.price !== product?.netPrice && (
               <p className="line-through text-lg opacity-50">
                 {formatAmount(product?.price)}
               </p>
             )}
 
+         {/* discount price */}
             {product?.discountPercentage > 0 && (
               <p className="text-secondary text-sm font-semibold">
                 {product?.discountPercentage}% Off

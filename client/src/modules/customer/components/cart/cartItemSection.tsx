@@ -1,12 +1,13 @@
 import {
   AddCircleOutline,
+  Close,
   LocalShipping,
   RemoveCircleOutline,
 } from "@mui/icons-material";
 import { IconButton, Button } from "@mui/material";
 import { Product } from "../../types/productTypes";
 import { formatAmount } from "../../../admin/utils/productUtil";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppDispatch } from "../../../../store/storeTypes";
 import { useDispatch } from "react-redux";
 import { getCurrentUser } from "../../utils/localStorageUtils";
@@ -20,15 +21,15 @@ import { useNavigate } from "react-router-dom";
 function CartItemSection({
   cartItemProduct,
   quantity,
+  cartItemId,
 }: {
   cartItemProduct: Product;
+  cartItemId: number;
   quantity: number;
 }) {
-  const [cartQuantity, setCartQuantity] = useState(quantity);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const userId = getCurrentUser()?.id;
-  console.log('cartItemProduct:', cartItemProduct)
 
   return (
     <div className="p-5 shadow-lg border rounded-md relative bg-white">
@@ -82,27 +83,25 @@ function CartItemSection({
           </div>
         </div>
       </div>
-      <div className="flex items-center lg:space-x-10 pt-4">
+      <div className="flex items-center justify-between pt-4">
         {/* reduce item from cart-items */}
         <div className="flex items-center space-x-2">
           <IconButton
             color="primary"
-            disabled={cartQuantity === 1}
+            disabled={quantity === 1}
             onClick={() => {
-              setCartQuantity(cartQuantity - 1);
               dispatch(reduceItemFromCart(cartItemProduct.productId));
             }}
           >
             <RemoveCircleOutline />
           </IconButton>
 
-          <span className="py-1 px-6 border rounded-md">{cartQuantity}</span>
+          <span className="py-1 px-6 border rounded-md">{quantity}</span>
 
           {/* add item to cart-items */}
           <IconButton
             color="primary"
             onClick={() => {
-              setCartQuantity(cartQuantity + 1);
               dispatch(
                 addItemToCart({
                   userId: userId || 0,
@@ -118,9 +117,11 @@ function CartItemSection({
           </IconButton>
         </div>
 
+        {/* remove cart item from cart */}
         <Button
+          startIcon={<Close />}
           onClick={() => {
-            dispatch(removeItemFromCart(cartItemProduct.productId));
+            dispatch(removeItemFromCart(cartItemId));
           }}
         >
           Remove

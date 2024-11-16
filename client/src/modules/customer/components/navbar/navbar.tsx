@@ -30,7 +30,7 @@ import AdminAppRoutes from "../../../../common/adminRoutes";
 import { getAllCategories } from "../../../../store/customer/product/action";
 import { ExpandMore } from "@mui/icons-material";
 import { CategoryState } from "../../types/productTypes";
-import { getCart } from "../../../../store/customer/cart/action";
+import { getCart, getCartItems } from "../../../../store/customer/cart/action";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -45,7 +45,7 @@ export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const { categories } = useSelector((state: RootState) => state.product);
-  const { cart } = useSelector((state: RootState) => state.cart);
+  const { cart, cartItems } = useSelector((state: RootState) => state.cart);
 
   const openUserMenu = Boolean(anchorEl);
   const user = getCurrentUser();
@@ -58,14 +58,15 @@ export default function Navbar() {
   useEffect(() => {
     const timer = setTimeout(() => {
       !categories?.length && dispatch(getAllCategories());
-      !cart && dispatch(getCart());
+      dispatch(getCart());
+      !cartItems.length && dispatch(getCartItems());
     }, 10);
 
     return () => {
       clearTimeout(timer);
     };
     // eslint-disable-next-line
-  }, []);
+  }, [cart?.totalItems]);
 
   const handleUserClick = (event: { currentTarget: any }) => {
     setAnchorEl(event.currentTarget);

@@ -5,6 +5,7 @@ import ErrorBoundary from "./routes/errorBoudnary";
 import AdminRoutes from "./routes/admin/adminRoutes";
 import "./App.css";
 import { ScrollToTop } from "./modules/customer/utils/homeUtils";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
     >
       <ErrorBoundary>
         <ScrollToTop />
+        <ToastContainer />
         <Routes>
           <Route path="/*" element={<CustomerRoutes />}></Route>
           <Route path="/admin/*" element={<AdminRoutes />}></Route>

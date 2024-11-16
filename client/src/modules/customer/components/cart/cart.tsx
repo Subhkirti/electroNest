@@ -17,7 +17,7 @@ function Cart() {
   useEffect(() => {
     const timer = setTimeout(() => {
       dispatch(getCartItems());
-      dispatch(getCart());
+      !cart && dispatch(getCart());
     }, 10);
 
     return () => {
@@ -37,6 +37,7 @@ function Cart() {
                 cartItem?.productDetails && (
                   <CartItemSection
                     quantity={cartItem.quantity}
+                    cartItemId={cartItem.cartItemId}
                     cartItemProduct={cartItem.productDetails}
                     key={index}
                   />

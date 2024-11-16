@@ -32,7 +32,6 @@ app.get("/cart", (req, res) => {
   );
 });
 
-
 // Get cart Items
 app.get("/cart_items", (req, res) => {
   const { id } = req.query;
@@ -119,7 +118,7 @@ app.get("/cart_items", (req, res) => {
                         category_id: productDetail.category_id,
                         section_id: productDetail.section_id,
                         item_id: productDetail.item_id,
-                        delivery_charges: productDetail.delivery_charges
+                        delivery_charges: productDetail.delivery_charges,
                       }
                     : null, // If no matching product found, set `product_details` to null
                 };
@@ -156,7 +155,8 @@ app.get("/cart_items", (req, res) => {
 
 // Add cart items
 app.post("/cart-items/add", (req, res) => {
-  const { userId, productId, price, discountPercentage, deliveryCharges } = req.body;
+  const { userId, productId, price, discountPercentage, deliveryCharges } =
+    req.body;
   const discountPrice = (price * discountPercentage) / 100;
   // Step 1: Check if the user already has an active cart
   const checkCartQuery = `SELECT id FROM ${cartTableName} WHERE user_id = ? AND total_items > 0`;
@@ -217,7 +217,12 @@ app.post("/cart-items/add", (req, res) => {
 
           connection.query(
             updateCartItemQuery,
-            [existingQuantity + 1, discountPrice, deliveryCharges, results[0].id],
+            [
+              existingQuantity + 1,
+              discountPrice,
+              deliveryCharges,
+              results[0].id,
+            ],
             (err) => {
               if (err) {
                 console.error("Error updating cart item quantity:", err);
@@ -229,6 +234,8 @@ app.post("/cart-items/add", (req, res) => {
                 console.log(
                   `Updated cart item quantity for product ID ${productId}`
                 );
+                console.log("discountPrice:", discountPrice);
+
                 // Now, return a single response after the update
                 updateCartTotal(cartId, (err) => {
                   if (err) {
@@ -249,10 +256,12 @@ app.post("/cart-items/add", (req, res) => {
                           message: "Error finding cart items details",
                         });
                       }
+                      console.log("results 1====>", results);
+
                       res.status(200).json({
                         status: 200,
                         data: results,
-                        message: "Cart item added successfully",
+                        message: "Product is added to Cart.",
                       });
                     }
                   );
@@ -284,11 +293,11 @@ app.post("/cart-items/add", (req, res) => {
                       message: "Error updating cart totals",
                     });
                   }
-                  console.log("cartItemsResults:", cartItemsResults.id);
+                  console.log("cartItemsResults:", cartItemsResults);
 
                   connection.query(
                     `SELECT * FROM ${cartItemsTableName} WHERE id = ?`,
-                    [cartItemsResults?.id],
+                    [cartItemsResults?.insertId],
                     (err, results) => {
                       if (err) {
                         console.error("Error finding cart items details:", err);
@@ -300,7 +309,7 @@ app.post("/cart-items/add", (req, res) => {
                       res.status(200).json({
                         status: 200,
                         data: results,
-                        message: "Cart item added successfully",
+                        message: "Product is added to Cart.",
                       });
                     }
                   );
@@ -325,99 +334,96 @@ function updateCartTotal(cartId, callback) {
       total_items = (SELECT SUM(quantity) FROM ${cartItemsTableName} WHERE cart_id = ?)
     WHERE id = ?`;
 
-  connection.query(updateCartQuery, [cartId, cartId, cartId, cartId, cartId], (err) => {
-    if (err) {
-      console.error("Error updating cart totals:", err);
-      return callback(err);
-    } else {
-      console.log("Cart totals updated successfully.");
-      callback(null);
+  connection.query(
+    updateCartQuery,
+    [cartId, cartId, cartId, cartId, cartId],
+    (err) => {
+      if (err) {
+        console.error("Error updating cart totals:", err);
+        return callback(err);
+      } else {
+        console.log("Cart totals updated successfully.");
+        callback(null);
+      }
     }
-  });
+  );
 }
 
-// Remove an item from the cart
+// Remove an item from the user's cart
 app.post("/cart-items/remove", (req, res) => {
-  const { userId, productId } = req.body;
+  const { userId, cartItemId } = req.body;
 
   // Step 1: Check if the user has an active cart
-  const checkCartQuery = `SELECT id FROM ${cartTableName} WHERE user_id = ? AND total_items > 0`;
-
-  connection.query(checkCartQuery, [userId], (err, results) => {
+  const checkCartQuery = `SELECT id FROM ${cartTableName} WHERE user_id = ?`;
+  connection.query(checkCartQuery, [userId], (err, cartResults) => {
     if (err) {
       console.error("Error checking user's cart:", err);
-      return res.status(400).json({
-        status: 400,
-        message: "Error checking user's cart",
-      });
+      return res.status(500).json({ status: 500, message: "Server error" });
     }
 
-    if (results.length === 0) {
-      return res.status(404).json({
-        status: 404,
-        message: "No active cart found for the user",
-      });
+    if (cartResults.length === 0) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "No active cart found" });
     }
 
-    const cartId = results?.[0]?.id || 0;
+    const cartId = cartResults[0].id;
 
-    // Step 2: Check if the product exists in the user's cart
-    const checkProductInCartQuery = `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
+    // Step 2: Remove the specified product from the cart_items table
+    const removeItemQuery = `DELETE FROM ${cartItemsTableName} WHERE cart_id = ? AND id = ?`;
+    connection.query(removeItemQuery, [cartId, cartItemId], (err) => {
+      if (err) {
+        console.error("Error removing product from cart:", err);
+        return res
+          .status(500)
+          .json({ status: 500, message: "Failed to remove item" });
+      }
 
-    connection.query(
-      checkProductInCartQuery,
-      [cartId, productId],
-      (err, results) => {
+      // Step 3: Check if there are any items left in the cart
+      const countItemsQuery = `SELECT COUNT(*) AS itemCount FROM ${cartItemsTableName} WHERE cart_id = ?`;
+      connection.query(countItemsQuery, [cartId], (err, countResults) => {
         if (err) {
-          console.error("Error checking product in cart:", err);
-          return res.status(400).json({
-            status: 400,
-            message: "Error checking product in cart",
-          });
+          console.error("Error checking remaining items:", err);
+          return res.status(500).json({ status: 500, message: "Server error" });
         }
 
-        if (results.length === 0) {
-          return res.status(404).json({
-            status: 404,
-            message: "Product not found in the cart",
-          });
-        }
-        const cartItemId = results?.[0]?.id || 0;
-        // Step 3: Remove the product from the cart
-        const removeCartItemQuery = `DELETE FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
+        const itemCount = countResults[0].itemCount;
 
-        connection.query(
-          removeCartItemQuery,
-          [cartId, productId],
-          (err, results) => {
+        if (itemCount === 0) {
+          // Step 4: Delete the cart itself if it's empty
+          const deleteCartQuery = `DELETE FROM ${cartTableName} WHERE id = ?`;
+          connection.query(deleteCartQuery, [cartId], (err) => {
             if (err) {
-              console.error("Error removing product from cart:", err);
-              return res.status(400).json({
-                status: 400,
-                message: "Error removing product from cart",
-              });
+              console.error("Error deleting empty cart:", err);
+              return res
+                .status(500)
+                .json({ status: 500, message: "Failed to delete cart" });
             }
 
-            // Step 4: Update the cart totals after removal
-            updateCartTotal(cartId, (err) => {
-              if (err) {
-                console.error("Error updating cart totals:", err);
-                return res.status(400).json({
-                  status: 400,
-                  message: "Error updating cart totals",
-                });
-              }
-
-              res.status(200).json({
-                status: 200,
-                data: cartItemId,
-                message: "Product removed from cart successfully",
-              });
+            return res.status(200).json({
+              status: 200,
+              data: { cartId, cartItemId, userId },
+              message: "Product removed and cart deleted successfully",
             });
-          }
-        );
-      }
-    );
+          });
+        } else {
+          // Step 5: If items remain, update the cart totals (if applicable)
+          updateCartTotal(cartId, (err) => {
+            if (err) {
+              console.error("Error updating cart totals:", err);
+              return res
+                .status(500)
+                .json({ status: 500, message: "Failed to update totals" });
+            }
+            return res.status(200).json({
+              status: 200,
+              data: { cartId, cartItemId, userId },
+              message: "Product removed successfully",
+            });
+          });
+        }
+      });
+    });
   });
 });
 

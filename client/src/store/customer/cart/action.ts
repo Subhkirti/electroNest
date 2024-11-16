@@ -12,6 +12,8 @@ import {
   cartItemsMap,
   cartMap,
 } from "../../../modules/customer/mappers/cartMapper";
+import { toast } from "react-toastify";
+import AppRoutes from "../../../common/appRoutes";
 
 const userId = getCurrentUser()?.id || 0;
 const getCart = () => async (dispatch: ActionDispatch) => {
@@ -66,8 +68,12 @@ const addItemToCart =
 
       dispatch({
         type: ActionTypes.ADD_ITEM_TO_CART_SUCCESS,
-        payload: res?.data?.data,
+        payload:
+          res?.data?.data?.length > 0 ? res?.data?.data.map(cartItemsMap) : [],
       });
+      window.location.pathname != AppRoutes.cart &&
+        res?.data?.message &&
+        toast.success(res?.data?.message, { position: "bottom-center" });
     } catch (error) {
       handleCatchError({
         error,
@@ -77,15 +83,16 @@ const addItemToCart =
   };
 
 const removeItemFromCart =
-  (productId: number) => async (dispatch: ActionDispatch) => {
+  (cartItemId: number) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.REMOVE_CART_ITEM_REQUEST });
 
     try {
       const res = await axios.post(
         `${ApiUrls.removeItemFromCart}`,
-        { productId, userId },
+        { cartItemId, userId },
         headersConfig
       );
+
       dispatch({
         type: ActionTypes.REMOVE_CART_ITEM_SUCCESS,
         payload: res?.data?.data,
