@@ -7,7 +7,6 @@ import {
 import { IconButton, Button } from "@mui/material";
 import { Product } from "../../types/productTypes";
 import { formatAmount } from "../../../admin/utils/productUtil";
-import { useEffect, useState } from "react";
 import { AppDispatch } from "../../../../store/storeTypes";
 import { useDispatch } from "react-redux";
 import { getCurrentUser } from "../../utils/localStorageUtils";

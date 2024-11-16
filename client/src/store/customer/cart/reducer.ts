@@ -67,7 +67,7 @@ function cartReducer(state = initState, action: RootAction) {
         ...state,
         isLoading: false,
         cart:
-          state.cart && action.payload == state.cart.cartId
+          state.cart && action.payload === state.cart.cartId
             ? { ...state.cart, totalItems: state.cart.totalItems - 1 }
             : null,
       };

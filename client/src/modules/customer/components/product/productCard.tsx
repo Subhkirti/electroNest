@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Product } from "../../types/productTypes";
 import {
-  formatAmount,
   formatAmountRange,
   textTruncate,
 } from "../../../admin/utils/productUtil";

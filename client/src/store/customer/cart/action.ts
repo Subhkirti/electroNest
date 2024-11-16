@@ -71,7 +71,7 @@ const addItemToCart =
         payload:
           res?.data?.data?.length > 0 ? res?.data?.data.map(cartItemsMap) : [],
       });
-      window.location.pathname != AppRoutes.cart &&
+      window.location.pathname !== AppRoutes.cart &&
         res?.data?.message &&
         toast.success(res?.data?.message, { position: "bottom-center" });
     } catch (error) {

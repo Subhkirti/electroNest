@@ -9,7 +9,7 @@ import { useLocation } from "react-router-dom";
 import OrderSummary from "./orderSummary";
 import AddDeliveryAddress from "./addDeliveryAddress";
 
-const steps = ["Login", "Add Delivery Address", "Order Summary", "Payment"];
+const steps = ["Add Delivery Address", "Order Summary", "Payment"];
 
 export default function CheckoutStepper() {
   const [activeStep, setActiveStep] = React.useState(0);
@@ -76,7 +76,7 @@ export default function CheckoutStepper() {
           </Box>
 
           <div className="mt-10">
-            {step === 2 ? <AddDeliveryAddress /> : <OrderSummary />}
+            {step === 0 ? <AddDeliveryAddress /> : <OrderSummary />}
           </div>
         </React.Fragment>
       )}

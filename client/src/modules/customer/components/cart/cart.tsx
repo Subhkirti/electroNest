@@ -23,6 +23,7 @@ function Cart() {
     return () => {
       clearTimeout(timer);
     };
+    // eslint-disable-next-line
   }, [cartItems.length, cart?.totalItems]);
 
   return (
