@@ -16,8 +16,8 @@ const AppStrings = {
   addToCart: "Add to cart",
   addAddress: "Add address",
   addNewAddress: "Add new address",
-
-
+  selectDeliveryAddress: "Select Delivery Address",
+  deliverToThisAddress: "Deliver to this Address",
   buyNow: "Buy now",
 
   /* admin strings */

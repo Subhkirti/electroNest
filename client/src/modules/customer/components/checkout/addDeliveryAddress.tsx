@@ -12,7 +12,7 @@ import {
 } from "../../../admin/utils/userUtil";
 import AppStrings from "../../../../common/appStrings";
 
-function AddDeliveryAddress() {
+function AddDeliveryAddress({ handleNext }: { handleNext?: () => void }) {
   const dispatch = useDispatch<AppDispatch>();
   const { addresses } = useSelector((state: RootState) => state.address);
   const [formData, setFormData] = useState<AddressReqBody>(addressInitState);
@@ -33,10 +33,10 @@ function AddDeliveryAddress() {
       container
       justifyContent={addresses?.length ? "space-between" : "center"}
     >
-      <AddressCard />
+      <AddressCard handleNext={handleNext} />
 
       <Grid item xs={12} lg={7}>
-        <div className="border rounded-md shadow-md p-5 bg-white">
+        <div className="border rounded-md p-5 bg-white">
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               <Grid item xs={12} lg={6}>
@@ -123,11 +123,17 @@ function AddDeliveryAddress() {
                 />
               </Grid>
 
-              <Grid item xs={12} lg={12}>
+              <Grid
+                item
+                xs={12}
+                lg={12}
+                display={"flex"}
+                justifyContent={"center"}
+              >
                 <Button
                   type="submit"
                   size="large"
-                  sx={{ py: 1.5, mt: 2 }}
+                  sx={{ py: 1.5, mt: 2, boxShadow: "none" }}
                   variant="contained"
                 >
                   {addresses?.length

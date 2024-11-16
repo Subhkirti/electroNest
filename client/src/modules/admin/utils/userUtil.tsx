@@ -65,7 +65,9 @@ function mergeAddress({
   zipCode: number;
   landmark: string;
 }) {
-  return [street, landmark, city, state, zipCode].join(", ") || "";
+  return [street, landmark, city, state, zipCode]
+    .filter((value) => value)
+    .join(", ");
 }
 export {
   userInitState,

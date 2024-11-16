@@ -7,7 +7,7 @@ import { getCart, getCartItems } from "../../../../store/customer/cart/action";
 import Loader from "../../../../common/components/loader";
 import EmptyCart from "./EmptyCart";
 
-function Cart() {
+function Cart({ isOrderSummary }: { isOrderSummary?: boolean }) {
   const { isLoading, cartItems, cart } = useSelector(
     (state: RootState) => state.cart
   );
@@ -41,6 +41,7 @@ function Cart() {
                     cartItemId={cartItem.cartItemId}
                     cartItemProduct={cartItem.productDetails}
                     key={index}
+                    isOrderSummary={isOrderSummary}
                   />
                 )
               );

@@ -21,10 +21,12 @@ function CartItemSection({
   cartItemProduct,
   quantity,
   cartItemId,
+  isOrderSummary,
 }: {
   cartItemProduct: Product;
   cartItemId: number;
   quantity: number;
+  isOrderSummary?: boolean;
 }) {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -60,6 +62,8 @@ function CartItemSection({
           <p className="opacity-70 mt-2 capitalize">
             Seller: Matebook technologies
           </p>
+          {isOrderSummary && quantity > 0 && <p>Quantity: {quantity}</p>}
+
           <div className="flex space-x-4 items-center text-gray-900 pt-6">
             {cartItemProduct?.price > 0 &&
               cartItemProduct?.price !== cartItemProduct?.netPrice && (
@@ -82,50 +86,52 @@ function CartItemSection({
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-between pt-4">
-        {/* reduce item from cart-items */}
-        <div className="flex items-center space-x-2">
-          <IconButton
-            color="primary"
-            disabled={quantity === 1}
+      {!isOrderSummary && (
+        <div className="flex items-center justify-between pt-4">
+          {/* reduce item from cart-items */}
+          <div className="flex items-center space-x-2">
+            <IconButton
+              color="primary"
+              disabled={quantity === 1}
+              onClick={() => {
+                dispatch(reduceItemFromCart(cartItemProduct.productId));
+              }}
+            >
+              <RemoveCircleOutline />
+            </IconButton>
+
+            <span className="py-1 px-6 border rounded-md">{quantity}</span>
+
+            {/* add item to cart-items */}
+            <IconButton
+              color="primary"
+              onClick={() => {
+                dispatch(
+                  addItemToCart({
+                    userId: userId || 0,
+                    productId: cartItemProduct.productId,
+                    price: cartItemProduct.price,
+                    discountPercentage: cartItemProduct.discountPercentage,
+                    deliveryCharges: cartItemProduct.deliveryCharges,
+                  })
+                );
+              }}
+            >
+              <AddCircleOutline />
+            </IconButton>
+          </div>
+
+          {/* remove cart item from cart */}
+          <Button
+            startIcon={<Close />}
             onClick={() => {
-              dispatch(reduceItemFromCart(cartItemProduct.productId));
+              dispatch(removeItemFromCart(cartItemId));
             }}
           >
-            <RemoveCircleOutline />
-          </IconButton>
-
-          <span className="py-1 px-6 border rounded-md">{quantity}</span>
-
-          {/* add item to cart-items */}
-          <IconButton
-            color="primary"
-            onClick={() => {
-              dispatch(
-                addItemToCart({
-                  userId: userId || 0,
-                  productId: cartItemProduct.productId,
-                  price: cartItemProduct.price,
-                  discountPercentage: cartItemProduct.discountPercentage,
-                  deliveryCharges: cartItemProduct.deliveryCharges,
-                })
-              );
-            }}
-          >
-            <AddCircleOutline />
-          </IconButton>
+            Remove
+          </Button>
         </div>
-
-        {/* remove cart item from cart */}
-        <Button
-          startIcon={<Close />}
-          onClick={() => {
-            dispatch(removeItemFromCart(cartItemId));
-          }}
-        >
-          Remove
-        </Button>
-      </div>
+      )}
     </div>
   );
 }
