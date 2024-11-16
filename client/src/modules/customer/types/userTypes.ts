@@ -10,6 +10,7 @@ interface User {
   updatedAt: Date;
   mobile: number | null;
   avatarText?: string;
+  phoneNumber?: number;
 }
 
 interface RegisterReqBody {
@@ -25,6 +26,7 @@ interface LoginReqBody {
 }
 
 interface UserReqBody {
+  id?: number;
   imageUrl?: File | string;
   firstName: string;
   lastName?: string;

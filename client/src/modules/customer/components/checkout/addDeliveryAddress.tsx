@@ -1,132 +1,138 @@
-import { Button, Grid, TextField } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import AddressCard from "../addressCard/addressCard";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
+import { addAddress } from "../../../../store/customer/address/action";
+import { AddressReqBody } from "../../types/addressTypes";
+import InputField from "../../../../common/components/inputField";
+import {
+  addressInitState,
+  addressStateIds,
+} from "../../../admin/utils/userUtil";
+import AppStrings from "../../../../common/appStrings";
 
 function AddDeliveryAddress() {
-  function handleSubmit(e: {
-    preventDefault: () => void;
-    currentTarget: HTMLFormElement;
-  }) {
-    e.preventDefault(); /* to stop page reloading */
-    const data = new FormData(e.currentTarget);
-    const formData = {
-      firstName: data.get("firstName"),
-      lastName: data.get("lastName"),
-      address: data.get("address"),
-      city: data.get("city"),
-      state: data.get("state"),
-      zipCode: data.get("zipCode"),
-      phoneNumber: data.get("phoneNumber"),
-    };
+  const dispatch = useDispatch<AppDispatch>();
+  const { addresses } = useSelector((state: RootState) => state.address);
+  const [formData, setFormData] = useState<AddressReqBody>(addressInitState);
 
-    console.log("formData:", formData);
+  function handleOnChange(value: any, fieldId: string) {
+    setFormData({ ...formData, [fieldId]: value });
+  }
+
+  function handleSubmit(e: { preventDefault: () => void }) {
+    /* to stop page reloading */
+    e.preventDefault();
+    dispatch(addAddress(formData));
+    setFormData(addressInitState);
   }
 
   return (
-    <Grid container justifyContent={"space-between"}>
-      <Grid
-        item
-        xs={12}
-        lg={4.8}
-        className="border bg-white rounded-md shadow-md h-[30.5rem] overflow-y-scroll"
-      >
-        <div className="p-7 border-b cursor-pointer ">
-          <AddressCard />
-          <Button sx={{ mt: 2 }} variant="contained" size="large">
-            Deliver here
-          </Button>
-        </div>
-      </Grid>
+    <Grid
+      container
+      justifyContent={addresses?.length ? "space-between" : "center"}
+    >
+      <AddressCard />
 
       <Grid item xs={12} lg={7}>
         <div className="border rounded-md shadow-md p-5 bg-white">
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="firstName"
-                  name="firstName"
-                  label="First Name"
-                  fullWidth
-                  autoComplete="given-name"
+              <Grid item xs={12} lg={6}>
+                <InputField
+                  label={"First Name"}
+                  required={true}
+                  id={addressStateIds.firstName}
+                  value={formData?.firstName}
+                  maxLength={50}
+                  onChange={handleOnChange}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="lastName"
-                  name="lastName"
-                  label="Last Name"
-                  fullWidth
-                  autoComplete="given-name"
+              <Grid item xs={12} lg={6}>
+                <InputField
+                  label={"Last Name"}
+                  id={addressStateIds.lastName}
+                  value={formData?.lastName}
+                  maxLength={50}
+                  onChange={handleOnChange}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={12}>
-                <TextField
-                  required
-                  id="address"
-                  name="address"
-                  label="Address"
-                  fullWidth
-                  multiline
-                  rows={5}
+              <Grid item xs={12} lg={12}>
+                <InputField
+                  label={"House no. / Street / Building name / Area "}
+                  required={true}
+                  id={addressStateIds.street}
+                  value={formData?.street}
+                  onChange={handleOnChange}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="city"
-                  name="city"
-                  label="City"
-                  fullWidth
-                  autoComplete="given-city"
+              <Grid item xs={12} lg={6}>
+                <InputField
+                  label={"City"}
+                  required={true}
+                  id={addressStateIds.city}
+                  value={formData?.city}
+                  onChange={handleOnChange}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="state"
-                  name="state"
-                  label="State"
-                  fullWidth
-                  autoComplete="given-state"
+              <Grid item xs={12} lg={6}>
+                <InputField
+                  label={"State"}
+                  required={true}
+                  id={addressStateIds.state}
+                  value={formData?.state}
+                  onChange={handleOnChange}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="zipCode"
-                  name="zipCode"
-                  label="Zip / Postal code"
-                  fullWidth
-                  autoComplete="shipping postal-code"
+              <Grid item xs={12} lg={6}>
+                <InputField
+                  label={"Zip / Postal code"}
+                  required={true}
+                  id={addressStateIds.zipCode}
+                  value={formData?.zipCode}
+                  type="number"
+                  maxLength={6}
+                  onChange={handleOnChange}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  label="Phone Number"
-                  fullWidth
-                  autoComplete="given-phone-number"
+              <Grid item xs={12} lg={6}>
+                <InputField
+                  label={"Phone Number"}
+                  required={true}
+                  id={addressStateIds.phoneNumber}
+                  value={formData.phoneNumber}
+                  type="number"
+                  maxLength={10}
+                  onChange={handleOnChange}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} lg={12}>
+                <InputField
+                  label={"Landmark"}
+                  id={addressStateIds.landmark}
+                  value={formData?.landmark}
+                  onChange={handleOnChange}
+                />
+              </Grid>
+
+              <Grid item xs={12} lg={12}>
                 <Button
                   type="submit"
                   size="large"
                   sx={{ py: 1.5, mt: 2 }}
                   variant="contained"
                 >
-                  Deliver Here
+                  {addresses?.length
+                    ? AppStrings.addNewAddress
+                    : AppStrings.addAddress}
                 </Button>
               </Grid>
             </Grid>

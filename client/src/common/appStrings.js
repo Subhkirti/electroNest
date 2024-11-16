@@ -14,6 +14,10 @@ const AppStrings = {
   justRelaxFindProducts:
     "Just relax, let us help you find some first-class products.",
   addToCart: "Add to cart",
+  addAddress: "Add address",
+  addNewAddress: "Add new address",
+
+
   buyNow: "Buy now",
 
   /* admin strings */

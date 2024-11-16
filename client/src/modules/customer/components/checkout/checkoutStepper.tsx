@@ -75,7 +75,7 @@ export default function CheckoutStepper() {
             </Button>
           </Box>
 
-          <div className="mt-10">
+          <div className="mt-4">
             {step === 0 ? <AddDeliveryAddress /> : <OrderSummary />}
           </div>
         </React.Fragment>

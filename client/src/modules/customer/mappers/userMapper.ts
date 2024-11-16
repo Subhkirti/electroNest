@@ -1,3 +1,4 @@
+import { Address } from "../types/addressTypes";
 import { User } from "../types/userTypes";
 
 function userMap(doc: any): User {
@@ -18,4 +19,17 @@ function userMap(doc: any): User {
   };
 }
 
-export { userMap };
+function addressMap(doc: any): Address {
+  return {
+    addressId: doc?.id || 0,
+    userId: doc?.user_id || 0,
+    firstName: doc?.first_name || "",
+    lastName: doc?.last_name || "",
+    street: doc?.street || "",
+    city: doc?.city || "",
+    state: doc?.state || "",
+    zipCode: doc?.zip_code || "",
+    landmark: doc?.landmark || "",
+  };
+}
+export { userMap, addressMap };
