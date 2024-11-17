@@ -48,7 +48,7 @@ function Cart({ isOrderSummary }: { isOrderSummary?: boolean }) {
             })}
           </div>
 
-          <PriceDetails />
+          <PriceDetails isOrderSummary={isOrderSummary} />
         </div>
       ) : (
         <EmptyCart />

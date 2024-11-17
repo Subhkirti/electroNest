@@ -109,4 +109,11 @@ function loadCategoryBreadCrumbs(categories: CategoryState[], product: any) {
   }
   return categoryBreadcrumbs;
 }
-export { productFilters, sortOptions, loadCategoryBreadCrumbs };
+
+function fetchCheckoutStep() {
+  const location = window.location;
+  const querySearch = new URLSearchParams(location.search);
+  const activeStep = parseInt(querySearch.get("step") || "1");
+  return activeStep;
+}
+export { productFilters, sortOptions, loadCategoryBreadCrumbs, fetchCheckoutStep };

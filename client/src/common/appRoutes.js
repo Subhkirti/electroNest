@@ -9,6 +9,7 @@ const AppRoutes = {
   firstLevelProduct: "/:categoryId",
   productDetail: "/product/:productId",
   checkout: "/checkout",
+  payment: "/payment",
   orders: "/account/orders",
   orderDetail: "/account/order/:orderId",
   notFound: "/not-found",

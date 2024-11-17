@@ -5,8 +5,10 @@ import { useSelector } from "react-redux";
 import { formatAmount } from "../../../admin/utils/productUtil";
 import EmptyCart from "../cart/EmptyCart";
 import Loader from "../../../../common/components/loader";
+import AppStrings from "../../../../common/appStrings";
+import AppRoutes from "../../../../common/appRoutes";
 
-function PriceDetails() {
+function PriceDetails({ isOrderSummary }: { isOrderSummary?: boolean }) {
   const navigate = useNavigate();
   const { isLoading, cart, cartItems } = useSelector(
     (state: RootState) => state.cart
@@ -67,16 +69,20 @@ function PriceDetails() {
           </div>
 
           <Button
-            onClick={() => navigate("/checkout")}
             variant="contained"
+            onClick={() =>
+              isOrderSummary
+                ? navigate(`${AppRoutes.checkout}?step=3&payment_id=`)
+                : navigate(`${AppRoutes.checkout}`)
+            }
             fullWidth
             className="bg-primary"
           >
-            Checkout
+            {isOrderSummary ? AppStrings.payment : AppStrings.checkout}
           </Button>
         </div>
       ) : (
-        <EmptyCart />
+        <></>
       )}
     </div>
   );

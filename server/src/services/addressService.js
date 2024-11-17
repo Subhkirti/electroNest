@@ -48,29 +48,93 @@ app.post("/address/add", (req, res) => {
               .json({ status: 500, message: "Error adding address" });
           }
 
-          connection.query(findAddressQuery, [result.insertId], (err, results) => {
-            if (err) {
-              return res.status(500).json({
-                status: 500,
-                message: "Error while finding address details",
+          connection.query(
+            findAddressQuery,
+            [result.insertId],
+            (err, results) => {
+              if (err) {
+                return res.status(500).json({
+                  status: 500,
+                  message: "Error while finding address details",
+                });
+              }
+
+              res.status(200).json({
+                status: 200,
+                message: "Address added successfully",
+                data: results?.[0],
               });
             }
-
-            res.status(200).json({
-              status: 200,
-              message: "Address added successfully",
-              data: results?.[0],
-            });
-          });
+          );
         }
       );
     }
   );
 });
 
+// Activate an address, to set the current delivery address from multiple addresses
+app.post("/address/set-active", (req, res) => {
+  const { addressId } = req.body;
+
+  if (!addressId) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Address ID is required" });
+  }
+
+  // Step 1: Find the user_id for the given address ID
+  const getUserQuery = `SELECT user_id FROM ${tableName} WHERE id = ?`;
+
+  connection.query(getUserQuery, [addressId], (err, userResult) => {
+    if (err || userResult.length === 0) {
+      return res
+        .status(500)
+        .json({ status: 500, message: "Error fetching address details" });
+    }
+
+    const userId = userResult[0].user_id;
+
+    // Step 2: Deactivate all other addresses for this user
+    const deactivateOtherAddressesQuery = `UPDATE ${tableName} SET active = false WHERE user_id = ?`;
+
+    connection.query(deactivateOtherAddressesQuery, [userId], (err) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ status: 500, message: "Error deactivating other addresses" });
+      }
+
+      // Step 3: Activate the specified address
+      const activateAddressQuery = `UPDATE ${tableName} SET active = true WHERE id = ?`;
+
+      connection.query(activateAddressQuery, [addressId], (err, result) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ status: 500, message: "Error activating address" });
+        }
+
+        if (result.affectedRows === 0) {
+          return res.status(404).json({
+            status: 404,
+            message: "Address not found",
+          });
+        }
+
+        res.status(200).json({
+          status: 200,
+          message: "Address activated successfully",
+        });
+      });
+    });
+  });
+});
+
 // Fetch all addresses for a specific user
+// Fetch all active addresses for a specific user
 app.get("/addresses", (req, res) => {
   const userId = req.query?.id;
+  const onlyActive = req.query?.active === "true";
 
   if (!userId) {
     return res
@@ -78,7 +142,9 @@ app.get("/addresses", (req, res) => {
       .json({ status: 400, message: "User ID is required" });
   }
 
-  const getAddressesQuery = `SELECT * FROM ${tableName} WHERE user_id = ?`;
+  const getAddressesQuery = onlyActive
+    ? `SELECT * FROM ${tableName} WHERE user_id = ? AND active = true`
+    : `SELECT * FROM ${tableName} WHERE user_id = ?`;
 
   connection.query(getAddressesQuery, [userId], (err, result) => {
     if (err) {
@@ -153,6 +219,7 @@ app.put("/address/edit", (req, res) => {
   );
 });
 
+
 // Delete an address
 app.delete("/address/delete", (req, res) => {
   const addressId = req.query.id;
@@ -201,6 +268,7 @@ function checkAddressTableExistence() {
         CREATE TABLE ${tableName} (
           id INT AUTO_INCREMENT PRIMARY KEY,
           user_id INT,
+          active BOOLEAN DEFAULT false,
           first_name VARCHAR(255) NOT NULL,
           last_name VARCHAR(255),
           street VARCHAR(255),

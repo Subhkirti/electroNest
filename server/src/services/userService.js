@@ -75,6 +75,7 @@ app.post("/register", (req, res) => {
                           message: "Failed to register",
                         });
                       }
+                      
                       // Respond with success and token
                       res.status(200).json({
                         status: 200,

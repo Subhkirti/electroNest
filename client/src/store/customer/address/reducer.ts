@@ -5,6 +5,7 @@ import ActionTypes from "./actionTypes";
 const initState: AddressState = {
   addresses: [],
   address: null,
+  activeAddress: null,
   isLoading: false,
   error: null,
 };
@@ -18,6 +19,9 @@ function addressReducer(
     case ActionTypes.UPDATE_ADDRESS_REQUEST:
     case ActionTypes.GET_ADDRESSES_REQUEST:
     case ActionTypes.REMOVE_ADDRESS_REQUEST:
+    case ActionTypes.REMOVE_ADDRESS_REQUEST:
+    case ActionTypes.SET_ACTIVE_ADDRESS_REQUEST:
+    case ActionTypes.GET_ACTIVE_ADDRESS_REQUEST:
       return { ...state, isLoading: true, error: null };
     case ActionTypes.ADD_ADDRESS_SUCCESS:
       return {
@@ -51,6 +55,27 @@ function addressReducer(
         ),
         address: action?.payload?.data,
       };
+    case ActionTypes.SET_ACTIVE_ADDRESS_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        addresses: state.addresses.map((item: Address) => ({
+          ...item,
+          isActive: item.addressId === Number(action.payload),
+        })),
+        activeAddress:
+          state.addresses.find(
+            (item: Address) => item.addressId === Number(action.payload)
+          ) || null,
+      };
+    case ActionTypes.GET_ACTIVE_ADDRESS_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        activeAddress: action.payload,
+      };
     case ActionTypes.REMOVE_ADDRESS_SUCCESS:
       const newState = {
         ...state,
@@ -60,13 +85,13 @@ function addressReducer(
           (item: Address) => item?.addressId !== Number(action?.payload)
         ),
       };
-
       return newState;
-
     case ActionTypes.ADD_ADDRESS_FAILURE:
     case ActionTypes.UPDATE_ADDRESS_FAILURE:
     case ActionTypes.GET_ADDRESSES_FAILURE:
     case ActionTypes.REMOVE_ADDRESS_FAILURE:
+    case ActionTypes.SET_ACTIVE_ADDRESS_FAILURE:
+    case ActionTypes.GET_ACTIVE_ADDRESS_FAILURE:
       return { ...state, isLoading: false, error: action?.payload || null };
 
     default:

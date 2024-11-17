@@ -39,6 +39,28 @@ const getAllAddresses = () => async (dispatch: ActionDispatch) => {
   }
 };
 
+const getActiveAddress = () => async (dispatch: ActionDispatch) => {
+  dispatch({ type: ActionTypes.GET_ACTIVE_ADDRESS_REQUEST });
+  try {
+    const res = await axios.get(
+      userId
+        ? `${ApiUrls.getAddresses}id=${userId}&active=true`
+        : ApiUrls.getCartItems,
+      headersConfig
+    );
+    dispatch({
+      type: ActionTypes.GET_ACTIVE_ADDRESS_SUCCESS,
+      payload:
+        res?.data?.data?.length > 0 ? addressMap(res?.data?.data[0]) : null,
+    });
+  } catch (error) {
+    handleCatchError({
+      error,
+      actionType: ActionTypes.GET_ACTIVE_ADDRESS_FAILURE,
+    });
+  }
+};
+
 const addAddress =
   (reqData: AddressReqBody) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.ADD_ADDRESS_REQUEST });
@@ -52,8 +74,7 @@ const addAddress =
 
       dispatch({
         type: ActionTypes.ADD_ADDRESS_SUCCESS,
-        payload:
-          res?.data?.data? addressMap(res?.data?.data) : [],
+        payload: res?.data?.data ? addressMap(res?.data?.data) : [],
       });
       // set phone number in user object
       setCurrentUser({ phoneNumber: reqData.phoneNumber } as User);
@@ -93,14 +114,13 @@ const updateAddress =
 
     try {
       const res = await axios.post(ApiUrls.editAddress, reqData, headersConfig);
-
       dispatch({
         type: ActionTypes.UPDATE_ADDRESS_SUCCESS,
         payload:
           res?.data?.data?.length > 0 ? res?.data?.data.map(addressMap) : [],
       });
-       // set phone number in user object
-       setCurrentUser({ phoneNumber: reqData.phoneNumber } as User);
+      // set phone number in user object
+      setCurrentUser({ phoneNumber: reqData.phoneNumber } as User);
     } catch (error) {
       handleCatchError({
         error,
@@ -108,4 +128,35 @@ const updateAddress =
       });
     }
   };
-export { getAllAddresses, removeAddress, updateAddress, addAddress };
+
+const setActiveAddress =
+  (addressId: number) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.SET_ACTIVE_ADDRESS_REQUEST });
+
+    try {
+      const res = await axios.post(
+        ApiUrls.setActiveAddress,
+        { addressId },
+        headersConfig
+      );
+      res?.data?.status >= 200 &&
+        dispatch({
+          type: ActionTypes.SET_ACTIVE_ADDRESS_SUCCESS,
+          payload: addressId,
+        });
+
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.SET_ACTIVE_ADDRESS_FAILURE,
+      });
+    }
+  };
+export {
+  getAllAddresses,
+  removeAddress,
+  updateAddress,
+  addAddress,
+  getActiveAddress,
+  setActiveAddress,
+};

@@ -14,11 +14,13 @@ const AppStrings = {
   justRelaxFindProducts:
     "Just relax, let us help you find some first-class products.",
   addToCart: "Add to cart",
-  addAddress: "Add address",
+  addAddress: "Add delivery address",
   addNewAddress: "Add new address",
   selectDeliveryAddress: "Select Delivery Address",
   deliverToThisAddress: "Deliver to this Address",
   buyNow: "Buy now",
+  checkout: "Checkout",
+  payment: "Payment",
 
   /* admin strings */
   users: "Users",
@@ -50,6 +52,7 @@ const AppStrings = {
 
   oopsPageNotFound: "Oops! Page Not Found",
   pageNotExist: "The page you're looking for doesn't exist or has been moved.",
+  pleaseAddDeliveryAddress: "Please add delivery address.",
 
   /* success messages */
   categoryAddedSuccessfully: "Category added successfully",

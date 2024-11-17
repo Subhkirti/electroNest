@@ -30,6 +30,7 @@ function addressMap(doc: any): Address {
     state: doc?.state || "",
     zipCode: doc?.zip_code || "",
     landmark: doc?.landmark || "",
+    isActive: doc?.active === 1 ? true : false,
   };
 }
 export { userMap, addressMap };

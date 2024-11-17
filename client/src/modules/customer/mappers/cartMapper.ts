@@ -1,4 +1,5 @@
 import { Cart, CartItem } from "../types/cartTypes";
+import { Order, OrderStatus } from "../types/orderTypes";
 import { productMap } from "./productsMapper";
 
 function cartItemsMap(doc: any): CartItem {
@@ -28,7 +29,19 @@ function cartMap(doc: any): Cart {
     totalDiscountPrice: doc?.total_discount_price || 0,
     totalItems: doc?.total_items || 0,
     totalPrice: doc?.total_price || 0,
-    totalDeliveryCharges: doc?.total_delivery_charges || 0
+    totalDeliveryCharges: doc?.total_delivery_charges || 0,
   };
 }
-export { cartItemsMap, cartMap };
+
+function orderMap(doc: any): Order {
+  return {
+    createdAt: doc?.created_at || new Date(),
+    updatedAt: doc?.updated_at || new Date(),
+    userId: doc?.user_id || 0,
+    cartId: doc?.cart_id || 0,
+    addressId: doc?.address_id || 0,
+    orderId: doc?.id || 0,
+    status: doc?.status || OrderStatus.Pending,
+  };
+}
+export { cartItemsMap, cartMap, orderMap };

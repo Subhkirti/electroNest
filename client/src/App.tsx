@@ -18,7 +18,7 @@ function App() {
     >
       <ErrorBoundary>
         <ScrollToTop />
-        <ToastContainer />
+        <ToastContainer toastClassName="font-montserrat text-black"/>
         <Routes>
           <Route path="/*" element={<CustomerRoutes />}></Route>
           <Route path="/admin/*" element={<AdminRoutes />}></Route>

@@ -34,6 +34,7 @@ interface AuthState {
 interface AddressState {
   addresses: Address[];
   address: Address | null;
+  activeAddress: Address | null;
   isLoading: boolean;
   error: string | null;
 }

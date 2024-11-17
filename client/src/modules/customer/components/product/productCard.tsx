@@ -14,7 +14,7 @@ function ProductCard({ product }: { product: Product }) {
       className="productCard relative hover:shadow-lg hover:border-gray-300 border rounded-md w-[16rem] bg-white m-2 transition-all cursor-pointer"
     >
       {/* image section */}
-      <div className="h-[12rem] flex justify-center my-4  px-3">
+      <div className="h-[12rem] flex justify-center my-4 hover:scale-125 transition-all duration-700 px-3">
         <img src={product?.images?.[0]} alt="" />
       </div>
       {product.deliveryCharges <= 0 && (

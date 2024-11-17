@@ -33,7 +33,7 @@ function CartItemSection({
   const userId = getCurrentUser()?.id;
 
   return (
-    <div className="p-5 shadow-lg border rounded-md relative bg-white">
+    <div className="p-5 border rounded-md relative bg-white">
       <div className="absolute ribbon top-0 left-0 font-bold text-sm">
         <LocalShipping sx={{ fontSize: "16px" }} />
         {cartItemProduct.deliveryCharges > 0
@@ -45,7 +45,11 @@ function CartItemSection({
           className="w-[12rem] h-[12rem] lg:w-[9rem] self-center lg:h-[9rem] cursor-pointer"
           onClick={() => navigate(`/product/${cartItemProduct?.productId}`)}
         >
-          <img src={cartItemProduct?.images?.[0]} alt="product-image" />
+          <img
+            src={cartItemProduct?.images?.[0]}
+            alt="product-image"
+            className="hover:scale-125 transition-all duration-1000"
+          />
         </div>
 
         {/* product description */}

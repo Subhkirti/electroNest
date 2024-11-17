@@ -1,6 +1,7 @@
 interface Address {
   addressId: number;
   userId: number;
+  isActive: boolean;
   firstName: string;
   lastName: string;
   street: string;
