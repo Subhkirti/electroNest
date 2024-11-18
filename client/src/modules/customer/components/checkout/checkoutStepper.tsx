@@ -1,10 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import { useNavigate } from "react-router-dom";
 import OrderSummary from "./orderSummary";
 import AddDeliveryAddress from "./addDeliveryAddress";
@@ -23,11 +22,13 @@ import { OrderStatus } from "../../types/orderTypes";
 import Loader from "../../../../common/components/loader";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import Cart from "../cart/cart";
+import PageNotFound from "../../../../common/components/404Page";
 
 const steps = ["Cart", "Add Delivery Address", "Order Summary", "Payment"];
 
 export default function CheckoutStepper() {
   const { error, isLoading: razorpayLoading, Razorpay } = useRazorpay();
+  const [paymentError, setPaymentError] = useState("");
   const activeStep = fetchCheckoutStep();
   const navigate = useNavigate();
   const user = getCurrentUser();
@@ -111,6 +112,11 @@ export default function CheckoutStepper() {
           navigate,
         });
       },
+      modal: {
+        ondismiss() {
+          setPaymentError("Transaction Failed");
+        },
+      },
       theme: {
         color: "#4f45e4",
       },
@@ -131,84 +137,90 @@ export default function CheckoutStepper() {
   return (
     <Box sx={{ width: "100%" }}>
       {isLoading && <Loader color="primary" fixed={true} />}
-      <Stepper
-        activeStep={activeStep - 1}
-        style={{ backgroundColor: "white", padding: "20px 0px" }}
-      >
-        {steps.map((label, index) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      {activeStep === steps.length ? (
-        razorpayLoading ? (
-          <div className="flex justify-center space-y-3">
-            <p className="text-2xl font-bold mt-20">Loading Razorpay ...</p>
-            <Loader suspenseLoader={true} />
-          </div>
-        ) : (
-          error && <p>Error loading Razorpay: {error}</p>
-        )
-      ) : (
-        <>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              pt: 2,
-              bgcolor: "white",
-            }}
-          >
-            <Button
-              color="inherit"
-              disabled={activeStep === 1}
-              onClick={handleBack}
-              sx={{ mr: 1 }}
-            >
-              Back
-            </Button>
-            <Box sx={{ flex: "1 1 auto" }} />
-            <Button
-              onClick={handleNext}
-              variant="contained"
-              disabled={isLoading}
-              style={{
-                borderRadius: "0px",
-                clipPath:
-                  "polygon(75% 0%, 100% 50%, 75% 100%, 0% 100%, 0 50%, 0% 0%)",
-              }}
-            >
-              {activeStep === steps.length ? "Finish" : "Next"}
-            </Button>
-          </Box>
-          <div className="mt-4">
-            <RenderStepComponent
-              activeStep={activeStep}
-              onNextCallback={handleNext}
-            />
-          </div>
-        </>
+      {activeStep <= steps.length && (
+        <Stepper
+          activeStep={activeStep - 1}
+          style={{ backgroundColor: "white", padding: "20px 0px" }}
+        >
+          {steps.map((label, index) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
       )}
+      {activeStep < steps.length && <NavigatorButtons />}
+
+      <div className="mt-4">
+        <RenderStepComponent
+          activeStep={activeStep}
+          onNextCallback={handleNext}
+        />
+      </div>
     </Box>
   );
-}
 
-function RenderStepComponent({
-  activeStep,
-  onNextCallback,
-}: {
-  activeStep: number;
-  onNextCallback: () => void;
-}) {
-  switch (activeStep) {
-    case 1:
-      return <Cart />;
-    case 2:
-      return <AddDeliveryAddress onNextCallback={onNextCallback} />;
-    case 3:
-      return <OrderSummary onNextCallback={onNextCallback} />;
-    default:
-      return <></>;
+  function NavigatorButtons() {
+    return (
+      <Box className="flex bg-white pt-8">
+        <Button
+          color="inherit"
+          disabled={activeStep === 1}
+          onClick={handleBack}
+          sx={{ mr: 1 }}
+        >
+          Back
+        </Button>
+        <Box sx={{ flex: "1 1 auto" }} />
+        <Button
+          onClick={handleNext}
+          variant="contained"
+          disabled={isLoading}
+          style={{
+            borderRadius: "0px",
+            clipPath:
+              "polygon(75% 0%, 100% 50%, 75% 100%, 0% 100%, 0 50%, 0% 0%)",
+          }}
+        >
+          {activeStep === steps.length ? "Finish" : "Next"}
+        </Button>
+      </Box>
+    );
+  }
+
+  function Payment() {
+    return error ? (
+      <p>Error loading Razorpay: {error}</p>
+    ) : paymentError ? (
+      <p>{paymentError} Redirecing to home page...</p>
+    ) : razorpayLoading ? (
+      <div className="flex justify-center space-y-3">
+        <p className="text-2xl font-bold mt-20">Loading Razorpay ...</p>
+        <Loader suspenseLoader={true} />
+      </div>
+    ) : (
+      <></>
+    );
+  }
+
+  function RenderStepComponent({
+    activeStep,
+    onNextCallback,
+  }: {
+    activeStep: number;
+    onNextCallback: () => void;
+  }) {
+    switch (activeStep) {
+      case 1:
+        return <Cart />;
+      case 2:
+        return <AddDeliveryAddress onNextCallback={onNextCallback} />;
+      case 3:
+        return <OrderSummary onNextCallback={onNextCallback} />;
+      case 4:
+        return <Payment />;
+      default:
+        return <PageNotFound />;
+    }
   }
 }
