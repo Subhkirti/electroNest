@@ -7,7 +7,13 @@ import { getCart, getCartItems } from "../../../../store/customer/cart/action";
 import Loader from "../../../../common/components/loader";
 import EmptyCart from "./EmptyCart";
 
-function Cart({ isOrderSummary }: { isOrderSummary?: boolean }) {
+function Cart({
+  isOrderSummary,
+  onNextCallback,
+}: {
+  isOrderSummary?: boolean;
+  onNextCallback?: () => void;
+}) {
   const { isLoading, cartItems, cart } = useSelector(
     (state: RootState) => state.cart
   );
@@ -48,7 +54,7 @@ function Cart({ isOrderSummary }: { isOrderSummary?: boolean }) {
             })}
           </div>
 
-          <PriceDetails isOrderSummary={isOrderSummary} />
+          <PriceDetails isOrderSummary={isOrderSummary} onNextCallback={onNextCallback} />
         </div>
       ) : (
         <EmptyCart />

@@ -8,11 +8,12 @@ import ActionTypes from "./actionTypes";
 import ApiUrls from "../../../common/apiUrls";
 import { toast } from "react-toastify";
 import { OrderReqBody } from "../../../modules/customer/types/orderTypes";
-import { NavigateFunction } from "react-router-dom";
 import { getCurrentUser } from "../../../modules/customer/utils/localStorageUtils";
 import { orderMap } from "../../../modules/customer/mappers/cartMapper";
+import { NavigateFunction } from "react-router-dom";
 
-const userId = getCurrentUser()?.id || 0;
+const user = getCurrentUser();
+const userId = user?.id || 0;
 /* get order history */
 const getOrderHistory = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_ORDER_HISTORY_REQUEST });
@@ -64,25 +65,25 @@ const createOrder =
   }) =>
   async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.CREATE_ORDER_REQUEST });
+
     try {
+      // Call API to create the order
       const res = await axios.post(
         `${ApiUrls.createOrder}`,
         reqData,
         headersConfig
       );
-      const orderId = res?.data?.data;
+      const orderId = res?.data?.data?.razorpayOrderId;
       if (orderId) {
         dispatch({
           type: ActionTypes.CREATE_ORDER_SUCCESS,
           payload: orderId,
         });
-
-        navigate({ search: `step=2&order_id=${orderId}` });
+        navigate({ search: `step=3&order_id=${orderId}` });
       } else {
-        toast.error("Something went wrong while placing order.");
+        toast.error("Something went wrong while placing the order.");
       }
     } catch (error) {
-      console.log('error:', error)
       handleCatchError({
         error,
         actionType: ActionTypes.CREATE_ORDER_FAILURE,
@@ -90,4 +91,36 @@ const createOrder =
     }
   };
 
-export { getOrderHistory, getOrderById, createOrder };
+const verifyPayment = async ({
+  orderId,
+  navigate,
+  razorpayPaymentId,
+  razorpaySignature,
+}: {
+  orderId: string;
+  navigate: NavigateFunction;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}) => {
+  try {
+    const paymentVerification = await axios.post(
+      `${ApiUrls.verifyPayment}`,
+      {
+        orderId,
+        paymentId: razorpayPaymentId,
+        signature: razorpaySignature,
+      },
+      headersConfig
+    );
+    if (paymentVerification.data.success) {
+      navigate({
+        search: `step=3&order_id=${orderId}&payment=success`,
+      });
+    } else {
+      toast.error("Payment verification failed.");
+    }
+  } catch (verifyError) {
+    toast.error("Payment verification failed.");
+  }
+};
+export { getOrderHistory, getOrderById, createOrder, verifyPayment };

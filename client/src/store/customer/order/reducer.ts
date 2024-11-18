@@ -4,6 +4,7 @@ import ActionTypes from "./actionTypes";
 const initState: OrderState = {
   orders: [],
   order: null,
+  orderId: null, //razorpayOrderId
   isLoading: false,
   error: null,
 };
@@ -20,7 +21,7 @@ function orderReducer(state: OrderState = initState, action: RootAction) {
         isLoading: false,
         error: null,
         orders: action?.payload,
-        order: action?.payload?.[0]
+        order: action?.payload?.[0],
       };
     case ActionTypes.GET_ORDER_BY_ID_SUCCESS:
       return {
@@ -34,6 +35,7 @@ function orderReducer(state: OrderState = initState, action: RootAction) {
         ...state,
         isLoading: false,
         error: null,
+        orderId: action.payload,
       };
     case ActionTypes.CREATE_ORDER_FAILURE:
     case ActionTypes.GET_ORDER_BY_ID_FAILURE:

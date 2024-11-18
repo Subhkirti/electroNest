@@ -1,75 +1,190 @@
 const connection = require("../connection");
 const app = require("../app");
+const Razorpay = require("razorpay");
+
+
 const tableName = "orders";
-checkOrderTableExistence();
+
+// Initialize Razorpay instance
+var razorpayInstance = new Razorpay({
+  key_id: process.env.RAZORPAY_API_KEY,
+  key_secret: process.env.RAZORPAY_API_SECRET,
+});
 
 // Create Order API
 app.post("/order/create", (req, res) => {
-  const { userId, cartId, addressId, status } = req.body;
+  const { userId, cartId, addressId, status, amount } = req.body;
 
-  if (!userId || !cartId || !addressId) {
+  // Input validation
+  if (!userId || !addressId || Number(amount) <= 0) {
     return res
       .status(400)
       .json({ status: 400, message: "Missing required fields" });
   }
 
-  // Check if an order with the same userId, cartId, and addressId already exists
+  // Step 1: Fetch User Details from the 'users' table
   connection.query(
-    `SELECT id FROM orders WHERE user_id = ? AND cart_id = ?`,
-    [userId, cartId],
-    (err, results) => {
-      if (err) {
+    `SELECT first_name, email, mobile FROM users WHERE id = ?`,
+    [userId],
+    (err, userResults) => {
+      if (err || userResults.length === 0) {
         return res
           .status(500)
-          .json({ status: 500, message: "Error checking for existing order" });
+          .json({ status: 500, message: "Error fetching user details" });
       }
 
-      if (results.length > 0) {
-        const orderId = results[0].id;
+      const user = userResults[0];
+      const userName = user.first_name;
+      const userEmail = user.email;
+      const userContact = user.mobile;
+
+      // Step 2: Check if cartId is provided
+      if (cartId) {
+        // Check for existing order with cartId
         connection.query(
-          `UPDATE ${tableName} SET cart_id = ?, address_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-          [cartId, addressId, status, orderId],
-          (err, result) => {
+          `SELECT id FROM ${tableName} WHERE user_id = ? AND cart_id = ?`,
+          [userId, cartId],
+          (err, existingOrders) => {
             if (err) {
               return res
                 .status(500)
-                .json({ status: 500, message: "Error updating order" });
+                .json({ status: 500, message: "Error checking existing orders" });
             }
-            if (result.affectedRows === 0) {
-              return res
-                .status(404)
-                .json({ status: 404, message: "Order not found" });
+
+            const isUpdate = existingOrders.length > 0;
+            const orderId = isUpdate ? existingOrders[0].id : null;
+
+            if (isUpdate) {
+              // Step 3A: Update the existing order
+              connection.query(
+                `UPDATE ${tableName} SET address_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+                [addressId, status || "pending", orderId],
+                (err, updateResult) => {
+                  if (err) {
+                    return res
+                      .status(500)
+                      .json({ status: 500, message: "Error updating order" });
+                  }
+                  return handleRazorpayOrderCreation(orderId, amount, userName, userEmail, userContact, res);
+                }
+              );
+            } else {
+              // Step 3B: Create a new order if no existing order found
+              createNewOrder(userId, cartId, addressId, status, amount, userName, userEmail, userContact, res);
             }
-            return res.status(200).json({
-              status: 200,
-              message: "Order updated successfully",
-              data: orderId,
-            });
           }
         );
       } else {
-        // Insert the new order if no duplicate is found
-        connection.query(
-          `INSERT INTO orders (user_id, cart_id, address_id, status) VALUES (?, ?, ?, ?)`,
-          [userId, cartId, addressId, status || "pending"],
-          (err, result) => {
-            if (err) {
-              return res
-                .status(500)
-                .json({ status: 500, message: "Error creating order" });
-            }
-            return res.status(200).json({
-              status: 200,
-              message: "Order created successfully",
-              data: result.insertId,
-            });
-          }
-        );
+        // Handle "Buy Now" case without cartId
+        createNewOrder(userId, null, addressId, status, amount, userName, userEmail, userContact, res);
       }
     }
   );
 });
 
+// Function to create a new order
+function createNewOrder(userId, cartId, addressId, status, amount, userName, userEmail, userContact, res) {
+  connection.query(
+    `INSERT INTO ${tableName} (user_id, cart_id, address_id, status, transaction_amount, receipt) VALUES (?, ?, ?, ?, ?, ?)`,
+    [
+      userId,
+      cartId,
+      addressId,
+      status || "pending",
+      amount,
+      `order_receipt_id_${Math.floor(Date.now() / 1000)}`, // unique receipt ID
+    ],
+    (err, insertResult) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ status: 500, message: "Error creating new order" });
+      }
+      const newOrderId = insertResult.insertId;
+      handleRazorpayOrderCreation(newOrderId, amount, userName, userEmail, userContact, res);
+    }
+  );
+}
+
+// Function to create Razorpay Order
+function handleRazorpayOrderCreation(orderId, amount, userName, userEmail, userContact, res) {
+  const options = {
+    amount: amount * 100, // Convert to paise (smallest currency unit)
+    currency: "INR",
+    receipt: `order_receipt_id_${orderId}`,
+    notes: { orderId },
+    // prefill: {
+    //   name: userName,
+    //   email: userEmail,
+    //   contact: userContact,
+    // },
+  };
+
+  razorpayInstance.orders.create(options, (err, razorpayOrder) => {
+    if (err) {
+      return res.status(500).json({ status: 500, message: "Error creating Razorpay order" });
+    }
+    // Success response with order details
+    return res.status(200).json({
+      status: 200,
+      message: "Order created successfully",
+      data: {
+        orderId,
+        razorpayOrderId: razorpayOrder.id,
+        amount: options.amount / 100, // Return in INR
+        receipt: options.receipt,
+      },
+    });
+  });
+}
+
+app.post("/verifyPayment", (req, res) => {
+  const { orderId, paymentId, signature } = req.body;
+
+  if (!orderId || !paymentId || !signature) {
+    return res.status(400).json({ status: 400, message: "Missing payment details" });
+  }
+  // Step 1: Verify the payment signature using Razorpay's utility
+  const isSignatureValid = razorpayInstance.utils.verifyPaymentSignature({
+    order_id: orderId,
+    payment_id: paymentId,
+    signature: signature,
+  });
+
+  if (!isSignatureValid) {
+    return res.status(400).json({ status: 400, message: "Payment signature mismatch" });
+  }
+
+  // Step 2: Confirm the payment and handle post-payment actions (e.g., updating order status)
+  // This step ensures that the payment was successful
+  connection.query(
+    `SELECT * FROM orders WHERE id = ?`,
+    [orderId],
+    (err, result) => {
+      if (err || result.length === 0) {
+        return res.status(500).json({ status: 500, message: "Order not found" });
+      }
+
+      // Update order status to "paid"
+      connection.query(
+        `UPDATE orders SET status = 'paid', updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [orderId],
+        (err, updateResult) => {
+          if (err) {
+            return res.status(500).json({ status: 500, message: "Error updating order status" });
+          }
+
+          // Step 3: Respond back with success
+          return res.status(200).json({
+            status: 200,
+            message: "Payment verified successfully",
+            data: { orderId, paymentId },
+          });
+        }
+      );
+    }
+  );
+});
 // Fetch all orders (with pagination)
 app.get("/orders", (req, res) => {
   const userId = req.query.id;

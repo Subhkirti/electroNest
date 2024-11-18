@@ -22,6 +22,7 @@ const ApiUrls = {
   getOrderHistory: apiBaseUrl + "/orders",
   getOrder: apiBaseUrl + "/order?id=",
   createOrder: apiBaseUrl + "/order/create",
+  verifyPayment: apiBaseUrl + "/verifyPayment",
   addAddress: apiBaseUrl + "/address/add",
   getAddresses: apiBaseUrl + "/addresses?",
   setActiveAddress: apiBaseUrl + "/address/set-active",

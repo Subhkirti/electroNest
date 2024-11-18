@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { getActiveAddress } from "../../../../store/customer/address/action";
 
-function OrderSummary() {
+function OrderSummary({ onNextCallback }: { onNextCallback: () => void }) {
   const { activeAddress } = useSelector((state: RootState) => state.address);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -28,7 +28,7 @@ function OrderSummary() {
         }}
         address={activeAddress}
       />
-      <Cart isOrderSummary={true} />
+      <Cart isOrderSummary={true} onNextCallback={onNextCallback} />
     </div>
   );
 }

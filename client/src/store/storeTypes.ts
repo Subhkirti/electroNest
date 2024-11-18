@@ -66,6 +66,7 @@ interface OrderState {
   orders: [];
   order: {} | null;
   isLoading: boolean;
+  orderId: string | null;
   error: string | null;
 }
 

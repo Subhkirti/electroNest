@@ -3,12 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { RootState } from "../../../../store/storeTypes";
 import { useSelector } from "react-redux";
 import { formatAmount } from "../../../admin/utils/productUtil";
-import EmptyCart from "../cart/EmptyCart";
 import Loader from "../../../../common/components/loader";
 import AppStrings from "../../../../common/appStrings";
 import AppRoutes from "../../../../common/appRoutes";
 
-function PriceDetails({ isOrderSummary }: { isOrderSummary?: boolean }) {
+function PriceDetails({
+  isOrderSummary,
+  onNextCallback,
+}: {
+  isOrderSummary?: boolean;
+  onNextCallback?: () => void;
+}) {
   const navigate = useNavigate();
   const { isLoading, cart, cartItems } = useSelector(
     (state: RootState) => state.cart
@@ -72,8 +77,8 @@ function PriceDetails({ isOrderSummary }: { isOrderSummary?: boolean }) {
             variant="contained"
             onClick={() =>
               isOrderSummary
-                ? navigate(`${AppRoutes.checkout}?step=3&payment_id=`)
-                : navigate(`${AppRoutes.checkout}`)
+                ? onNextCallback && onNextCallback()
+                : navigate(`${AppRoutes.checkout}?step=2`)
             }
             fullWidth
             className="bg-primary"

@@ -3,6 +3,7 @@ interface OrderReqBody {
   cartId: number;
   addressId: number;
   status: OrderStatus;
+  amount: number;
 }
 
 enum OrderStatus {
