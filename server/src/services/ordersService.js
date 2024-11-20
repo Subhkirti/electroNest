@@ -30,16 +30,11 @@ app.post("/order/create", (req, res) => {
     `SELECT first_name, email, mobile FROM users WHERE id = ?`,
     [userId],
     (err, userResults) => {
-      if (err || userResults.length === 0) {
+      if (err || !userResults.length) {
         return res
           .status(500)
           .json({ status: 500, message: "Error fetching user details" });
       }
-
-      const user = userResults[0];
-      const userName = user.first_name;
-      const userEmail = user.email;
-      const userContact = user.mobile;
 
       // Step 2: Check if cartId is provided
       if (cartId) {
@@ -74,50 +69,20 @@ app.post("/order/create", (req, res) => {
               );
             } else {
               // Step 3B: Create a new order if no existing order found
-              createNewOrder(
-                userId,
-                cartId,
-                addressId,
-                status,
-                amount,
-                userName,
-                userEmail,
-                userContact,
-                res
-              );
+              createNewOrder(userId, cartId, addressId, status, amount, res);
             }
           }
         );
       } else {
         // Handle "Buy Now" case without cartId
-        createNewOrder(
-          userId,
-          null,
-          addressId,
-          status,
-          amount,
-          userName,
-          userEmail,
-          userContact,
-          res
-        );
+        createNewOrder(userId, null, addressId, status, amount, res);
       }
     }
   );
 });
 
 // Function to create a new order
-function createNewOrder(
-  userId,
-  cartId,
-  addressId,
-  status,
-  amount,
-  userName,
-  userEmail,
-  userContact,
-  res
-) {
+function createNewOrder(userId, cartId, addressId, status, amount, res) {
   connection.query(
     `INSERT INTO ${tableName} (user_id, cart_id, address_id, status, transaction_amount, receipt) VALUES (?, ?, ?, ?, ?, ?)`,
     [
@@ -208,7 +173,7 @@ app.post("/verifyPayment", (req, res) => {
 
       // Update order status to "paid"
       connection.query(
-        `UPDATE orders SET status = 'paid', updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        `UPDATE orders SET status = 'paid', cart_id = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
         [orderId],
         (err, updateResult) => {
           if (err) {

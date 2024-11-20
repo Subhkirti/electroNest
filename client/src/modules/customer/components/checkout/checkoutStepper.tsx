@@ -110,7 +110,6 @@ export default function CheckoutStepper() {
       })
     );
   };
-  console.log('orderId:', orderId)
 
   const handlePaymentStep = () => {
     if (!razorpayOrderId || !orderId || !totalAmount) {
@@ -142,6 +141,7 @@ export default function CheckoutStepper() {
           razorpayPaymentId: response.razorpay_payment_id,
           razorpaySignature: response.razorpay_signature,
           razorpayOrderId: response.razorpay_order_id,
+          navigate
         });
       },
       modal: {
