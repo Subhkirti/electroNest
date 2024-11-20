@@ -98,13 +98,11 @@ const createOrder =
 const verifyPayment = async ({
   orderId,
   razorpayOrderId,
-  navigate,
   razorpayPaymentId,
   razorpaySignature,
 }: {
   orderId: string;
   razorpayOrderId: string;
-  navigate: NavigateFunction;
   razorpayPaymentId: string;
   razorpaySignature: string;
 }) => {
@@ -121,14 +119,14 @@ const verifyPayment = async ({
     );
 
     if (paymentVerification.data.status >= 200) {
-      navigate(AppRoutes.products);
-      toast.success("Order placed successfully.");
-
+      toast.success("Order placed. Thanks for shopping with us");
     } else {
       toast.error("Payment verification failed.");
     }
+    window.location.pathname = AppRoutes.products;
   } catch (verifyError) {
     toast.error("Payment verification failed.");
+    window.location.pathname = AppRoutes.products;
   }
 };
 export { getOrderHistory, getOrderById, createOrder, verifyPayment };
