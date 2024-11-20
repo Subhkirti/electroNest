@@ -11,6 +11,7 @@ import { OrderReqBody } from "../../../modules/customer/types/orderTypes";
 import { getCurrentUser } from "../../../modules/customer/utils/localStorageUtils";
 import { orderMap } from "../../../modules/customer/mappers/cartMapper";
 import { NavigateFunction } from "react-router-dom";
+import AppRoutes from "../../../common/appRoutes";
 
 const user = getCurrentUser();
 const userId = user?.id || 0;
@@ -73,13 +74,16 @@ const createOrder =
         reqData,
         headersConfig
       );
-      const orderId = res?.data?.data?.razorpayOrderId;
-      if (orderId) {
+      if (res?.data?.data) {
+        const { orderId, razorpayOrderId } = res?.data?.data;
+
         dispatch({
           type: ActionTypes.CREATE_ORDER_SUCCESS,
-          payload: orderId,
+          payload: { orderId, razorpayOrderId },
         });
-        navigate({ search: `step=3&order_id=${orderId}` });
+        navigate({
+          search: `step=3&order_id=${orderId}&razorpay_id=${razorpayOrderId}`,
+        });
       } else {
         toast.error("Something went wrong while placing the order.");
       }
@@ -93,11 +97,13 @@ const createOrder =
 
 const verifyPayment = async ({
   orderId,
+  razorpayOrderId,
   navigate,
   razorpayPaymentId,
   razorpaySignature,
 }: {
   orderId: string;
+  razorpayOrderId: string;
   navigate: NavigateFunction;
   razorpayPaymentId: string;
   razorpaySignature: string;
@@ -107,17 +113,17 @@ const verifyPayment = async ({
       `${ApiUrls.verifyPayment}`,
       {
         orderId,
+        razorpayOrderId,
         paymentId: razorpayPaymentId,
         signature: razorpaySignature,
       },
       headersConfig
     );
-    console.log('paymentVerification:', paymentVerification)
 
-    if (paymentVerification.data.success) {
-      navigate({
-        search: `step=4&order_id=${orderId}&payment=success`,
-      });
+    if (paymentVerification.data.status >= 200) {
+      navigate(AppRoutes.products);
+      toast.success("Order placed successfully.");
+
     } else {
       toast.error("Payment verification failed.");
     }

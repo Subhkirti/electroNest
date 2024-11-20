@@ -4,7 +4,7 @@ import ActionTypes from "./actionTypes";
 const initState: OrderState = {
   orders: [],
   order: null,
-  orderId: null, //razorpayOrderId
+  razorpayOrderId: null,
   isLoading: false,
   error: null,
 };
@@ -35,7 +35,8 @@ function orderReducer(state: OrderState = initState, action: RootAction) {
         ...state,
         isLoading: false,
         error: null,
-        orderId: action.payload,
+        order: { id: action?.payload?.orderId },
+        razorpayOrderId: action?.payload?.razorpayOrderId,
       };
     case ActionTypes.CREATE_ORDER_FAILURE:
     case ActionTypes.GET_ORDER_BY_ID_FAILURE:

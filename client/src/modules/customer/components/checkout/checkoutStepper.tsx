@@ -37,6 +37,7 @@ export default function CheckoutStepper() {
   const [seconds, setSeconds] = useState(3);
   const querySearch = new URLSearchParams(window.location.search);
   const orderId = querySearch.get("order_id") || "";
+  const razorpayOrderId = querySearch.get("razorpay_id") || "";
   const dispatch = useDispatch<AppDispatch>();
   const { isLoading } = useSelector((state: RootState) => state.order);
   const { cart } = useSelector((state: RootState) => state.cart);
@@ -44,7 +45,6 @@ export default function CheckoutStepper() {
   const totalAmount = cart
     ? cart.totalPrice - cart.totalDiscountPrice + cart.totalDeliveryCharges
     : 0;
-  console.log("paymentError:", paymentError, error);
 
   useEffect(() => {
     if (activeStep === 4) {
@@ -85,7 +85,9 @@ export default function CheckoutStepper() {
       return handleAddAddressStep();
     }
     if (activeStep === 3) {
-      return navigate(`?step=4&order_id=${orderId}`);
+      return navigate(
+        `?step=4&order_id=${orderId}&razorpay_id=${razorpayOrderId}`
+      );
     }
   };
 
@@ -108,18 +110,20 @@ export default function CheckoutStepper() {
       })
     );
   };
+  console.log('orderId:', orderId)
 
   const handlePaymentStep = () => {
-    if (!orderId || !totalAmount) {
+    if (!razorpayOrderId || !orderId || !totalAmount) {
       navigate(-1);
       return;
     }
 
+
     const options: RazorpayOrderOptions = {
       key: process.env.REACT_APP_RAZORPAY_API_KEY || "",
-      amount: totalAmount,
+      amount: totalAmount * 100,
       currency: "INR",
-      order_id: orderId,
+      order_id: razorpayOrderId,
       name: "ElectroNest",
       description: "Test transaction by ElectroNest",
       prefill: {
@@ -131,11 +135,13 @@ export default function CheckoutStepper() {
       handler: async (response: {
         razorpay_payment_id: string;
         razorpay_signature: string;
+        razorpay_order_id: string;
       }) => {
         await verifyPayment({
+          orderId,
           razorpayPaymentId: response.razorpay_payment_id,
           razorpaySignature: response.razorpay_signature,
-          orderId,
+          razorpayOrderId: response.razorpay_order_id,
           navigate,
         });
       },

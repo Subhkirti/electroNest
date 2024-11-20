@@ -66,7 +66,7 @@ interface OrderState {
   orders: [];
   order: {} | null;
   isLoading: boolean;
-  orderId: string | null;
+  razorpayOrderId: string | null;
   error: string | null;
 }
 

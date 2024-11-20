@@ -2,6 +2,7 @@ const connection = require("../connection");
 const app = require("../app");
 const tableName = "orders";
 const Razorpay = require("razorpay");
+
 checkOrderTableExistence();
 var {
   validatePaymentVerification,
@@ -68,14 +69,7 @@ app.post("/order/create", (req, res) => {
                       .status(500)
                       .json({ status: 500, message: "Error updating order" });
                   }
-                  return handleRazorpayOrderCreation(
-                    orderId,
-                    amount,
-                    userName,
-                    userEmail,
-                    userContact,
-                    res
-                  );
+                  return handleRazorpayOrderCreation(orderId, amount, res);
                 }
               );
             } else {
@@ -132,7 +126,7 @@ function createNewOrder(
       addressId,
       status || "pending",
       amount,
-      `order_receipt_id_${Math.floor(Date.now() / 1000)}`, // unique receipt ID
+      Math.floor(Date.now() / 1000), // unique receipt ID
     ],
     (err, insertResult) => {
       if (err) {
@@ -142,37 +136,18 @@ function createNewOrder(
           .json({ status: 500, message: "Error creating new order" });
       }
       const newOrderId = insertResult.insertId;
-      handleRazorpayOrderCreation(
-        newOrderId,
-        amount,
-        userName,
-        userEmail,
-        userContact,
-        res
-      );
+      handleRazorpayOrderCreation(newOrderId, amount, res);
     }
   );
 }
 
 // Function to create Razorpay Order
-function handleRazorpayOrderCreation(
-  orderId,
-  amount,
-  userName,
-  userEmail,
-  userContact,
-  res
-) {
+function handleRazorpayOrderCreation(orderId, amount, res) {
   const options = {
     amount: amount * 100, // Convert to paise (smallest currency unit)
     currency: "INR",
     receipt: `order_receipt_id_${orderId}`,
     notes: { orderId },
-    // prefill: {
-    //   name: userName,
-    //   email: userEmail,
-    //   contact: userContact,
-    // },
   };
 
   razorpayInstance.orders.create(options, (err, razorpayOrder) => {
@@ -195,11 +170,11 @@ function handleRazorpayOrderCreation(
   });
 }
 
+// verify payment and update order status and empty the cart if payment is successful
 app.post("/verifyPayment", (req, res) => {
-  const { orderId, paymentId, signature } = req.body;
-  console.log('orderId:', orderId);
+  const { razorpayOrderId, orderId, paymentId, signature } = req.body;
 
-  if (!orderId || !paymentId || !signature) {
+  if (!razorpayOrderId || !orderId || !paymentId || !signature) {
     return res
       .status(400)
       .json({ status: 400, message: "Missing payment details" });
@@ -207,7 +182,7 @@ app.post("/verifyPayment", (req, res) => {
 
   // Step 1: Verify the payment signature using Razorpay's utility
   const isSignatureValid = validatePaymentVerification(
-    { order_id: orderId, payment_id: paymentId },
+    { order_id: razorpayOrderId, payment_id: paymentId },
     signature,
     process.env.RAZORPAY_API_SECRET
   );
@@ -218,18 +193,18 @@ app.post("/verifyPayment", (req, res) => {
       .json({ status: 400, message: "Payment signature mismatch" });
   }
 
-  // Step 2: Confirm the payment and handle post-payment actions (e.g., updating order status)
-  // This step ensures that the payment was successful
+  // Step 2: Confirm the payment and handle post-payment actions
   connection.query(
-    `SELECT * FROM orders WHERE receipt = ?`,
+    `SELECT * FROM orders WHERE id = ?`,
     [orderId],
     (err, result) => {
-      console.log('err:', err, result)
-      if (err || result.length === 0) {
+      if (err || !result.length) {
         return res
           .status(500)
           .json({ status: 500, message: "Order not found" });
       }
+
+      const cartId = result[0].cart_id; // Retrieve cart_id from the orders table
 
       // Update order status to "paid"
       connection.query(
@@ -242,17 +217,44 @@ app.post("/verifyPayment", (req, res) => {
               .json({ status: 500, message: "Error updating order status" });
           }
 
-          // Step 3: Respond back with success
-          return res.status(200).json({
-            status: 200,
-            message: "Payment verified successfully",
-            data: { orderId, paymentId },
-          });
+          // Step 3: Clear cart_items and cart tables
+          connection.query(
+            `DELETE FROM cart_items WHERE cart_id = ?`,
+            [cartId],
+            (err, deleteCartItemsResult) => {
+              if (err) {
+                return res
+                  .status(500)
+                  .json({ status: 500, message: "Error clearing cart items" });
+              }
+
+              // Delete the cart itself
+              connection.query(
+                `DELETE FROM cart WHERE id = ?`,
+                [cartId],
+                (err, deleteCartResult) => {
+                  if (err) {
+                    return res
+                      .status(500)
+                      .json({ status: 500, message: "Error clearing cart" });
+                  }
+
+                  // Step 4: Respond back with success
+                  return res.status(200).json({
+                    status: 200,
+                    message: "Payment verified and cart cleared successfully",
+                    data: { orderId, paymentId },
+                  });
+                }
+              );
+            }
+          );
         }
       );
     }
   );
 });
+
 // Fetch all orders (with pagination)
 app.get("/orders", (req, res) => {
   const userId = req.query.id;
