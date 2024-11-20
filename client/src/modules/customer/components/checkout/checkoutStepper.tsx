@@ -23,6 +23,7 @@ import Loader from "../../../../common/components/loader";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import Cart from "../cart/cart";
 import PageNotFound from "../../../../common/components/404Page";
+import AppRoutes from "../../../../common/appRoutes";
 
 const steps = ["Cart", "Add Delivery Address", "Order Summary", "Payment"];
 
@@ -33,6 +34,7 @@ export default function CheckoutStepper() {
   const navigate = useNavigate();
   const user = getCurrentUser();
   const userId = user?.id || 0;
+  const [seconds, setSeconds] = useState(3);
   const querySearch = new URLSearchParams(window.location.search);
   const orderId = querySearch.get("order_id") || "";
   const dispatch = useDispatch<AppDispatch>();
@@ -42,9 +44,30 @@ export default function CheckoutStepper() {
   const totalAmount = cart
     ? cart.totalPrice - cart.totalDiscountPrice + cart.totalDeliveryCharges
     : 0;
+  console.log("paymentError:", paymentError, error);
 
   useEffect(() => {
     if (activeStep === 4) {
+      const beforeUnloadHandler = (event: any) => {
+        navigate(AppRoutes.home);
+      };
+      window.addEventListener("load", beforeUnloadHandler);
+
+      if (paymentError) {
+        if (seconds === 0) {
+          navigate(AppRoutes.home);
+        }
+        if (seconds > 0) {
+          const timer = setInterval(() => {
+            setSeconds(seconds - 1);
+          }, 1000);
+
+          return () => {
+            clearTimeout(timer);
+            window.removeEventListener("load", beforeUnloadHandler);
+          };
+        }
+      }
       setTimeout(() => {
         handlePaymentStep();
       }, 1000);
@@ -52,9 +75,12 @@ export default function CheckoutStepper() {
     if (activeStep === 2) {
       dispatch(getOrderHistory());
     }
-  }, [activeStep]);
+  }, [activeStep, paymentError, seconds]);
 
   const handleNext = async () => {
+    if (activeStep === 1) {
+      return navigate(`?step=2`);
+    }
     if (activeStep === 2) {
       return handleAddAddressStep();
     }
@@ -101,6 +127,7 @@ export default function CheckoutStepper() {
         email: user?.email,
         contact: user?.phoneNumber?.toString(),
       },
+      callback_url: "/payment-success",
       handler: async (response: {
         razorpay_payment_id: string;
         razorpay_signature: string;
@@ -114,7 +141,7 @@ export default function CheckoutStepper() {
       },
       modal: {
         ondismiss() {
-          setPaymentError("Transaction Failed");
+          setPaymentError("Transaction Failed.");
         },
       },
       theme: {
@@ -124,7 +151,7 @@ export default function CheckoutStepper() {
 
     try {
       const razorpayInstance = new Razorpay(options);
-      razorpayInstance && razorpayInstance.open();
+      razorpayInstance && seconds > 0 && razorpayInstance.open();
     } catch (err) {
       toast.error("Server Error while creating payment link.");
     }
@@ -155,11 +182,37 @@ export default function CheckoutStepper() {
         <RenderStepComponent
           activeStep={activeStep}
           onNextCallback={handleNext}
+          seconds={seconds}
         />
       </div>
     </Box>
   );
 
+  // Render active step component section
+  function RenderStepComponent({
+    activeStep,
+    onNextCallback,
+    seconds,
+  }: {
+    activeStep: number;
+    onNextCallback: () => void;
+    seconds: number;
+  }) {
+    switch (activeStep) {
+      case 1:
+        return <Cart onNextCallback={onNextCallback} />;
+      case 2:
+        return <AddDeliveryAddress onNextCallback={onNextCallback} />;
+      case 3:
+        return <OrderSummary onNextCallback={onNextCallback} />;
+      case 4:
+        return <Payment seconds={seconds} />;
+      default:
+        return <PageNotFound />;
+    }
+  }
+
+  // Navigation buttons
   function NavigatorButtons() {
     return (
       <Box className="flex bg-white pt-8">
@@ -188,39 +241,31 @@ export default function CheckoutStepper() {
     );
   }
 
-  function Payment() {
-    return error ? (
-      <p>Error loading Razorpay: {error}</p>
-    ) : paymentError ? (
-      <p>{paymentError} Redirecing to home page...</p>
-    ) : razorpayLoading ? (
+  // Payments section
+  function Payment({ seconds }: { seconds: number }) {
+    return (
       <div className="flex justify-center space-y-3">
-        <p className="text-2xl font-bold mt-20">Loading Razorpay ...</p>
-        <Loader suspenseLoader={true} />
+        <p className="text-2xl font-bold mt-20">
+          {error ? (
+            "Error loading Razorpay: " + { error }
+          ) : paymentError ? (
+            <>
+              {paymentError}
+              {seconds > 0
+                ? ` Redirecting to home page in ${seconds} seconds...`
+                : ""}
+              <Loader suspenseLoader={true} />
+            </>
+          ) : razorpayLoading ? (
+            <>
+              Loading Razorpay ...
+              <Loader suspenseLoader={true} />
+            </>
+          ) : (
+            <Loader suspenseLoader={true} />
+          )}
+        </p>
       </div>
-    ) : (
-      <></>
     );
-  }
-
-  function RenderStepComponent({
-    activeStep,
-    onNextCallback,
-  }: {
-    activeStep: number;
-    onNextCallback: () => void;
-  }) {
-    switch (activeStep) {
-      case 1:
-        return <Cart />;
-      case 2:
-        return <AddDeliveryAddress onNextCallback={onNextCallback} />;
-      case 3:
-        return <OrderSummary onNextCallback={onNextCallback} />;
-      case 4:
-        return <Payment />;
-      default:
-        return <PageNotFound />;
-    }
   }
 }

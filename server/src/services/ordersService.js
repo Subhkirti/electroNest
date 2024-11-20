@@ -1,9 +1,11 @@
 const connection = require("../connection");
 const app = require("../app");
-const Razorpay = require("razorpay");
-
-
 const tableName = "orders";
+const Razorpay = require("razorpay");
+checkOrderTableExistence();
+var {
+  validatePaymentVerification,
+} = require("razorpay/dist/utils/razorpay-utils");
 
 // Initialize Razorpay instance
 var razorpayInstance = new Razorpay({
@@ -46,9 +48,10 @@ app.post("/order/create", (req, res) => {
           [userId, cartId],
           (err, existingOrders) => {
             if (err) {
-              return res
-                .status(500)
-                .json({ status: 500, message: "Error checking existing orders" });
+              return res.status(500).json({
+                status: 500,
+                message: "Error checking existing orders",
+              });
             }
 
             const isUpdate = existingOrders.length > 0;
@@ -65,25 +68,62 @@ app.post("/order/create", (req, res) => {
                       .status(500)
                       .json({ status: 500, message: "Error updating order" });
                   }
-                  return handleRazorpayOrderCreation(orderId, amount, userName, userEmail, userContact, res);
+                  return handleRazorpayOrderCreation(
+                    orderId,
+                    amount,
+                    userName,
+                    userEmail,
+                    userContact,
+                    res
+                  );
                 }
               );
             } else {
               // Step 3B: Create a new order if no existing order found
-              createNewOrder(userId, cartId, addressId, status, amount, userName, userEmail, userContact, res);
+              createNewOrder(
+                userId,
+                cartId,
+                addressId,
+                status,
+                amount,
+                userName,
+                userEmail,
+                userContact,
+                res
+              );
             }
           }
         );
       } else {
         // Handle "Buy Now" case without cartId
-        createNewOrder(userId, null, addressId, status, amount, userName, userEmail, userContact, res);
+        createNewOrder(
+          userId,
+          null,
+          addressId,
+          status,
+          amount,
+          userName,
+          userEmail,
+          userContact,
+          res
+        );
       }
     }
   );
 });
 
 // Function to create a new order
-function createNewOrder(userId, cartId, addressId, status, amount, userName, userEmail, userContact, res) {
+function createNewOrder(
+  userId,
+  cartId,
+  addressId,
+  status,
+  amount,
+  userName,
+  userEmail,
+  userContact,
+  res
+) {
   connection.query(
     `INSERT INTO ${tableName} (user_id, cart_id, address_id, status, transaction_amount, receipt) VALUES (?, ?, ?, ?, ?, ?)`,
     [
@@ -96,18 +136,33 @@ function createNewOrder(userId, cartId, addressId, status, amount, userName, use
     ],
     (err, insertResult) => {
       if (err) {
+        console.log("err:", err);
         return res
           .status(500)
           .json({ status: 500, message: "Error creating new order" });
       }
       const newOrderId = insertResult.insertId;
-      handleRazorpayOrderCreation(newOrderId, amount, userName, userEmail, userContact, res);
+      handleRazorpayOrderCreation(
+        newOrderId,
+        amount,
+        userName,
+        userEmail,
+        userContact,
+        res
+      );
     }
   );
 }
 
 // Function to create Razorpay Order
-function handleRazorpayOrderCreation(orderId, amount, userName, userEmail, userContact, res) {
+function handleRazorpayOrderCreation(
+  orderId,
+  amount,
+  userName,
+  userEmail,
+  userContact,
+  res
+) {
   const options = {
     amount: amount * 100, // Convert to paise (smallest currency unit)
     currency: "INR",
@@ -122,7 +177,9 @@ function handleRazorpayOrderCreation(orderId, amount, userName, userEmail, userC
 
   razorpayInstance.orders.create(options, (err, razorpayOrder) => {
     if (err) {
-      return res.status(500).json({ status: 500, message: "Error creating Razorpay order" });
+      return res
+        .status(500)
+        .json({ status: 500, message: "Error creating Razorpay order" });
     }
     // Success response with order details
     return res.status(200).json({
@@ -140,29 +197,38 @@ function handleRazorpayOrderCreation(orderId, amount, userName, userEmail, userC
 
 app.post("/verifyPayment", (req, res) => {
   const { orderId, paymentId, signature } = req.body;
+  console.log('orderId:', orderId);
 
   if (!orderId || !paymentId || !signature) {
-    return res.status(400).json({ status: 400, message: "Missing payment details" });
+    return res
+      .status(400)
+      .json({ status: 400, message: "Missing payment details" });
   }
+
   // Step 1: Verify the payment signature using Razorpay's utility
-  const isSignatureValid = razorpayInstance.utils.verifyPaymentSignature({
-    order_id: orderId,
-    payment_id: paymentId,
-    signature: signature,
-  });
+  const isSignatureValid = validatePaymentVerification(
+    { order_id: orderId, payment_id: paymentId },
+    signature,
+    process.env.RAZORPAY_API_SECRET
+  );
 
   if (!isSignatureValid) {
-    return res.status(400).json({ status: 400, message: "Payment signature mismatch" });
+    return res
+      .status(400)
+      .json({ status: 400, message: "Payment signature mismatch" });
   }
 
   // Step 2: Confirm the payment and handle post-payment actions (e.g., updating order status)
   // This step ensures that the payment was successful
   connection.query(
-    `SELECT * FROM orders WHERE id = ?`,
+    `SELECT * FROM orders WHERE receipt = ?`,
     [orderId],
     (err, result) => {
+      console.log('err:', err, result)
       if (err || result.length === 0) {
-        return res.status(500).json({ status: 500, message: "Order not found" });
+        return res
+          .status(500)
+          .json({ status: 500, message: "Order not found" });
       }
 
       // Update order status to "paid"
@@ -171,7 +237,9 @@ app.post("/verifyPayment", (req, res) => {
         [orderId],
         (err, updateResult) => {
           if (err) {
-            return res.status(500).json({ status: 500, message: "Error updating order status" });
+            return res
+              .status(500)
+              .json({ status: 500, message: "Error updating order status" });
           }
 
           // Step 3: Respond back with success
@@ -276,7 +344,6 @@ app.delete("/order/delete", (req, res) => {
 // Checked if the orders table exists, if not then created it
 function checkOrderTableExistence() {
   const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
-
   connection.query(checkTableQuery, [tableName], (err, results) => {
     if (err) {
       console.error("Error checking order table existence:", err);
@@ -285,7 +352,8 @@ function checkOrderTableExistence() {
 
     if (results && results[0].count === 0) {
       const createTableQuery = `
-        CREATE TABLE ${tableName} (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT, cart_id INT,address_id INT, status VARCHAR(50) DEFAULT 'pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (cart_id) REFERENCES cart(id) ON DELETE CASCADE, FOREIGN KEY (address_id) REFERENCES addresses(id) ON DELETE CASCADE)
+        CREATE TABLE ${tableName} (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT, cart_id INT,address_id INT, status VARCHAR(50) DEFAULT 'pending', transaction_amount DECIMAL(10, 2),
+          receipt VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (cart_id) REFERENCES cart(id) ON DELETE CASCADE, FOREIGN KEY (address_id) REFERENCES addresses(id) ON DELETE CASCADE)
       `;
 
       connection.query(createTableQuery, (err) => {

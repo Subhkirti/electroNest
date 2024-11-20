@@ -11,7 +11,7 @@ function OrderSummary({ onNextCallback }: { onNextCallback: () => void }) {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      dispatch(getActiveAddress());
+      !activeAddress && dispatch(getActiveAddress());
     }, 10);
 
     return () => {

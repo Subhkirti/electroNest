@@ -6,6 +6,7 @@ import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { getCart, getCartItems } from "../../../../store/customer/cart/action";
 import Loader from "../../../../common/components/loader";
 import EmptyCart from "./EmptyCart";
+import AppRoutes from "../../../../common/appRoutes";
 
 function Cart({
   isOrderSummary,
@@ -22,8 +23,14 @@ function Cart({
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      dispatch(getCartItems());
-      !cart && dispatch(getCart());
+      if (window.location.pathname === AppRoutes.checkout) {
+        !cartItems.length && dispatch(getCartItems());
+        !cart && dispatch(getCart());
+        return;
+      } else {
+        dispatch(getCartItems());
+        dispatch(getCart());
+      }
     }, 10);
 
     return () => {
@@ -54,7 +61,10 @@ function Cart({
             })}
           </div>
 
-          <PriceDetails isOrderSummary={isOrderSummary} onNextCallback={onNextCallback} />
+          <PriceDetails
+            isOrderSummary={isOrderSummary}
+            onNextCallback={onNextCallback}
+          />
         </div>
       ) : (
         <EmptyCart />

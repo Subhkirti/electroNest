@@ -112,9 +112,11 @@ const verifyPayment = async ({
       },
       headersConfig
     );
+    console.log('paymentVerification:', paymentVerification)
+
     if (paymentVerification.data.success) {
       navigate({
-        search: `step=3&order_id=${orderId}&payment=success`,
+        search: `step=4&order_id=${orderId}&payment=success`,
       });
     } else {
       toast.error("Payment verification failed.");
