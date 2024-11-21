@@ -25,7 +25,7 @@ import Cart from "../cart/cart";
 import PageNotFound from "../../../../common/components/404Page";
 import AppRoutes from "../../../../common/appRoutes";
 
-const steps = ["Cart", "Add Delivery Address", "Order Summary", "Payment"];
+const steps = ["Add Delivery Address", "Order Summary", "Payment"];
 
 export default function CheckoutStepper() {
   const { error, isLoading: razorpayLoading, Razorpay } = useRazorpay();
@@ -47,7 +47,7 @@ export default function CheckoutStepper() {
     : 0;
 
   useEffect(() => {
-    if (activeStep === 4) {
+    if (activeStep === 3) {
       const beforeUnloadHandler = (event: any) => {
         navigate(AppRoutes.home);
       };
@@ -72,21 +72,18 @@ export default function CheckoutStepper() {
         handlePaymentStep();
       }, 1000);
     }
-    if (activeStep === 2) {
+    if (activeStep === 1) {
       dispatch(getOrderHistory());
     }
   }, [activeStep, paymentError, seconds]);
 
   const handleNext = async () => {
     if (activeStep === 1) {
-      return navigate(`?step=2`);
-    }
-    if (activeStep === 2) {
       return handleAddAddressStep();
     }
-    if (activeStep === 3) {
+    if (activeStep === 2) {
       return navigate(
-        `?step=4&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`
+        `?step=3&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`
       );
     }
   };
@@ -117,7 +114,6 @@ export default function CheckoutStepper() {
       return;
     }
 
-
     const options: RazorpayOrderOptions = {
       key: process.env.REACT_APP_RAZORPAY_API_KEY || "",
       amount: totalAmount * 100,
@@ -142,7 +138,7 @@ export default function CheckoutStepper() {
           razorpayPaymentId: response.razorpay_payment_id,
           razorpaySignature: response.razorpay_signature,
           razorpayOrderId: response.razorpay_order_id,
-          navigate
+          navigate,
         });
       },
       modal: {
@@ -206,12 +202,10 @@ export default function CheckoutStepper() {
   }) {
     switch (activeStep) {
       case 1:
-        return <Cart onNextCallback={onNextCallback} />;
-      case 2:
         return <AddDeliveryAddress onNextCallback={onNextCallback} />;
-      case 3:
+      case 2:
         return <OrderSummary onNextCallback={onNextCallback} />;
-      case 4:
+      case 3:
         return <Payment seconds={seconds} />;
       default:
         return <PageNotFound />;

@@ -82,7 +82,7 @@ const createOrder =
           payload: { receiptId, razorpayOrderId },
         });
         navigate({
-          search: `step=3&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`,
+          search: `step=2&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`,
         });
       } else {
         toast.error("Something went wrong while placing the order.");

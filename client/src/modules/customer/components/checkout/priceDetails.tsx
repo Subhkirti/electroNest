@@ -78,7 +78,7 @@ function PriceDetails({
             onClick={() =>
               isOrderSummary
                 ? onNextCallback && onNextCallback()
-                : navigate(`${AppRoutes.checkout}?step=2`)
+                : navigate(AppRoutes.checkout)
             }
             fullWidth
             className="bg-primary"
