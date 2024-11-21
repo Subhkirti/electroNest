@@ -81,9 +81,17 @@ const createOrder =
           type: ActionTypes.CREATE_ORDER_SUCCESS,
           payload: { receiptId, razorpayOrderId },
         });
-        navigate({
-          search: `step=2&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`,
-        });
+
+        // navigation
+        reqData?.cartId
+          ? navigate({
+              search: `step=2&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`,
+            })
+          : reqData?.productId &&
+            navigate({
+              search: `step=2&product_id=${reqData?.productId}
+          `,
+            });
       } else {
         toast.error("Something went wrong while placing the order.");
       }

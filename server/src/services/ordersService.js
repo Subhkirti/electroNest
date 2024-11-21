@@ -16,7 +16,7 @@ var razorpayInstance = new Razorpay({
 
 // Create Order API
 app.post("/order/create", (req, res) => {
-  const { userId, cartId, addressId, status } = req.body;
+  const { userId, cartId, addressId, status, productId } = req.body;
 
   // Input validation
   if (!userId || !addressId) {
@@ -37,90 +37,128 @@ app.post("/order/create", (req, res) => {
       }
 
       // Step 2: Create a new order for each product in the cart
-      createNewOrder(userId, cartId, addressId, status, res);
+      createNewOrder(userId, cartId, addressId, status, productId, res);
     }
   );
 });
 
 // Function to create a new order for each product in the cart
-function createNewOrder(userId, cartId, addressId, status, res) {
-  // Step 1: Fetch product details from cart_items for the given cart_id
-  connection.query(
-    `SELECT ci.product_id, ci.quantity, ci.price, ci.delivery_charges, ci.discount_price 
+function createNewOrder(userId, cartId, addressId, status, productId, res) {
+  if (cartId) {
+    // Step 1: Fetch product details from cart_items for the given cart_id
+    connection.query(
+      `SELECT ci.product_id, ci.quantity, ci.price, ci.delivery_charges, ci.discount_price 
     FROM cart_items ci JOIN products p ON ci.product_id = p.product_id WHERE ci.cart_id = ?`,
-    [cartId],
-    (err, cartItems) => {
-      if (err || !cartItems.length) {
+      [cartId],
+      (err, cartItems) => {
+        if (err || !cartItems.length) {
+          return res
+            .status(400)
+            .json({ status: 400, message: "No items found in cart" });
+        }
+
+        // Step 2: Prepare data for insertion
+        const ordersData = cartItems.map((item) => {
+          const transactionAmount =
+            (item.price + item.delivery_charges - item.discount_price) *
+            item.quantity;
+
+          return [
+            userId,
+            addressId,
+            status || "pending",
+            item.product_id,
+            item.quantity,
+            transactionAmount,
+            Math.floor(Date.now() / 1000),
+          ];
+        });
+        insertIntoOrder(ordersData, res);
+      }
+    );
+  } else if (productId) {
+    connection.query(
+      `SELECT * FROM products WHERE product_id = ?`,
+      [productId],
+      (err, products) => {
+        const product = products[0];
+
+        if (err || !products.length) {
+          return res
+            .status(400)
+            .json({ status: 400, message: "No items found in products" });
+        }
+
+        // Step 2: Prepare data for insertion
+        const transactionAmount = product.net_price + product.delivery_charges;
+        insertIntoOrder(
+          [
+            [
+              userId,
+              addressId,
+              status || "pending",
+              productId,
+              1,
+              transactionAmount,
+              Math.floor(Date.now() / 1000),
+            ],
+          ],
+          res
+        );
+      }
+    );
+  } else {
+    return res.status(400).json({
+      status: 400,
+      message: "Can't placed order. Please try again after sometime.",
+    });
+  }
+}
+
+// @params ordersData : Array
+function insertIntoOrder(ordersData, res) {
+  // Step 3: Insert multiple rows into the orders table
+  connection.query(
+    `INSERT INTO ${tableName} (user_id, address_id, status, product_id, quantity, transaction_amount, receipt) VALUES ?`,
+    [ordersData],
+    (err, insertResult) => {
+      if (err) {
         return res
-          .status(400)
-          .json({ status: 400, message: "No items found in cart" });
+          .status(500)
+          .json({ status: 500, message: "Error creating new orders" });
       }
 
-      // Step 2: Prepare data for insertion
-      const ordersData = cartItems.map((item) => {
-        const transactionAmount =
-          (item.price + item.delivery_charges - item.discount_price) *
-          item.quantity;
+      // Step 4: Calculate the total transaction amount for all products
+      const totalAmount = ordersData?.reduce(
+        (sum, order) => sum + order?.[5], // Sum up the transaction_amount field
+        0
+      );
 
-        return [
-          userId,
-          addressId,
-          status || "pending",
-          item.product_id,
-          item.quantity,
-          transactionAmount,
-          Math.floor(Date.now() / 1000),
-        ];
-      });
-
-      // Step 3: Insert multiple rows into the orders table
+      // Step 5: Fetch receipt_id from the first inserted order
       connection.query(
-        `INSERT INTO ${tableName} 
-          (user_id, address_id, status, product_id, quantity, transaction_amount, receipt) 
-          VALUES ?`,
-        [ordersData],
-        (err, insertResult) => {
-          if (err) {
-            console.log("Error inserting orders:", err);
+        `SELECT receipt FROM ${tableName} WHERE id = ?`,
+        [insertResult.insertId],
+        (err, receiptResult) => {
+          if (err || !receiptResult.length) {
             return res
               .status(500)
-              .json({ status: 500, message: "Error creating new orders" });
+              .json({ status: 500, message: "Error fetching receipt_id" });
           }
 
-          // Step 4: Calculate the total transaction amount for all products
-          const totalAmount = ordersData.reduce(
-            (sum, order) => sum + order?.[5], // Sum up the transaction_amount field
-            0
-          );
+          const receiptId = receiptResult[0].receipt;
 
-          // Step 5: Fetch receipt_id from the first inserted order
-          connection.query(
-            `SELECT receipt FROM ${tableName} WHERE id = ?`,
-            [insertResult.insertId],
-            (err, receiptResult) => {
-              if (err || !receiptResult.length) {
-                return res
-                  .status(500)
-                  .json({ status: 500, message: "Error fetching receipt_id" });
-              }
-
-              const receiptId = receiptResult[0].receipt;
-
-              // Step 6: Handle Razorpay order creation
-              handleRazorpayOrderCreation(
-                insertResult.insertId,
-                receiptId,
-                totalAmount,
-                res
-              );
-            }
+          // Step 6: Handle Razorpay order creation
+          handleRazorpayOrderCreation(
+            insertResult.insertId,
+            receiptId,
+            totalAmount,
+            res
           );
         }
       );
     }
   );
 }
-
 // Function to create Razorpay Order
 function handleRazorpayOrderCreation(orderId, receiptId, amount, res) {
   const options = {

@@ -1,9 +1,10 @@
 interface OrderReqBody {
   userId: number;
-  cartId: number;
+  cartId?: number;
   addressId: number;
   status: OrderStatus;
   amount: number;
+  productId?: number;
 }
 
 enum OrderStatus {

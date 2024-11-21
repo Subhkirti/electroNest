@@ -152,7 +152,7 @@ function ProductImageGallery({ product }: { product: Product }) {
               </p>
             )}
 
-         {/* discount price */}
+            {/* discount price */}
             {product?.discountPercentage > 0 && (
               <p className="text-secondary text-sm font-semibold">
                 {product?.discountPercentage}% Off
@@ -188,7 +188,11 @@ function ProductImageGallery({ product }: { product: Product }) {
                 startIcon={
                   <KeyboardDoubleArrowRight style={{ fontSize: "26px" }} />
                 }
-                onClick={() => navigate(AppRoutes.cart)}
+                onClick={() =>
+                  navigate(
+                    `${AppRoutes.checkout}?product_id=${product.productId}`
+                  )
+                }
                 className="lg:w-[50%]  px-8 py-3 shadow-none hover:shadow-none"
               >
                 {AppStrings.buyNow}

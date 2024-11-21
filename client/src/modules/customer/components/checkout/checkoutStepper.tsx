@@ -21,7 +21,6 @@ import { getCurrentUser } from "../../utils/localStorageUtils";
 import { OrderStatus } from "../../types/orderTypes";
 import Loader from "../../../../common/components/loader";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
-import Cart from "../cart/cart";
 import PageNotFound from "../../../../common/components/404Page";
 import AppRoutes from "../../../../common/appRoutes";
 
@@ -38,6 +37,7 @@ export default function CheckoutStepper() {
   const querySearch = new URLSearchParams(window.location.search);
   const receiptId = querySearch.get("receipt_id") || "";
   const razorpayOrderId = querySearch.get("razorpay_id") || "";
+  const productId = querySearch.get("product_id") || "";
   const dispatch = useDispatch<AppDispatch>();
   const { isLoading } = useSelector((state: RootState) => state.order);
   const { cart } = useSelector((state: RootState) => state.cart);
@@ -102,6 +102,7 @@ export default function CheckoutStepper() {
           addressId: activeAddress?.addressId || 0,
           status: OrderStatus.Pending,
           amount: totalAmount,
+          productId: productId ? Number(productId) : 0,
         },
         navigate,
       })
