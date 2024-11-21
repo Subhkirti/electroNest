@@ -35,7 +35,7 @@ function orderReducer(state: OrderState = initState, action: RootAction) {
         ...state,
         isLoading: false,
         error: null,
-        order: { id: action?.payload?.orderId },
+        order: { receiptId: action?.payload?.receiptId },
         razorpayOrderId: action?.payload?.razorpayOrderId,
       };
     case ActionTypes.CREATE_ORDER_FAILURE:

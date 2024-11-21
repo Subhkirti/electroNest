@@ -36,7 +36,7 @@ export default function CheckoutStepper() {
   const userId = user?.id || 0;
   const [seconds, setSeconds] = useState(3);
   const querySearch = new URLSearchParams(window.location.search);
-  const orderId = querySearch.get("order_id") || "";
+  const receiptId = querySearch.get("receipt_id") || "";
   const razorpayOrderId = querySearch.get("razorpay_id") || "";
   const dispatch = useDispatch<AppDispatch>();
   const { isLoading } = useSelector((state: RootState) => state.order);
@@ -86,7 +86,7 @@ export default function CheckoutStepper() {
     }
     if (activeStep === 3) {
       return navigate(
-        `?step=4&order_id=${orderId}&razorpay_id=${razorpayOrderId}`
+        `?step=4&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`
       );
     }
   };
@@ -112,7 +112,7 @@ export default function CheckoutStepper() {
   };
 
   const handlePaymentStep = () => {
-    if (!razorpayOrderId || !orderId || !totalAmount) {
+    if (!razorpayOrderId || !receiptId || !totalAmount) {
       navigate(-1);
       return;
     }
@@ -137,7 +137,8 @@ export default function CheckoutStepper() {
         razorpay_order_id: string;
       }) => {
         await verifyPayment({
-          orderId,
+          cartId: cart?.cartId || 0,
+          receiptId,
           razorpayPaymentId: response.razorpay_payment_id,
           razorpaySignature: response.razorpay_signature,
           razorpayOrderId: response.razorpay_order_id,

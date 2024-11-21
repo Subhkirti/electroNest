@@ -75,14 +75,14 @@ const createOrder =
         headersConfig
       );
       if (res?.data?.data) {
-        const { orderId, razorpayOrderId } = res?.data?.data;
+        const { receiptId, razorpayOrderId } = res?.data?.data;
 
         dispatch({
           type: ActionTypes.CREATE_ORDER_SUCCESS,
-          payload: { orderId, razorpayOrderId },
+          payload: { receiptId, razorpayOrderId },
         });
         navigate({
-          search: `step=3&order_id=${orderId}&razorpay_id=${razorpayOrderId}`,
+          search: `step=3&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`,
         });
       } else {
         toast.error("Something went wrong while placing the order.");
@@ -96,13 +96,15 @@ const createOrder =
   };
 
 const verifyPayment = async ({
-  orderId,
+  cartId,
+  receiptId,
   razorpayOrderId,
   navigate,
   razorpayPaymentId,
   razorpaySignature,
 }: {
-  orderId: string;
+  cartId: number;
+  receiptId: string;
   razorpayOrderId: string;
   navigate: NavigateFunction;
   razorpayPaymentId: string;
@@ -112,7 +114,8 @@ const verifyPayment = async ({
     const paymentVerification = await axios.post(
       `${ApiUrls.verifyPayment}`,
       {
-        orderId,
+        cartId,
+        receiptId,
         razorpayOrderId,
         paymentId: razorpayPaymentId,
         signature: razorpaySignature,
