@@ -19,7 +19,7 @@ app.post("/order/create", (req, res) => {
   const { userId, cartId, addressId, status } = req.body;
 
   // Input validation
-  if (!userId || !addressId || !cartId) {
+  if (!userId || !addressId) {
     return res
       .status(400)
       .json({ status: 400, message: "Missing required fields" });
@@ -159,7 +159,6 @@ app.post("/verifyPayment", (req, res) => {
       .status(400)
       .json({ status: 400, message: "Missing payment details or receipt_id" });
   }
-
 
   // Step 1: Verify the payment signature
   const isSignatureValid = validatePaymentVerification(
