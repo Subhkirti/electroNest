@@ -83,7 +83,7 @@ function formatAmount(amount: number) {
           minimumFractionDigits: 0,
           maximumFractionDigits: 2,
         })
-    : "";
+    : "₹0";
 }
 //Format the given input into string in suitable terms of 'k', 'M', etc.
 function formatAmountRange(amount: number) {

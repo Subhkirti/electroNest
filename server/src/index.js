@@ -16,14 +16,16 @@ require("./services/userService");
 require("./services/productsService");
 require("./services/cartService");
 require("./services/ordersService");
-// require("./services/sellersService");
+require("./services/paymentsService");
 require("./services/addressService");
+// require("./services/sellersService");
 
 const PORT = process.env.PORT;
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Welcome to electroNest apis," });
 });
+
 
 app.listen(PORT, () => {
   console.log(`ElectroNest application is running on: ${PORT}`);

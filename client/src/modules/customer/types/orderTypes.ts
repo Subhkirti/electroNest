@@ -8,12 +8,24 @@ interface OrderReqBody {
 }
 
 enum OrderStatus {
-  Pending = "pending",
-  Placed = "placed",
-  OrderConfirmed = "orderConfirmed",
-  Shipped = "shipped",
-  OutForDelivery = "outForDelivery",
-  Delivered = "delivered",
+  PENDING = "pending",
+  PLACED = "placed",
+  ORDER_CONFIRMED = "orderConfirmed",
+  SHIPPED = "shipped",
+  OUT_FOR_DELIVERY = "outForDelivery",
+  DELIVERED = "delivered",
+  CANCELLED = "cancelled",
+  FAILED = "failed",
+  REFUNDED = "refunded",
+  RETURNED = "returned",
+}
+
+enum PaymentStatus {
+  PENDING = "pending",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
+  REFUNDED = "refunded",
 }
 
 interface Order {
@@ -27,4 +39,4 @@ interface Order {
 }
 
 export type { OrderReqBody, Order };
-export { OrderStatus };
+export { OrderStatus, PaymentStatus };

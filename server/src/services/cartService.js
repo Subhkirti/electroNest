@@ -256,8 +256,6 @@ app.post("/cart-items/add", (req, res) => {
                           message: "Error finding cart items details",
                         });
                       }
-                      console.log("results 1====>", results);
-
                       res.status(200).json({
                         status: 200,
                         data: results,

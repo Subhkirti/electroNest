@@ -104,7 +104,7 @@ export default function CheckoutStepper() {
           userId,
           cartId: cart?.cartId || 0,
           addressId: activeAddress?.addressId || 0,
-          status: OrderStatus.Pending,
+          status: OrderStatus.PENDING,
           amount: totalAmount,
           productId: productId ? Number(productId) : 0,
         },

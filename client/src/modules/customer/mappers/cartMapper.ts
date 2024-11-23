@@ -41,7 +41,7 @@ function orderMap(doc: any): Order {
     cartId: doc?.cart_id || 0,
     addressId: doc?.address_id || 0,
     orderId: doc?.id || 0,
-    status: doc?.status || OrderStatus.Pending,
+    status: doc?.status || OrderStatus.PENDING,
   };
 }
 export { cartItemsMap, cartMap, orderMap };
