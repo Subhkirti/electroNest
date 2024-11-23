@@ -85,11 +85,11 @@ const createOrder =
         // navigation
         reqData?.cartId
           ? navigate({
-              search: `step=2&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`,
+              search: `step=3&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`,
             })
           : reqData?.productId &&
             navigate({
-              search: `step=2&product_id=${reqData?.productId}
+              search: `step=3&product_id=${reqData?.productId}
           `,
             });
       } else {

@@ -5,8 +5,8 @@ const ProductDetails = lazy(() =>
   import("../../modules/customer/components/productDetails/productDetails")
 );
 const Cart = lazy(() => import("../../modules/customer/components/cart/cart"));
-const Checkout = lazy(() =>
-  import("../../modules/customer/components/checkout/checkout")
+const CheckoutStepper = lazy(() =>
+  import("../../modules/customer/components/checkout/checkoutStepper")
 );
 const Order = lazy(() =>
   import("../../modules/customer/components/order/order")
@@ -53,7 +53,7 @@ const authRoutes = [
   },
   {
     path: AppRoutes.checkout,
-    component: Checkout,
+    component: CheckoutStepper,
   },
 ];
 

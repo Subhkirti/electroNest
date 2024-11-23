@@ -1,11 +1,12 @@
 import { Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { RootState } from "../../../../store/storeTypes";
 import { useSelector } from "react-redux";
 import { formatAmount } from "../../../admin/utils/productUtil";
 import Loader from "../../../../common/components/loader";
 import AppStrings from "../../../../common/appStrings";
 import AppRoutes from "../../../../common/appRoutes";
+import { fetchCheckoutStep } from "../../utils/productUtils";
 
 function PriceDetails({
   isOrderSummary,
@@ -14,6 +15,7 @@ function PriceDetails({
   isOrderSummary?: boolean;
   onNextCallback?: () => void;
 }) {
+  const location = useLocation();
   const navigate = useNavigate();
   const { isLoading, cart, cartItems } = useSelector(
     (state: RootState) => state.cart
@@ -78,7 +80,9 @@ function PriceDetails({
             onClick={() =>
               isOrderSummary
                 ? onNextCallback && onNextCallback()
-                : navigate(AppRoutes.checkout)
+                : location.pathname === AppRoutes.cart
+                ? navigate(AppRoutes.checkout)
+                : navigate(`${AppRoutes.checkout}?step=2`)
             }
             fullWidth
             className="bg-primary"

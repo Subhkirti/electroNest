@@ -23,8 +23,9 @@ import Loader from "../../../../common/components/loader";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import PageNotFound from "../../../../common/components/404Page";
 import AppRoutes from "../../../../common/appRoutes";
+import Checkout from "./checkout";
 
-const steps = ["Add Delivery Address", "Order Summary", "Payment"];
+const steps = ["Checkout", "Add Delivery Address", "Order Summary", "Payment"];
 
 export default function CheckoutStepper() {
   const { error, isLoading: razorpayLoading, Razorpay } = useRazorpay();
@@ -39,7 +40,7 @@ export default function CheckoutStepper() {
   const razorpayOrderId = querySearch.get("razorpay_id") || "";
   const productId = querySearch.get("product_id") || "";
   const dispatch = useDispatch<AppDispatch>();
-  const { isLoading } = useSelector((state: RootState) => state.order);
+  const { isLoading, orders } = useSelector((state: RootState) => state.order);
   const { cart } = useSelector((state: RootState) => state.cart);
   const { activeAddress } = useSelector((state: RootState) => state.address);
   const totalAmount = cart
@@ -47,7 +48,7 @@ export default function CheckoutStepper() {
     : 0;
 
   useEffect(() => {
-    if (activeStep === 3) {
+    if (activeStep === 4) {
       const beforeUnloadHandler = (event: any) => {
         navigate(AppRoutes.home);
       };
@@ -72,18 +73,21 @@ export default function CheckoutStepper() {
         handlePaymentStep();
       }, 1000);
     }
-    if (activeStep === 1) {
-      dispatch(getOrderHistory());
+    if (activeStep === 3) {
+      !orders.length && dispatch(getOrderHistory());
     }
   }, [activeStep, paymentError, seconds]);
 
   const handleNext = async () => {
     if (activeStep === 1) {
-      return handleAddAddressStep();
+      return navigate(`${AppRoutes.checkout}?step=2`);
     }
     if (activeStep === 2) {
+      return handleAddAddressStep();
+    }
+    if (activeStep === 3) {
       return navigate(
-        `?step=3&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`
+        `?step=4&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`
       );
     }
   };
@@ -179,34 +183,30 @@ export default function CheckoutStepper() {
           ))}
         </Stepper>
       )}
-      {activeStep < steps.length && <NavigatorButtons />}
+      {activeStep < steps.length && (cart || productId) && <NavigatorButtons />}
 
       <div className="mt-4">
-        <RenderStepComponent
-          activeStep={activeStep}
-          onNextCallback={handleNext}
-          seconds={seconds}
-        />
+        <RenderStepComponent onNextCallback={handleNext} seconds={seconds} />
       </div>
     </Box>
   );
 
   // Render active step component section
   function RenderStepComponent({
-    activeStep,
     onNextCallback,
     seconds,
   }: {
-    activeStep: number;
     onNextCallback: () => void;
     seconds: number;
   }) {
     switch (activeStep) {
       case 1:
-        return <AddDeliveryAddress onNextCallback={onNextCallback} />;
+        return <Checkout onNextCallback={onNextCallback} />;
       case 2:
-        return <OrderSummary onNextCallback={onNextCallback} />;
+        return <AddDeliveryAddress onNextCallback={onNextCallback} />;
       case 3:
+        return <OrderSummary onNextCallback={onNextCallback} />;
+      case 4:
         return <Payment seconds={seconds} />;
       default:
         return <PageNotFound />;

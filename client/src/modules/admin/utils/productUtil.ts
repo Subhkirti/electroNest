@@ -76,14 +76,14 @@ const textTruncate = (text: string, length: number) => {
 };
 
 function formatAmount(amount: number) {
-  return (
-    "₹" +
-    amount.toLocaleString("en-IN", {
-      style: "decimal",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    })
-  );
+  return amount
+    ? "₹" +
+        amount.toLocaleString("en-IN", {
+          style: "decimal",
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        })
+    : "";
 }
 //Format the given input into string in suitable terms of 'k', 'M', etc.
 function formatAmountRange(amount: number) {

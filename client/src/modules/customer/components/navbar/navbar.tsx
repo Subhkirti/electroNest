@@ -58,7 +58,7 @@ export default function Navbar() {
   useEffect(() => {
     const timer = setTimeout(() => {
       !categories?.length && dispatch(getAllCategories());
-      dispatch(getCart());
+      !cart && dispatch(getCart());
       !cartItems.length && dispatch(getCartItems());
     }, 10);
 
@@ -66,7 +66,7 @@ export default function Navbar() {
       clearTimeout(timer);
     };
     // eslint-disable-next-line
-  }, [cart?.totalItems]);
+  }, []);
 
   const handleUserClick = (event: { currentTarget: any }) => {
     setAnchorEl(event.currentTarget);

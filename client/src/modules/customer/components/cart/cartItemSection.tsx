@@ -24,7 +24,7 @@ function CartItemSection({
   isOrderSummary,
 }: {
   cartItemProduct: Product;
-  cartItemId: number;
+  cartItemId?: number;
   quantity: number;
   isOrderSummary?: boolean;
 }) {
@@ -126,14 +126,16 @@ function CartItemSection({
           </div>
 
           {/* remove cart item from cart */}
-          <Button
-            startIcon={<Close />}
-            onClick={() => {
-              dispatch(removeItemFromCart(cartItemId));
-            }}
-          >
-            Remove
-          </Button>
+          {cartItemId && cartItemId > 0 && (
+            <Button
+              startIcon={<Close />}
+              onClick={() => {
+                dispatch(removeItemFromCart(cartItemId));
+              }}
+            >
+              Remove
+            </Button>
+          )}
         </div>
       )}
     </div>
