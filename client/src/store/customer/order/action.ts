@@ -3,7 +3,7 @@ import {
   handleCatchError,
   headersConfig,
 } from "../../../modules/customer/utils/apiUtils";
-import { ActionDispatch } from "../../storeTypes";
+import { ActionDispatch, AppDispatch } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
 import ApiUrls from "../../../common/apiUrls";
 import { toast } from "react-toastify";
@@ -12,6 +12,7 @@ import { getCurrentUser } from "../../../modules/customer/utils/localStorageUtil
 import { orderMap } from "../../../modules/customer/mappers/cartMapper";
 import { NavigateFunction } from "react-router-dom";
 import AppRoutes from "../../../common/appRoutes";
+import { getCart } from "../cart/action";
 
 const user = getCurrentUser();
 const userId = user?.id || 0;
@@ -108,6 +109,7 @@ const verifyPayment = async ({
   receiptId,
   razorpayOrderId,
   navigate,
+  dispatch,
   razorpayPaymentId,
   razorpaySignature,
 }: {
@@ -115,10 +117,10 @@ const verifyPayment = async ({
   receiptId: string;
   razorpayOrderId: string;
   navigate: NavigateFunction;
+  dispatch: AppDispatch;
   razorpayPaymentId: string;
   razorpaySignature: string;
 }) => {
-
   try {
     const paymentVerification = await axios.post(
       `${ApiUrls.verifyPayment}`,
@@ -133,6 +135,7 @@ const verifyPayment = async ({
     );
     if (paymentVerification.data.status >= 200) {
       toast.success("Order placed. Thanks for shopping with us.");
+      dispatch(getCart());
       navigate(AppRoutes.products);
     } else {
       toast.error("Payment verification failed.");

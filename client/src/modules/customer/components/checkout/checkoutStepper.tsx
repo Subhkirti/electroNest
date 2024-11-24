@@ -144,6 +144,7 @@ export default function CheckoutStepper() {
           razorpaySignature: response.razorpay_signature,
           razorpayOrderId: response.razorpay_order_id,
           navigate,
+          dispatch,
         });
       },
       modal: {
