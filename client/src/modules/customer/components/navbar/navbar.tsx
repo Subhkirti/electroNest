@@ -31,6 +31,7 @@ import { getAllCategories } from "../../../../store/customer/product/action";
 import { ExpandMore } from "@mui/icons-material";
 import { CategoryState } from "../../types/productTypes";
 import { getCart, getCartItems } from "../../../../store/customer/cart/action";
+import { getCategoryPath } from "../../utils/productUtils";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -87,13 +88,13 @@ export default function Navbar() {
   };
 
   const handleCategoryClick = (category: any, section: any, item: any) => {
-    if (category?.categoryId && section?.sectionId && item?.itemId) {
-      navigate(`/${category.categoryId}/${section.sectionId}/${item.itemId}`);
-    } else if (category?.categoryId && section?.sectionId) {
-      navigate(`/${category.categoryId}/${section.sectionId}`);
-    } else if (category?.categoryId) {
-      navigate(`/${category.categoryId}`);
-    }
+    navigate(
+      getCategoryPath({
+        categoryId: category?.categoryId,
+        sectionId: section?.sectionId,
+        itemId: item?.itemId,
+      })
+    );
     handleCloseUserMenu();
     setOpen(false);
     setShowMore(false);

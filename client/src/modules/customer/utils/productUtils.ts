@@ -1,3 +1,4 @@
+import { NavigateFunction } from "react-router-dom";
 import AppRoutes from "../../../common/appRoutes";
 import { CategoryBreadcrumbs, CategoryState } from "../types/productTypes";
 
@@ -75,7 +76,11 @@ function loadCategoryBreadCrumbs(categories: CategoryState[], product: any) {
     if (category) {
       categoryBreadcrumbs.push({
         category: category.categoryName || "",
-        path: category.categoryId ? `/${category.categoryId}` : AppRoutes.home,
+        path: getCategoryPath({
+          categoryId: category.categoryId || "",
+          sectionId: "",
+          itemId: "",
+        }),
       });
 
       // Find the matching section
@@ -86,9 +91,11 @@ function loadCategoryBreadCrumbs(categories: CategoryState[], product: any) {
       if (section) {
         categoryBreadcrumbs.push({
           category: section.sectionName || "",
-          path: section.sectionId
-            ? `/${category.categoryId}/${section.sectionId}`
-            : AppRoutes.home,
+          path: getCategoryPath({
+            categoryId: category.categoryId || "",
+            sectionId: section.sectionId,
+            itemId: "",
+          }),
         });
 
         // Find the matching item
@@ -99,9 +106,11 @@ function loadCategoryBreadCrumbs(categories: CategoryState[], product: any) {
         if (item) {
           categoryBreadcrumbs.push({
             category: item.itemName || "",
-            path: item.itemId
-              ? `/${category.categoryId}/${section.sectionId}/${item.itemId}`
-              : AppRoutes.home,
+            path: getCategoryPath({
+              categoryId: category.categoryId || "",
+              sectionId: section.sectionId,
+              itemId: item.itemId,
+            }),
           });
         }
       }
@@ -122,10 +131,31 @@ function getQuerySearch(param: string) {
   const value = querySearch.get(param) || "";
   return value;
 }
+
+function getCategoryPath({
+  categoryId,
+  sectionId,
+  itemId,
+}: {
+  categoryId: string;
+  sectionId?: string;
+  itemId?: string;
+}) {
+  if (categoryId && sectionId && itemId) {
+    return `/products/${categoryId}/${sectionId}/${itemId}`;
+  } else if (categoryId && sectionId) {
+    return `/products/${categoryId}/${sectionId}`;
+  } else if (categoryId) {
+    return `/products/${categoryId}`;
+  } else {
+    return AppRoutes.products;
+  }
+}
 export {
   productFilters,
   sortOptions,
   loadCategoryBreadCrumbs,
   getCheckoutStep,
-  getQuerySearch
+  getQuerySearch,
+  getCategoryPath,
 };
