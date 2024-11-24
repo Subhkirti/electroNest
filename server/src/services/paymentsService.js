@@ -17,9 +17,9 @@ checkPaymentsTableExistence();
 
 // Create Payment API
 app.post("/payment/create", (req, res) => {
-  const { userId, orderId, amount } = req.body;
+  const { userId, orderId, amount, receipt } = req.body;
 
-  if (!userId || !orderId || !amount) {
+  if (!userId || !orderId || !amount || !receipt) {
     return res
       .status(400)
       .json({ status: 400, message: "Missing required fields" });
@@ -38,41 +38,61 @@ app.post("/payment/create", (req, res) => {
         .status(500)
         .json({ status: 500, message: "Error creating payment order" });
     }
+
     connection.query(
-      `SELECT receipt FROM orders WHERE id = ?`,
-      [orderId],
+      `SELECT * FROM ${paymentsTableName} WHERE LOWER(receipt_id) = LOWER(?)`,
+      [receipt],
       (err, receiptResult) => {
+
         if (err || !receiptResult.length) {
-          return res
-            .status(500)
-            .json({ status: 500, message: "Error fetching receipt_id" });
-        }
+          connection.query(
+            `INSERT INTO ${paymentsTableName} (user_id, order_id, razorpay_order_id, receipt_id, amount, payment_status) VALUES (?, ?, ?, ?, ?, ?)`,
+            [userId, orderId, razorpayOrder.id, receipt, amount, "pending"],
+            (err) => {
+              if (err) {
+                return res.status(500).json({
+                  status: 500,
+                  message: "Error saving payment details",
+                });
+              }
 
-        const receiptId = receiptResult[0].receipt;
-
-        // Save payment details to database
-        connection.query(
-          `INSERT INTO ${paymentsTableName} (user_id, order_id, razorpay_order_id, amount, payment_status) VALUES (?, ?, ?, ?, ?)`,
-          [userId, orderId, razorpayOrder.id, amount, "pending"],
-          (err) => {
-            if (err) {
-              console.log("err:", err);
-              return res
-                .status(500)
-                .json({ status: 500, message: "Error saving payment details" });
+              return res.status(200).json({
+                status: 200,
+                message: "Payment order created successfully",
+                data: {
+                  receipt,
+                  razorpayOrderId: razorpayOrder.id,
+                  amount: options.amount / 100, // Convert back to INR
+                },
+              });
             }
+          );
+        } else {
+          const razorpayOrderId = receiptResult?.[0]?.razorpay_order_id;          
+          // Save payment details to database
+          connection.query(
+            `INSERT INTO ${paymentsTableName} (user_id, order_id, razorpay_order_id, receipt_id, amount, payment_status) VALUES (?, ?, ?, ?, ?, ?)`,
+            [userId, orderId, razorpayOrderId, receipt, amount, "pending"],
+            (err) => {
+              if (err) {
+                return res.status(500).json({
+                  status: 500,
+                  message: "Error saving payment details",
+                });
+              }
 
-            return res.status(200).json({
-              status: 200,
-              message: "Payment order created successfully",
-              data: {
-                receiptId,
-                razorpayOrderId: razorpayOrder.id,
-                amount: options.amount / 100, // Convert back to INR
-              },
-            });
-          }
-        );
+              return res.status(200).json({
+                status: 200,
+                message: "Payment order created successfully",
+                data: {
+                  receipt,
+                  razorpayOrderId: razorpayOrderId,
+                  amount: options.amount / 100, // Convert back to INR
+                },
+              });
+            }
+          );
+        }
       }
     );
   });
@@ -115,7 +135,6 @@ app.post("/payment/verify", (req, res) => {
         `UPDATE ${ordersTableName} SET status = 'placed' WHERE id = (SELECT order_id FROM ${paymentsTableName} WHERE receipt = ?)`,
         [receiptId],
         (err, updateOrderResult) => {
-          console.log("receiptId:", receiptId, "err:", err, updateOrderResult);
 
           if (err) {
             return res
@@ -188,6 +207,7 @@ function checkPaymentsTableExistence() {
           razorpay_order_id VARCHAR(255), 
           amount DECIMAL(10, 2), 
           payment_status ENUM('pending', 'completed', 'failed', 'cancelled', 'refunded') NOT NULL DEFAULT 'pending',
+          receipt_id VARCHAR(255),
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

@@ -2,10 +2,8 @@ const connection = require("../connection");
 const app = require("../app");
 const ordersTableName = "orders";
 const PORT = process.env.PORT;
-
 checkOrdersTableExistence();
 
-// Create Order API
 app.post("/order/create", async (req, res) => {
   const { userId, cartId, addressId, status, productId } = req.body;
 
@@ -16,190 +14,157 @@ app.post("/order/create", async (req, res) => {
   }
 
   try {
-    await createNewOrder(userId, cartId, addressId, status, productId, res);
+    const result = await createNewOrder(
+      userId,
+      cartId,
+      addressId,
+      status,
+      productId
+    );
+    res.status(result.status).json(result);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ status: 500, message: "Internal server error" });
+    console.error("Error creating order:", error);
+    res.status(500).json({ status: 500, message: "Internal server error" });
   }
 });
 
-// Function to create a new order for each product in the cart or single product
-async function createNewOrder(
-  userId,
-  cartId,
-  addressId,
-  status,
-  productId,
-  res
-) {
+async function createNewOrder(userId, cartId, addressId, status, productId) {
   if (cartId) {
-    // Create order for all items in the cart
-    try {
-      const cartItems = await getCartItems(cartId);
-
-      if (!cartItems.length) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "No items found in cart" });
-      }
-
-      for (let item of cartItems) {
-        const transactionAmount =
-          (item.price + item.delivery_charges - item.discount_price) *
-          item.quantity;
-
-        const orderId = await insertIntoOrdersTable([
-          userId,
-          addressId,
-          status || "pending",
-          item.product_id,
-          item.quantity,
-          transactionAmount,
-          Math.floor(Date.now() / 1000),
-        ]);
-
-        if (orderId) {
-          insertIntoPaymentsTable(userId, orderId, transactionAmount, res);
-        }
-      }
-    } catch (err) {
-      return res
-        .status(500)
-        .json({ status: 500, message: "Error processing cart items" });
+    const cartItems = await getCartItems(cartId);
+    let res;
+    if (!cartItems.length) {
+      return { status: 400, message: "No items found in cart" };
     }
-  } else if (productId) {
-    // Create order for a single product (Buy Now)
-    try {
-      const product = await getProduct(productId);
 
-      if (!product) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "Product not found" });
-      }
+    for (let item of cartItems) {
+      const transactionAmount =
+        (item.price + item.delivery_charges - item.discount_price) *
+        item.quantity;
 
-      const transactionAmount = product.net_price + product.delivery_charges;
-
-      const orderId = await insertIntoOrdersTable([
+      const orderId = await insertOrder(
         userId,
         addressId,
         status || "pending",
-        productId,
-        1,
-        transactionAmount,
-        Math.floor(Date.now() / 1000),
-      ]);
-
-
-      if (orderId) {
-        insertIntoPaymentsTable(userId, orderId, transactionAmount, res);
-      }
-    } catch (err) {
-      return res
-        .status(500)
-        .json({ status: 500, message: "Error processing product" });
+        item.product_id,
+        item.quantity,
+        transactionAmount
+      );
+      if (!orderId) throw new Error("Error inserting order");
+      res = await createPayment(userId, orderId, transactionAmount);
+      console.log("res2.1:", res);
     }
+    console.log("res2.2:", res);
+
+    return {
+      status: 200,
+      message: "Order and payment created successfully",
+      data: res?.data,
+    };
+  } else if (productId) {
+    const product = await getProduct(productId);
+    if (!product) {
+      return { status: 400, message: "Product not found" };
+    }
+
+    const transactionAmount = product.net_price + product.delivery_charges;
+    const orderId = await insertOrder(
+      userId,
+      addressId,
+      status || "pending",
+      productId,
+      1,
+      transactionAmount
+    );
+    if (!orderId) throw new Error("Error inserting order");
+    const res = await createPayment(userId, orderId, transactionAmount);
+    console.log("res1:", res);
+    return {
+      status: 200,
+      message: "Order and payment created successfully",
+      data: res?.data,
+    };
   } else {
-    return res.status(400).json({
-      status: 400,
-      message: "Unable to place order. Try again later.",
-    });
+    return { status: 400, message: "Unable to place order. Try again later." };
   }
 }
 
-// Fetch cart items
 function getCartItems(cartId) {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      `SELECT ci.product_id, ci.quantity, ci.price, ci.delivery_charges, ci.discount_price
-      FROM cart_items ci
-      JOIN products p ON ci.product_id = p.product_id
-      WHERE ci.cart_id = ?`,
-      [cartId],
-      (err, cartItems) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(cartItems);
-        }
-      }
-    );
-  });
+  return executeQuery(
+    `SELECT ci.product_id, ci.quantity, ci.price, ci.delivery_charges, ci.discount_price
+     FROM cart_items ci
+     JOIN products p ON ci.product_id = p.product_id
+     WHERE ci.cart_id = ?`,
+    [cartId]
+  );
 }
 
-// Fetch product details
-function getProduct(productId) {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      `SELECT * FROM products WHERE product_id = ?`,
-      [productId],
-      (err, products) => {
-        if (err || !products.length) {
-          reject(err || "Product not found");
-        } else {
-          resolve(products[0]);
-        }
-      }
-    );
-  });
+async function getProduct(productId) {
+  return executeQuery(`SELECT * FROM products WHERE product_id = ?`, [
+    productId,
+  ])
+    .then((results) => results[0])
+    .catch(() => null);
 }
 
-// Insert orders into the orders table
-// Insert orders into the orders table
-function insertIntoOrdersTable(ordersData) {
-  return new Promise((resolve, reject) => {
-    // Ensure ordersData is in the correct format for batch insertion
-    if (!Array.isArray(ordersData) || ordersData.length === 0) {
-      return reject("Invalid orders data format.");
+async function insertOrder(
+  userId,
+  addressId,
+  status,
+  productId,
+  quantity,
+  transactionAmount
+) {
+  return executeQuery(
+    `INSERT INTO ${ordersTableName} (user_id, address_id, status, product_id, quantity, transaction_amount, receipt) 
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [
+      userId,
+      addressId,
+      status,
+      productId,
+      quantity,
+      transactionAmount,
+      Math.floor(Date.now() / 1000),
+    ]
+  ).then((result) => result.insertId);
+}
+
+async function createPayment(userId, orderId, amount) {
+  connection.query(
+    `SELECT receipt FROM ${ordersTableName} WHERE id = ?`,
+    [orderId],
+    async (err, res) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ status: 500, message: "Error counting orders" });
+      }
+      await fetch(`http://localhost:${PORT}/payment/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          orderId,
+          amount,
+          receipt: res?.[0]?.receipt || null,
+        }),
+      })
+        .then((response) => response.json())
+        .then((paymentResponse) => {
+        console.log('paymentResponse:', paymentResponse)
+        return paymentResponse
+        });
     }
-    connection.query(
-      `INSERT INTO ${ordersTableName} (user_id, address_id, status, product_id, quantity, transaction_amount, receipt) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      ordersData,
-      (err, insertResult) => {
-        if (err) {
-          reject("Error creating orders");
-        } else {
-          resolve(insertResult.insertId);
-        }
-      }
-    );
-  });
+  );
 }
 
-// Insert data into payments table
-function insertIntoPaymentsTable(userId, orderId, amount, res) {
-  fetch(`http://localhost:${PORT}/payment/create`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ userId, orderId, amount }),
-  })
-    .then((response) => response.json())
-    .then((paymentResponse) => {
-      if (paymentResponse.status === 200) {
-        // Payment was created successfully
-        return res.status(200).json({
-          status: 200,
-          message: "Order and payment created successfully",
-          data: paymentResponse.data,
-        });
-      } else {
-        // Handle payment creation failure
-        return res.status(500).json({
-          status: 500,
-          message: "Order created, but payment creation failed",
-        });
-      }
-    })
-    .catch((err) => {
-      console.error("Error calling /payment/create API:", err);
-      return res.status(500).json({
-        status: 500,
-        message: "Error calling payment API",
-      });
+function executeQuery(query, params = []) {
+  return new Promise((resolve, reject) => {
+    connection.query(query, params, (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
     });
+  });
 }
 
 // Fetch all orders (with pagination)
@@ -266,37 +231,36 @@ app.get("/order-details", (req, res) => {
 
 // Check if the orders table exists and create it if not
 function checkOrdersTableExistence() {
-  const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
+  const checkQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = ? AND table_name = ?`;
+  connection.query(
+    checkQuery,
+    [process.env.DB_NAME, ordersTableName],
+    (err, results) => {
+      if (err) {
+        console.error("Error checking orders table existence:", err);
+        return;
+      }
 
-  connection.query(checkTableQuery, [ordersTableName], (err, results) => {
-    if (err) {
-      console.error("Error checking orders table existence:", err);
-      return;
-    }
-
-    if (results[0].count === 0) {
-      const createTableQuery = `
+      if (results[0].count === 0) {
+        const createTableQuery = `
         CREATE TABLE ${ordersTableName} (
           id INT AUTO_INCREMENT PRIMARY KEY,
           user_id INT,
           address_id INT,
           cart_id INT,
-          status ENUM('pending', 'placed', 'orderConfirmed', 'shipped', 'outForDelivery', 'delivered', 'cancelled', 'failed', 'refunded', 'returned') NOT NULL DEFAULT 'pending',
+          status ENUM('pending', 'placed', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
           product_id INT,
           quantity INT,
           transaction_amount DECIMAL(10, 2),
           receipt VARCHAR(255),
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-          FOREIGN KEY (address_id) REFERENCES addresses(id) ON DELETE CASCADE,
-          FOREIGN KEY (cart_id) REFERENCES cart(id) ON DELETE CASCADE
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )`;
-
-      connection.query(createTableQuery, (err) => {
-        if (err) console.error("Error creating orders table:", err);
-        else console.log("Orders table created successfully.");
-      });
+        connection.query(createTableQuery, (err) => {
+          if (err) console.error("Error creating orders table:", err);
+          else console.log("Orders table created successfully.");
+        });
+      }
     }
-  });
+  );
 }
