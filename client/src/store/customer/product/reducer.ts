@@ -12,6 +12,7 @@ const initState: ProductState = {
   thirdLevelCategories: [],
   categories: [],
   products: [],
+  productsCarousel: [],
   product: null,
   newProduct: null,
   isLoading: false,
@@ -43,7 +44,15 @@ function productReducer(
     case ActionTypes.DELETE_SECOND_LEVEL_CATEGORIES_REQUEST:
     case ActionTypes.DELETE_THIRD_LEVEL_CATEGORIES_REQUEST:
     case ActionTypes.GET_ALL_CATEGORIES_REQUEST:
+    case ActionTypes.GET_PRODUCTS_CAROUSEL_REQUEST:
       return { ...state, isLoading: true, error: null };
+    case ActionTypes.GET_PRODUCTS_CAROUSEL_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        productsCarousel: action?.payload,
+      };
     case ActionTypes.FIND_PRODUCTS_SUCCESS:
       return {
         ...state,
@@ -249,6 +258,7 @@ function productReducer(
     case ActionTypes.DELETE_SECOND_LEVEL_CATEGORIES_FAILURE:
     case ActionTypes.DELETE_THIRD_LEVEL_CATEGORIES_FAILURE:
     case ActionTypes.GET_ALL_CATEGORIES_FAILURE:
+    case ActionTypes.GET_PRODUCTS_CAROUSEL_FAILURE:
       return { ...state, isLoading: false, error: action?.payload };
     default:
       return state;

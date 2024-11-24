@@ -10,13 +10,15 @@ function ProductCard({ product }: { product: Product }) {
   const navigate = useNavigate();
   return product.productId ? (
     <div
-      onClick={() => navigate(`/product/${product.productId}`)}
+      onClick={() => navigate(product.path)}
       className="productCard relative hover:shadow-lg hover:border-gray-300 border rounded-md w-[16rem] bg-white m-2 transition-all cursor-pointer"
     >
       {/* image section */}
-      <div className="h-[12rem] flex justify-center my-4 hover:scale-125 transition-all duration-700 px-3">
-        <img src={product?.images?.[0]} alt="" />
+      <div className="aspect-w-1 aspect-h-1 flex justify-center my-4 hover:scale-105 transition-all duration-700 px-3">
+        <img src={product?.images?.[0]} alt="" className="object-contain" />
       </div>
+
+      {/* delivery charges ribbon */}
       {product.deliveryCharges <= 0 && (
         <div className="absolute ribbon top-0 left-0 font-bold text-sm">
           <LocalShipping sx={{ fontSize: "16px" }} />

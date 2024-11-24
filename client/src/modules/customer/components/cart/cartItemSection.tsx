@@ -43,7 +43,7 @@ function CartItemSection({
       <div className="flex flex-col lg:flex-row ">
         <div
           className="w-[12rem] h-[12rem] lg:w-[9rem] self-center lg:h-[9rem] cursor-pointer"
-          onClick={() => navigate(`/product/${cartItemProduct?.productId}`)}
+          onClick={() => navigate(cartItemProduct.path)}
         >
           <img
             src={cartItemProduct?.images?.[0]}
@@ -56,7 +56,7 @@ function CartItemSection({
         <div className="lg:ml-5 space-y-1 align-baseline">
           <p
             className="font-semibold cursor-pointer"
-            onClick={() => navigate(`/product/${cartItemProduct?.productId}`)}
+            onClick={() => navigate(cartItemProduct.path)}
           >
             {cartItemProduct?.productName}
           </p>

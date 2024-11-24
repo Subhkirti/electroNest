@@ -13,7 +13,6 @@ import { loadCategoryBreadCrumbs } from "../../utils/productUtils";
 import { CategoryBreadcrumbs } from "../../types/productTypes";
 import NotFound from "../../../../common/components/notFound";
 import AppStrings from "../../../../common/appStrings";
-import "react-multi-carousel/lib/styles.css";
 import Breadcrumbs from "./breadcrumbs";
 import ProductImageGallery from "./productImageGallery";
 import SimilarProducts from "./similarProducts";

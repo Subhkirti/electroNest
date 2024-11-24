@@ -1,6 +1,10 @@
 import { ThunkDispatch } from "redux-thunk";
 import { User } from "../modules/customer/types/userTypes";
-import { CategoryState, Product } from "../modules/customer/types/productTypes";
+import {
+  CategoryState,
+  Product,
+  TopLevelCategories,
+} from "../modules/customer/types/productTypes";
 import { SvgIconTypeMap } from "@mui/material";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
 import { Cart, CartItem } from "../modules/customer/types/cartTypes";
@@ -45,6 +49,7 @@ interface ProductState {
   thirdLevelCategories: any[];
   categories: CategoryState[];
   products: Product[];
+  productsCarousel: ProductsCarouselState[];
   product: Product | null;
   newProduct: Product | null;
   isLoading: boolean;
@@ -53,6 +58,10 @@ interface ProductState {
   topLCategoryCount: number;
   secondLCategoryCount: number;
   thirdLCategoryCount: number;
+}
+interface ProductsCarouselState {
+  category: TopLevelCategories;
+  products: Product[];
 }
 
 interface CartState {

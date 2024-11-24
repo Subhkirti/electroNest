@@ -66,6 +66,7 @@ interface Product {
   quantity: number;
   brand: string;
   color: string;
+  path: string;
   size: string;
   images: string[];
   categoryId: string;

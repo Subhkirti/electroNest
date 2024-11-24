@@ -30,9 +30,12 @@ const categoryStateIds = {
 const productColors = [
   { label: "White", value: "white" },
   { label: "Black", value: "black" },
+  { label: "Premium Black", value: "premium-black" },
   { label: "Red", value: "red" },
   { label: "Green", value: "green" },
+  { label: "Aloe", value: "aloe" },
   { label: "Blue", value: "blue" },
+  { label: "Midnight Blue", value: "midnight-blue" },
   { label: "Yellow", value: "yellow" },
   { label: "Orange", value: "orange" },
   { label: "Purple", value: "purple" },

@@ -695,6 +695,64 @@ app.get("/third-level-categories", (req, res) => {
   );
 });
 
+/* Get products carousel list for home page */
+app.get("/products-carousel", (req, res) => {
+  const pageNumber = 1;
+  const pageSize = 20;
+  const limit = parseInt(pageSize);
+  const offset = (parseInt(pageNumber) - 1) * limit;
+
+  // First query to get top-level categories
+  connection.query(
+    `SELECT * FROM ${topLevelCateTableName} LIMIT 6`,
+    (err, results) => {
+      if (err) {
+        return res.status(400).json({
+          status: 400,
+          message: "Error while getting top level categories",
+        });
+      }
+
+      // Use Promise.all to handle multiple asynchronous queries
+      const categoryPromises = results.map((category) => {
+        const selectQuery = `SELECT * FROM ${tableName} WHERE LOWER(category_id) = ? LIMIT ? OFFSET ?`;
+        const categoryId = category?.category_id?.trim().toLowerCase();
+        return new Promise((resolve, reject) => {
+          connection.query(
+            selectQuery,
+            [categoryId, limit, offset],
+            (err, products) => {
+              if (err) {
+                reject(err);
+              } else {
+                // Include category and its products
+                resolve({
+                  category,
+                  products,
+                });
+              }
+            }
+          );
+        });
+      });
+
+      Promise.all(categoryPromises)
+        .then((categoriesWithProducts) => {
+          res.status(200).json({
+            status: 200,
+            data: categoriesWithProducts,
+          });
+        })
+        .catch((err) => {
+          res.status(400).json({
+            status: 400,
+            message: "Error while getting products",
+          });
+        });
+    }
+  );
+});
+
 /* Add top level category */
 app.post("/top-level-categories/add", (req, res) => {
   const { categoryName } = req.body;

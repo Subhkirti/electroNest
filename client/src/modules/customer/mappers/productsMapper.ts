@@ -1,3 +1,4 @@
+import AppRoutes from "../../../common/appRoutes";
 import {
   Product,
   SecondLevelCategories,
@@ -69,6 +70,7 @@ function productMap(doc: any): Product {
     brand: doc?.brand || "",
     color: doc?.color || "",
     size: doc?.size || "",
+    path: doc?.product_id ? `/product/${doc?.product_id}` : AppRoutes.products,
     images: doc?.images.length ? JSON.parse(doc?.images) : [],
     categoryId: doc?.category_id || "",
     sectionId: doc?.section_id || "",
@@ -84,10 +86,18 @@ function productMap(doc: any): Product {
   };
 }
 
+function productsCarouselMap(doc: any) {
+  return {
+    category: topLevelCategoriesMap(doc?.category),
+    products: doc?.products.map(productMap),
+  };
+}
+
 export {
   topLevelCategoriesMap,
   secondLevelCategoriesMap,
   thirdLevelCategoriesMap,
   productMap,
   categoriesMap,
+  productsCarouselMap,
 };

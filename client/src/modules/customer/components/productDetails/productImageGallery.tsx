@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Carousel from "react-multi-carousel";
+
 import { carouselBreakpoints } from "../../../../common/constants";
 import { formatAmount } from "../../../admin/utils/productUtil";
 import { Button, Rating } from "@mui/material";
@@ -50,6 +51,7 @@ function ProductImageGallery({ product }: { product: Product }) {
           containerClass="w-full my-6"
           dotListClass="carousel-dots"
           showDots={true}
+          slidesToSlide={2}
         >
           {product?.images?.length > 0 &&
             product?.images.map((item, index) => {

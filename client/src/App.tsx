@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import CustomerRoutes from "./routes/customer/customerRoutes";
 import { Suspense } from "react";
+import "react-multi-carousel/lib/styles.css";
 import ErrorBoundary from "./routes/errorBoudnary";
 import AdminRoutes from "./routes/admin/adminRoutes";
 import "./App.css";

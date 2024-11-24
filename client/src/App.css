@@ -71,21 +71,17 @@ input:-webkit-autofill:focus {
   align-items: center;
   z-index: 1;
   clip-path: polygon(75% 0%, 57% 49%, 75% 100%, 0% 100%, 0 50%, 0% 0%);
-
 }
 
 .ribbon::before,
 .ribbon::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   height: 100%;
   border-style: solid;
   z-index: -1;
 }
-
-
-
 
 /* admin classes */
 .admin-container {
@@ -112,6 +108,7 @@ input:-webkit-autofill:focus {
 .react-multi-carousel-track {
   margin-bottom: 16px !important;
 }
+
 .carousel-dots .react-multi-carousel-dot--active button {
   background-color: rgb(172, 171, 171) !important;
 }

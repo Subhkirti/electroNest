@@ -5,6 +5,7 @@ const ApiUrls = {
   login: apiBaseUrl + "/signin",
   getUsers: apiBaseUrl + "/users?",
   findUsers: apiBaseUrl + "/user-details?",
+  getProductsCarousel: apiBaseUrl + "/products-carousel",
   addUser: apiBaseUrl + "/user/add",
   editUser: apiBaseUrl + "/user/edit?",
   deleteUser: apiBaseUrl + "/user/delete?",

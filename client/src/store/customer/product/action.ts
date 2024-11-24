@@ -13,6 +13,7 @@ import {
 import {
   categoriesMap,
   productMap,
+  productsCarouselMap,
   secondLevelCategoriesMap,
   thirdLevelCategoriesMap,
   topLevelCategoriesMap,
@@ -490,6 +491,26 @@ const uploadFile = async (filePath: File | null) => {
     );
   }
 };
+/* Categories section start here */
+const getHomeProductsCarousel = () => async (dispatch: ActionDispatch) => {
+  dispatch({ type: ActionTypes.GET_PRODUCTS_CAROUSEL_REQUEST });
+
+  try {
+    const res = await axios.get(ApiUrls.getProductsCarousel, );
+
+    dispatch({
+      type: ActionTypes.GET_PRODUCTS_CAROUSEL_SUCCESS,
+      payload:
+        res?.data?.data?.length > 0 ? res?.data?.data.map(productsCarouselMap) : [],
+    });
+  } catch (error) {
+    handleCatchError({
+      error,
+      actionType: ActionTypes.GET_PRODUCTS_CAROUSEL_FAILURE,
+    });
+  }
+};
+
 
 export {
   getProducts,
@@ -509,4 +530,5 @@ export {
   deleteTopLevelCategory,
   deleteSecondLevelCategory,
   deleteThirdLevelCategory,
+  getHomeProductsCarousel
 };
