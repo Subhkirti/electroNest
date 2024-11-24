@@ -7,7 +7,13 @@ import { findProductsById } from "../../../../store/customer/product/action";
 import PriceDetails from "./priceDetails";
 import Cart from "../cart/cart";
 
-function Checkout({ onNextCallback }: { onNextCallback?: () => void }) {
+function Checkout({
+  onNextCallback,
+  isOrderSummary,
+}: {
+  onNextCallback?: () => void;
+  isOrderSummary?: boolean;
+}) {
   const dispatch = useDispatch<AppDispatch>();
   const querySearch = new URLSearchParams(window.location.search);
   const productId = querySearch.get("product_id") || "";
@@ -15,10 +21,16 @@ function Checkout({ onNextCallback }: { onNextCallback?: () => void }) {
   const { product } = useSelector((state: RootState) => state.product);
 
   useEffect(() => {
-    if (productId) {
-      dispatch(findProductsById(productId));
-    }
-  }, []);
+    const timer = setTimeout(() => {
+      if (productId) {
+        dispatch(findProductsById(productId));
+      }
+    }, 10);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [productId]);
 
   return productId && product ? (
     <div className="lg:grid grid-cols-3 relative">
@@ -26,7 +38,7 @@ function Checkout({ onNextCallback }: { onNextCallback?: () => void }) {
         <CartItemSection
           quantity={1}
           cartItemProduct={product}
-          isOrderSummary={false}
+          isOrderSummary={isOrderSummary}
         />
       </div>
       <PriceDetails onNextCallback={onNextCallback} />

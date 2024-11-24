@@ -6,7 +6,7 @@ import { formatAmount } from "../../../admin/utils/productUtil";
 import Loader from "../../../../common/components/loader";
 import AppStrings from "../../../../common/appStrings";
 import AppRoutes from "../../../../common/appRoutes";
-import { fetchCheckoutStep } from "../../utils/productUtils";
+import { getCheckoutStep } from "../../utils/productUtils";
 
 function PriceDetails({
   isOrderSummary,

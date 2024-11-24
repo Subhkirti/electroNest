@@ -1,44 +1,35 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
-import OrderSummary from "./orderSummary";
-import AddDeliveryAddress from "./addDeliveryAddress";
-import { fetchCheckoutStep } from "../../utils/productUtils";
+import { getCheckoutStep, getQuerySearch } from "../../utils/productUtils";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
 import {
   createOrder,
   getOrderHistory,
-  verifyPayment,
 } from "../../../../store/customer/order/action";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { getCurrentUser } from "../../utils/localStorageUtils";
 import { OrderStatus } from "../../types/orderTypes";
 import Loader from "../../../../common/components/loader";
-import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
-import PageNotFound from "../../../../common/components/404Page";
 import AppRoutes from "../../../../common/appRoutes";
-import Checkout from "./checkout";
+import RenderActiveStep from "./renderActiveStep";
 
-const steps = ["Checkout", "Add Delivery Address", "Order Summary", "Payment"];
+const checkoutSteps = ["Checkout", "Add Delivery Address", "Order Summary", "Payment"];
 
 export default function CheckoutStepper() {
-  const { error, isLoading: razorpayLoading, Razorpay } = useRazorpay();
-  const [paymentError, setPaymentError] = useState("");
-  const activeStep = fetchCheckoutStep();
+  const activeStep = getCheckoutStep();
   const navigate = useNavigate();
   const user = getCurrentUser();
   const userId = user?.id || 0;
-  const [seconds, setSeconds] = useState(3);
-  const querySearch = new URLSearchParams(window.location.search);
-  const receiptId = querySearch.get("receipt_id") || "";
-  const razorpayOrderId = querySearch.get("razorpay_id") || "";
-  const productId = querySearch.get("product_id") || "";
+  const receiptId = getQuerySearch("receipt_id");
+  const razorpayOrderId = getQuerySearch("razorpay_id");
+  const productId = getQuerySearch("product_id");
   const dispatch = useDispatch<AppDispatch>();
   const { isLoading, orders } = useSelector((state: RootState) => state.order);
   const { cart } = useSelector((state: RootState) => state.cart);
@@ -48,39 +39,18 @@ export default function CheckoutStepper() {
     : 0;
 
   useEffect(() => {
-    if (activeStep === 4) {
-      const beforeUnloadHandler = (event: any) => {
-        navigate(AppRoutes.home);
-      };
-      window.addEventListener("load", beforeUnloadHandler);
-
-      if (paymentError) {
-        if (seconds === 0) {
-          navigate(AppRoutes.home);
-        }
-        if (seconds > 0) {
-          const timer = setInterval(() => {
-            setSeconds(seconds - 1);
-          }, 1000);
-
-          return () => {
-            clearTimeout(timer);
-            window.removeEventListener("load", beforeUnloadHandler);
-          };
-        }
-      }
-      setTimeout(() => {
-        handlePaymentStep();
-      }, 1000);
-    }
     if (activeStep === 3) {
       !orders.length && dispatch(getOrderHistory());
     }
-  }, [activeStep, paymentError, seconds]);
+  }, [activeStep]);
 
   const handleNext = async () => {
     if (activeStep === 1) {
-      return navigate(`${AppRoutes.checkout}?step=2`);
+      return navigate(
+        productId
+          ? `${AppRoutes.checkout}?step=2&product_id=${productId}`
+          : `${AppRoutes.checkout}?step=2`
+      );
     }
     if (activeStep === 2) {
       return handleAddAddressStep();
@@ -113,58 +83,6 @@ export default function CheckoutStepper() {
     );
   };
 
-  const handlePaymentStep = () => {
-    if (!razorpayOrderId || !receiptId || !totalAmount) {
-      navigate(-1);
-      return;
-    }
-
-    const options: RazorpayOrderOptions = {
-      key: process.env.REACT_APP_RAZORPAY_API_KEY || "",
-      amount: totalAmount * 100,
-      currency: "INR",
-      order_id: razorpayOrderId,
-      name: "ElectroNest",
-      description: "Test transaction by ElectroNest",
-      prefill: {
-        name: user?.name,
-        email: user?.email,
-        contact: user?.phoneNumber?.toString(),
-      },
-      callback_url: "/payment-success",
-      handler: async (response: {
-        razorpay_payment_id: string;
-        razorpay_signature: string;
-        razorpay_order_id: string;
-      }) => {
-        await verifyPayment({
-          cartId: cart?.cartId || 0,
-          receiptId,
-          razorpayPaymentId: response.razorpay_payment_id,
-          razorpaySignature: response.razorpay_signature,
-          razorpayOrderId: response.razorpay_order_id,
-          navigate,
-          dispatch,
-        });
-      },
-      modal: {
-        ondismiss() {
-          setPaymentError("Transaction Failed.");
-        },
-      },
-      theme: {
-        color: "#4f45e4",
-      },
-    };
-
-    try {
-      const razorpayInstance = new Razorpay(options);
-      razorpayInstance && seconds > 0 && razorpayInstance.open();
-    } catch (err) {
-      toast.error("Server Error while creating payment link.");
-    }
-  };
-
   const handleBack = () => {
     navigate(`?step=${activeStep - 1}`);
   };
@@ -172,47 +90,25 @@ export default function CheckoutStepper() {
   return (
     <Box sx={{ width: "100%" }}>
       {isLoading && <Loader color="primary" fixed={true} />}
-      {activeStep <= steps.length && (
+      {activeStep <= checkoutSteps.length && (
         <Stepper
           activeStep={activeStep - 1}
           style={{ backgroundColor: "white", padding: "20px 0px" }}
         >
-          {steps.map((label, index) => (
+          {checkoutSteps.map((label, index) => (
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
             </Step>
           ))}
         </Stepper>
       )}
-      {activeStep < steps.length && (cart || productId) && <NavigatorButtons />}
+      {activeStep < checkoutSteps.length && (cart || productId) && <NavigatorButtons />}
 
       <div className="mt-4">
-        <RenderStepComponent onNextCallback={handleNext} seconds={seconds} />
+        <RenderActiveStep activeStep={activeStep} onNextCallback={handleNext} />
       </div>
     </Box>
   );
-
-  // Render active step component section
-  function RenderStepComponent({
-    onNextCallback,
-    seconds,
-  }: {
-    onNextCallback: () => void;
-    seconds: number;
-  }) {
-    switch (activeStep) {
-      case 1:
-        return <Checkout onNextCallback={onNextCallback} />;
-      case 2:
-        return <AddDeliveryAddress onNextCallback={onNextCallback} />;
-      case 3:
-        return <OrderSummary onNextCallback={onNextCallback} />;
-      case 4:
-        return <Payment seconds={seconds} />;
-      default:
-        return <PageNotFound />;
-    }
-  }
 
   // Navigation buttons
   function NavigatorButtons() {
@@ -237,37 +133,9 @@ export default function CheckoutStepper() {
               "polygon(75% 0%, 100% 50%, 75% 100%, 0% 100%, 0 50%, 0% 0%)",
           }}
         >
-          {activeStep === steps.length ? "Finish" : "Next"}
+          {activeStep === checkoutSteps.length ? "Finish" : "Next"}
         </Button>
       </Box>
-    );
-  }
-
-  // Payments section
-  function Payment({ seconds }: { seconds: number }) {
-    return (
-      <div className="flex justify-center space-y-3">
-        <p className="text-2xl font-bold mt-20">
-          {error ? (
-            "Error loading Razorpay: " + { error }
-          ) : paymentError ? (
-            <>
-              {paymentError}
-              {seconds > 0
-                ? ` Redirecting to home page in ${seconds} seconds...`
-                : ""}
-              <Loader suspenseLoader={true} />
-            </>
-          ) : razorpayLoading ? (
-            <>
-              Loading Razorpay ...
-              <Loader suspenseLoader={true} />
-            </>
-          ) : (
-            <Loader suspenseLoader={true} />
-          )}
-        </p>
-      </div>
     );
   }
 }
