@@ -43,7 +43,6 @@ app.post("/payment/create", (req, res) => {
       `SELECT * FROM ${paymentsTableName} WHERE LOWER(receipt_id) = LOWER(?)`,
       [receipt],
       (err, receiptResult) => {
-
         if (err || !receiptResult.length) {
           connection.query(
             `INSERT INTO ${paymentsTableName} (user_id, order_id, razorpay_order_id, receipt_id, amount, payment_status) VALUES (?, ?, ?, ?, ?, ?)`,
@@ -60,7 +59,7 @@ app.post("/payment/create", (req, res) => {
                 status: 200,
                 message: "Payment order created successfully",
                 data: {
-                  receipt,
+                  receiptId: receipt,
                   razorpayOrderId: razorpayOrder.id,
                   amount: options.amount / 100, // Convert back to INR
                 },
@@ -68,7 +67,7 @@ app.post("/payment/create", (req, res) => {
             }
           );
         } else {
-          const razorpayOrderId = receiptResult?.[0]?.razorpay_order_id;          
+          const razorpayOrderId = receiptResult?.[0]?.razorpay_order_id;
           // Save payment details to database
           connection.query(
             `INSERT INTO ${paymentsTableName} (user_id, order_id, razorpay_order_id, receipt_id, amount, payment_status) VALUES (?, ?, ?, ?, ?, ?)`,
@@ -85,7 +84,7 @@ app.post("/payment/create", (req, res) => {
                 status: 200,
                 message: "Payment order created successfully",
                 data: {
-                  receipt,
+                  receiptId: receipt,
                   razorpayOrderId: razorpayOrderId,
                   amount: options.amount / 100, // Convert back to INR
                 },
@@ -132,10 +131,10 @@ app.post("/payment/verify", (req, res) => {
       }
 
       connection.query(
-        `UPDATE ${ordersTableName} SET status = 'placed' WHERE id = (SELECT order_id FROM ${paymentsTableName} WHERE receipt = ?)`,
+        `UPDATE ${ordersTableName} SET status = 'placed' WHERE LOWER(receipt) = LOWER(?)`,
         [receiptId],
         (err, updateOrderResult) => {
-
+          console.log("err:", err, receiptId, cartId);
           if (err) {
             return res
               .status(500)
@@ -145,26 +144,27 @@ app.post("/payment/verify", (req, res) => {
           if (cartId) {
             // Get the cart ID related to the order (if applicable)
             connection.query(
-              `DELETE FROM cart WHERE id = ?`,
+              `DELETE FROM cart_items WHERE cart_id = ?`,
               [cartId],
               (err, cartResult) => {
+                console.log("err:", err);
                 if (err) {
                   return res.status(500).json({
                     status: 500,
-                    message: "Error retrieving cart information for order",
+                    message: "Error clearing cart items after payment",
                   });
                 }
                 // Delete cart items if the order was created from a cart
                 connection.query(
-                  `DELETE FROM cart_items WHERE cart_id = ?`,
+                  `DELETE FROM cart WHERE id = ?`,
                   [cartId],
                   (err) => {
                     if (err) {
                       return res.status(500).json({
                         status: 500,
-                        message: "Error clearing cart items after payment",
+                        message: "Error retrieving cart information for order",
                       });
-                    }
+                    }                   
 
                     return res.status(200).json({
                       status: 200,

@@ -130,33 +130,54 @@ async function insertOrder(
 }
 
 async function createPayment(userId, orderId, amount) {
-  connection.query(
-    `SELECT receipt FROM ${ordersTableName} WHERE id = ?`,
-    [orderId],
-    async (err, res) => {
-      if (err) {
-        return res
-          .status(500)
-          .json({ status: 500, message: "Error counting orders" });
-      }
-      await fetch(`http://localhost:${PORT}/payment/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          orderId,
-          amount,
-          receipt: res?.[0]?.receipt || null,
-        }),
-      })
-        .then((response) => response.json())
-        .then((paymentResponse) => {
-        console.log('paymentResponse:', paymentResponse)
-        return paymentResponse
-        });
+  try {
+    // Step 1: Fetch the receipt from the database
+    const receipt = await new Promise((resolve, reject) => {
+      connection.query(
+        `SELECT receipt FROM ${ordersTableName} WHERE id = ?`,
+        [orderId],
+        (err, res) => {
+          if (err) {
+            reject(err); // Reject the promise if there's an error
+            return;
+          }
+          // Resolve with the receipt (or null if not found)
+          resolve(res?.[0]?.receipt || null);
+        }
+      );
+    });
+
+    // Step 2: Proceed with the payment API call using the receipt
+    if (!receipt) {
+      throw new Error("Receipt not found for the order");
     }
-  );
+
+    const paymentResponse = await fetch(`http://localhost:${PORT}/payment/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        orderId,
+        amount,
+        receipt,
+      }),
+    })
+      .then((response) => response.json())
+      .catch((error) => {
+        console.error("Error creating payment:", error);
+        throw error; // If there's an error, throw it
+      });
+
+    console.log("paymentResponse:", paymentResponse); // Log the payment response
+
+    return paymentResponse; // Return the payment response
+
+  } catch (error) {
+    console.error("Error in createPayment:", error);
+    return { status: 500, message: "Error processing payment" }; // Return error response
+  }
 }
+
 
 function executeQuery(query, params = []) {
   return new Promise((resolve, reject) => {
@@ -247,7 +268,6 @@ function checkOrdersTableExistence() {
           id INT AUTO_INCREMENT PRIMARY KEY,
           user_id INT,
           address_id INT,
-          cart_id INT,
           status ENUM('pending', 'placed', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
           product_id INT,
           quantity INT,
