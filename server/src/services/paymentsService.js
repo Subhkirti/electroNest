@@ -17,16 +17,16 @@ checkPaymentsTableExistence();
 
 // Create Payment API
 app.post("/payment/create", (req, res) => {
-  const { userId, orderId, amount, receipt } = req.body;
+  const { userId, orderId, amount, receipt, totalAmount } = req.body;
 
-  if (!userId || !orderId || !amount || !receipt) {
+  if (!userId || !orderId || !amount || !receipt || !totalAmount) {
     return res
       .status(400)
       .json({ status: 400, message: "Missing required fields" });
   }
 
   const options = {
-    amount: amount * 100, // Convert to paise
+    amount: totalAmount * 100, // Convert to paise
     currency: "INR",
     receipt: `order_receipt_id_${orderId}`,
     notes: { orderId },

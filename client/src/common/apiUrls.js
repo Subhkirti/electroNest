@@ -20,7 +20,6 @@ const ApiUrls = {
   reduceItemFromCart: apiBaseUrl + "/cart-items/reduce",
   getCartItems: apiBaseUrl + "/cart_items?",
   getOrderHistory: apiBaseUrl + "/orders",
-  createPayment: apiBaseUrl + "/payment/create",
   getOrder: apiBaseUrl + "/order?id=",
   createOrder: apiBaseUrl + "/order/create",
   verifyPayment: apiBaseUrl + "/payment/verify",

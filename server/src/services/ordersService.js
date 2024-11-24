@@ -29,8 +29,18 @@ app.post("/order/create", async (req, res) => {
 });
 
 async function createNewOrder(userId, cartId, addressId, status, productId) {
+  // Order through Cart
   if (cartId) {
     const cartItems = await getCartItems(cartId);
+    const cart = await getTotalAmountFromCart(cartId);
+    const totalAmount = cart?.[0]
+      ? cart?.[0]?.total_price -
+        cart?.[0]?.total_discount_price +
+        cart?.[0]?.total_delivery_charges
+      : 0;
+
+    console.log("totalAmount:", totalAmount);
+
     let res;
     if (!cartItems.length) {
       return { status: 400, message: "No items found in cart" };
@@ -50,17 +60,17 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
         transactionAmount
       );
       if (!orderId) throw new Error("Error inserting order");
-      res = await createPayment(userId, orderId, transactionAmount);
-      console.log("res2.1:", res);
+      res = await createPayment(userId, orderId, transactionAmount, totalAmount);
     }
-    console.log("res2.2:", res);
 
     return {
       status: 200,
       message: "Order and payment created successfully",
       data: res?.data,
     };
-  } else if (productId) {
+  }
+  // Order through Buy now
+  else if (productId) {
     const product = await getProduct(productId);
     if (!product) {
       return { status: 400, message: "Product not found" };
@@ -76,8 +86,7 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
       transactionAmount
     );
     if (!orderId) throw new Error("Error inserting order");
-    const res = await createPayment(userId, orderId, transactionAmount);
-    console.log("res1:", res);
+    const res = await createPayment(userId, orderId, transactionAmount, transactionAmount);
     return {
       status: 200,
       message: "Order and payment created successfully",
@@ -96,6 +105,10 @@ function getCartItems(cartId) {
      WHERE ci.cart_id = ?`,
     [cartId]
   );
+}
+
+function getTotalAmountFromCart(cartId) {
+  return executeQuery(`SELECT * FROM cart WHERE id = ?`, [cartId]);
 }
 
 async function getProduct(productId) {
@@ -129,7 +142,7 @@ async function insertOrder(
   ).then((result) => result.insertId);
 }
 
-async function createPayment(userId, orderId, amount) {
+async function createPayment(userId, orderId, amount, totalAmount) {
   try {
     // Step 1: Fetch the receipt from the database
     const receipt = await new Promise((resolve, reject) => {
@@ -152,16 +165,20 @@ async function createPayment(userId, orderId, amount) {
       throw new Error("Receipt not found for the order");
     }
 
-    const paymentResponse = await fetch(`http://localhost:${PORT}/payment/create`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId,
-        orderId,
-        amount,
-        receipt,
-      }),
-    })
+    const paymentResponse = await fetch(
+      `http://localhost:${PORT}/payment/create`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          orderId,
+          amount,
+          receipt,
+          totalAmount
+        }),
+      }
+    )
       .then((response) => response.json())
       .catch((error) => {
         console.error("Error creating payment:", error);
@@ -171,13 +188,11 @@ async function createPayment(userId, orderId, amount) {
     console.log("paymentResponse:", paymentResponse); // Log the payment response
 
     return paymentResponse; // Return the payment response
-
   } catch (error) {
     console.error("Error in createPayment:", error);
     return { status: 500, message: "Error processing payment" }; // Return error response
   }
 }
-
 
 function executeQuery(query, params = []) {
   return new Promise((resolve, reject) => {
