@@ -51,6 +51,7 @@ function ProductImageGallery({ product }: { product: Product }) {
           containerClass="w-full my-6"
           dotListClass="carousel-dots"
           showDots={true}
+          arrows={false}
           slidesToSlide={2}
         >
           {product?.images?.length > 0 &&

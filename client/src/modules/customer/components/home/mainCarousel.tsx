@@ -22,8 +22,9 @@ const MainCarousel = () => {
         },
       }}
       slidesToSlide={1}
-      autoPlay
+      autoPlay={true}
       autoPlaySpeed={2000}
+      transitionDuration={1000}
       infinite
       className="pb-10 -mt-10"
       dotListClass="carousel-dots"
