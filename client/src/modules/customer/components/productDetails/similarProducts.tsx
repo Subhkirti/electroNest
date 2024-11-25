@@ -8,7 +8,7 @@ function SimilarProducts({
   products: Product[];
   productId: number;
 }) {
-  return products?.length > 0 ? (
+  return products?.length > 0 && products?.[0]?.productId !== productId ? (
     <section className="pt-10">
       <h1 className="py-5 text-xl font-bold">Similar Products</h1>
       <div className="flex  flex-wrap  space-x-4">

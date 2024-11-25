@@ -108,7 +108,16 @@ input:-webkit-autofill:focus {
 .react-multi-carousel-track {
   margin-bottom: 16px !important;
 }
-
+.react-multiple-carousel__arrow--right {
+  right: 0px;
+  border-radius: 4px;
+  height: 20px;
+}
+.react-multiple-carousel__arrow--left {
+  left: 0px;
+  border-radius: 4px;
+  height: 20px;
+}
 .carousel-dots .react-multi-carousel-dot--active button {
   background-color: rgb(172, 171, 171) !important;
 }

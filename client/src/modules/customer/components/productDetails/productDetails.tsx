@@ -30,11 +30,13 @@ export default function ProductDetails() {
     (state: RootState) => state.product
   );
 
+  console.log("product:", product);
+
   useEffect(() => {
     // Fetch product details
     const timer = setTimeout(() => {
       productId && dispatch(findProductsById(productId));
-      productId &&
+      product &&
         dispatch(
           findProducts({
             categoryId: product?.categoryId || "",
@@ -50,7 +52,7 @@ export default function ProductDetails() {
       clearTimeout(timer);
     };
     // eslint-disable-next-line
-  }, [productId]);
+  }, [productId, product?.productId]);
 
   useEffect(() => {
     // Fetch category breadcrumbs

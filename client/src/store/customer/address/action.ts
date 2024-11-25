@@ -8,7 +8,6 @@ import {
   handleCatchError,
   headersConfig,
 } from "../../../modules/customer/utils/apiUtils";
-import { toast } from "react-toastify";
 import {
   getCurrentUser,
   setCurrentUser,

@@ -15,11 +15,12 @@ function handleCatchError({
   error: unknown;
   actionType: string;
 }) {
+  const user = getCurrentUser();
   const dispatch = store.dispatch;
   const axiosError = error as AxiosError<ErrorResponse>;
   const errorMessage =
     axiosError?.response?.data?.message || AppStrings.somethingWentWrong;
-  toast.error(errorMessage);
+  user?.id && toast.error(errorMessage);
   dispatch({
     type: actionType,
     payload: errorMessage,
