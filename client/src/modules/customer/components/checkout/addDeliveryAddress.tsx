@@ -110,8 +110,8 @@ function AddDeliveryAddress({
                 <InputField
                   label={"Phone Number"}
                   required={true}
-                  id={addressStateIds.phoneNumber}
-                  value={formData.phoneNumber}
+                  id={addressStateIds.mobile}
+                  value={formData.mobile}
                   type="number"
                   maxLength={10}
                   onChange={handleOnChange}

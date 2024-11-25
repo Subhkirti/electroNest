@@ -10,7 +10,6 @@ interface User {
   updatedAt: Date;
   mobile: number | null;
   avatarText?: string;
-  phoneNumber?: number;
 }
 
 interface RegisterReqBody {
@@ -31,9 +30,10 @@ interface UserReqBody {
   firstName: string;
   lastName?: string;
   email: string;
-  password: string;
-  role: "customer" | "admin";
+  password?: string;
+  role?: "customer" | "admin";
   mobile: number | null;
+  address?: string | null;
 }
 interface TableColumn<T> {
   id: keyof T;

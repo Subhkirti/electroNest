@@ -27,7 +27,7 @@ const addressStateIds = {
   state: "state",
   zipCode: "zipCode",
   landmark: "landmark",
-  phoneNumber: "phoneNumber",
+  mobile: "mobile",
 };
 
 const addressInitState = {
@@ -38,7 +38,7 @@ const addressInitState = {
   state: "",
   zipCode: 0,
   landmark: "",
-  phoneNumber: 0,
+  mobile: 0,
 };
 
 const userRoles = [

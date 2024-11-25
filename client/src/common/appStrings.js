@@ -49,10 +49,10 @@ const AppStrings = {
   resultsNotFound: "Results not Found!",
   productsNotFound: "Products not Found!",
   productDetailsNotFound: "Product Details not Found!",
-
   oopsPageNotFound: "Oops! Page Not Found",
   pageNotExist: "The page you're looking for doesn't exist or has been moved.",
   pleaseAddDeliveryAddress: "Please add delivery address.",
+  userDetailsNotFound: "User details not Found!",
 
   /* success messages */
   categoryAddedSuccessfully: "Category added successfully",

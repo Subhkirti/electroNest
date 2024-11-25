@@ -20,6 +20,6 @@ interface AddressReqBody {
   state: string;
   zipCode: number;
   landmark: string;
-  phoneNumber: number;
+  mobile: number;
 }
 export type { Address, AddressReqBody };

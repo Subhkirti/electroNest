@@ -3,6 +3,7 @@ const AppRoutes = {
   register: "/register",
   login: "/login",
   cart: "/cart",
+  profile: "/user/:userId",
   products: "/products",
   thirdLevelProduct: "/products/:categoryId/:sectionId/:itemId",
   secondLevelProduct: "/products/:categoryId/:sectionId",

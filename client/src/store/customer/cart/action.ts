@@ -36,22 +36,24 @@ const getCart = () => async (dispatch: ActionDispatch) => {
 };
 
 const getCartItems = () => async (dispatch: ActionDispatch) => {
-  dispatch({ type: ActionTypes.GET_CART_ITEMS_REQUEST });
-  try {
-    const res = await axios.get(
-      userId ? `${ApiUrls.getCartItems}id=${userId}` : ApiUrls.getCartItems,
-      headersConfig
-    );
-    dispatch({
-      type: ActionTypes.GET_CART_ITEMS_SUCCESS,
-      payload:
-        res?.data?.data?.length > 0 ? res?.data?.data.map(cartItemsMap) : [],
-    });
-  } catch (error) {
-    handleCatchError({
-      error,
-      actionType: ActionTypes.GET_CART_ITEMS_FAILURE,
-    });
+  if (userId) {
+    dispatch({ type: ActionTypes.GET_CART_ITEMS_REQUEST });
+    try {
+      const res = await axios.get(
+        `${ApiUrls.getCartItems}id=${userId}`,
+        headersConfig
+      );
+      dispatch({
+        type: ActionTypes.GET_CART_ITEMS_SUCCESS,
+        payload:
+          res?.data?.data?.length > 0 ? res?.data?.data.map(cartItemsMap) : [],
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_CART_ITEMS_FAILURE,
+      });
+    }
   }
 };
 

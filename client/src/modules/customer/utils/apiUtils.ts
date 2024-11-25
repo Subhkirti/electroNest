@@ -20,7 +20,7 @@ function handleCatchError({
   const axiosError = error as AxiosError<ErrorResponse>;
   const errorMessage =
     axiosError?.response?.data?.message || AppStrings.somethingWentWrong;
-  user?.id && toast.error(errorMessage);
+  toast.error(errorMessage);
   dispatch({
     type: actionType,
     payload: errorMessage,

@@ -16,7 +16,7 @@ app.post("/address/add", (req, res) => {
     state,
     zipCode,
     landmark,
-    phoneNumber,
+    mobile,
   } = req.body;
 
   if (!userId) {
@@ -31,7 +31,7 @@ app.post("/address/add", (req, res) => {
 
   connection.query(
     addPhoneNoInUsersQuery,
-    [phoneNumber, userId],
+    [mobile, userId],
     (err, result) => {
       if (err) {
         return res
@@ -171,7 +171,7 @@ app.put("/address/edit", (req, res) => {
     state,
     zipCode,
     landmark,
-    phoneNumber,
+    mobile,
   } = req.body;
 
   if (!userId) {
@@ -185,7 +185,7 @@ app.put("/address/edit", (req, res) => {
 
   connection.query(
     addPhoneNoInUsersQuery,
-    [phoneNumber, userId],
+    [mobile, userId],
     (err, result) => {
       if (err) {
         return res

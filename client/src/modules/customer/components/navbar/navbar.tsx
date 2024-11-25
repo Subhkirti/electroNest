@@ -427,8 +427,9 @@ export default function Navbar() {
                         >
                           <MenuItem
                             onClick={() =>
-                              user.role === "admin" &&
-                              navigate(AdminAppRoutes.dashboard)
+                              user.role === "admin"
+                                ? navigate(AdminAppRoutes.dashboard)
+                                : user?.id && navigate(`/user/${user?.id}`)
                             }
                           >
                             {"Profile"}

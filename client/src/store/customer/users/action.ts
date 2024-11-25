@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { NavigateFunction } from "react-router-dom";
 import AdminAppRoutes from "../../../common/adminRoutes";
 
+const isAdminEnv = window?.location.pathname.includes("/admin");
 const getAllUsers =
   (pageNumber: number, pageSize: number) =>
   async (dispatch: ActionDispatch) => {
@@ -101,9 +102,8 @@ const deleteUser = (userId: number) => async (dispatch: ActionDispatch) => {
   }
 };
 
-
 const editUser =
-  (userId: number, reqData: UserReqBody, navigate: NavigateFunction) =>
+  (userId: number, reqData: UserReqBody, navigate?: NavigateFunction) =>
   async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.EDIT_USER_REQUEST });
     try {
@@ -122,7 +122,7 @@ const editUser =
       });
       if (res?.data?.data) {
         toast.success("User details updated successfully.");
-        navigate(AdminAppRoutes.users);
+        isAdminEnv && navigate && navigate(AdminAppRoutes.users);
       }
     } catch (error) {
       handleCatchError({

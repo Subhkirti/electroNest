@@ -69,7 +69,7 @@ function Payment() {
       prefill: {
         name: user?.name,
         email: user?.email,
-        contact: user?.phoneNumber?.toString(),
+        contact: user?.mobile?.toString(),
       },
       callback_url: "/payment-success",
       handler: async (response: {

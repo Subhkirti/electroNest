@@ -38,11 +38,13 @@ const getAllAddresses = () => async (dispatch: ActionDispatch) => {
   }
 };
 
-const getActiveAddress = () => async (dispatch: ActionDispatch) => {
+const getActiveAddress = (id?: number) => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_ACTIVE_ADDRESS_REQUEST });
   try {
     const res = await axios.get(
-      userId
+      id
+        ? `${ApiUrls.getAddresses}id=${id}&active=true`
+        : userId
         ? `${ApiUrls.getAddresses}id=${userId}&active=true`
         : ApiUrls.getCartItems,
       headersConfig
@@ -76,7 +78,7 @@ const addAddress =
         payload: res?.data?.data ? addressMap(res?.data?.data) : [],
       });
       // set phone number in user object
-      setCurrentUser({ phoneNumber: reqData.phoneNumber } as User);
+      setCurrentUser({ mobile: reqData.mobile } as User);
     } catch (error) {
       handleCatchError({
         error,
@@ -119,7 +121,7 @@ const updateAddress =
           res?.data?.data?.length > 0 ? res?.data?.data.map(addressMap) : [],
       });
       // set phone number in user object
-      setCurrentUser({ phoneNumber: reqData.phoneNumber } as User);
+      setCurrentUser({ mobile: reqData.mobile } as User);
     } catch (error) {
       handleCatchError({
         error,
@@ -143,7 +145,6 @@ const setActiveAddress =
           type: ActionTypes.SET_ACTIVE_ADDRESS_SUCCESS,
           payload: addressId,
         });
-
     } catch (error) {
       handleCatchError({
         error,

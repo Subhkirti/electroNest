@@ -80,8 +80,8 @@ function AddressItemCard({
             })}
           </p>
 
-          {user?.phoneNumber && user?.phoneNumber > 0 && (
-            <p>{user?.phoneNumber}</p>
+          {user?.mobile && user?.mobile > 0 && (
+            <p>{user?.mobile}</p>
           )}
 
           {isAddressSelected && !isOrderSummary && (
