@@ -426,11 +426,12 @@ export default function Navbar() {
                           }}
                         >
                           <MenuItem
-                            onClick={() =>
+                            onClick={() => {
                               user.role === "admin"
                                 ? navigate(AdminAppRoutes.dashboard)
-                                : user?.id && navigate(`/user/${user?.id}`)
-                            }
+                                : user?.id && navigate(`/user/${user?.id}`);
+                              handleCloseUserMenu();
+                            }}
                           >
                             {"Profile"}
                           </MenuItem>

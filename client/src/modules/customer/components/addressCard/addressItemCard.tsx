@@ -18,7 +18,7 @@ function AddressItemCard({
 }: {
   address: Address | null;
   isOrderSummary?: boolean;
-  onNextCallback: () => void;
+  onNextCallback?: () => void;
 }) {
   const { activeAddress } = useSelector((state: RootState) => state.address);
   const dispatch = useDispatch<AppDispatch>();

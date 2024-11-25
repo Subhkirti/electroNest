@@ -1,4 +1,4 @@
-import { UserReqBody } from "../../customer/types/userTypes";
+import { EditUserReqBody, UserReqBody } from "../../customer/types/userTypes";
 
 const userInitState: UserReqBody = {
   imageUrl: "",
@@ -69,11 +69,25 @@ function mergeAddress({
     .filter((value) => value)
     .join(", ");
 }
+
+const editProfileInitState: EditUserReqBody = {
+  firstName: "",
+  lastName: "",
+  street: "",
+  city: "",
+  state: "",
+  zipCode: 0,
+  landmark: "",
+  mobile: null,
+  email: "",
+  imageUrl: "",
+};
 export {
   userInitState,
   userStateIds,
   userRoles,
   addressStateIds,
   addressInitState,
+  editProfileInitState,
   mergeAddress,
 };

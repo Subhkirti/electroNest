@@ -13,7 +13,7 @@ function AddressCard({
   onNextCallback,
   isOrderSummary,
 }: {
-  onNextCallback: () => void;
+  onNextCallback?: () => void;
   isOrderSummary?: boolean;
 }) {
   const { addresses, activeAddress } = useSelector(

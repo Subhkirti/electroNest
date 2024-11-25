@@ -22,4 +22,5 @@ interface AddressReqBody {
   landmark: string;
   mobile: number;
 }
+
 export type { Address, AddressReqBody };
