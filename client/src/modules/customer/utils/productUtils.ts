@@ -43,6 +43,7 @@ const productFilters = [
   {
     id: "availability",
     name: "Availability",
+    singleSelection: true,
     options: [
       { value: "in_stock", label: "In Stock" },
       { value: "out_of_stock", label: "Out Of Stock" },
@@ -53,14 +54,10 @@ const productFilters = [
 const sortOptions = [
   {
     name: "Price: Low to High",
-    href: "#",
-    current: false,
     value: "low_to_high",
   },
   {
     name: "Price: High to Low",
-    href: "#",
-    current: false,
     value: "high_to_low",
   },
 ];

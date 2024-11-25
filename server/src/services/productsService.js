@@ -501,9 +501,20 @@ app.post("/find-products", (req, res) => {
   }
 
   if (stock) {
-    console.log('stock:', stock)
-    whereClauses.push("quantity > 0");
-    queryParams.push(stock);
+    if (stock == "out_of_stock") {
+      whereClauses.push("stock <= 0");
+    } else {
+      whereClauses.push("stock > 0");
+    }
+  }
+
+  let orderByClause = "";
+  if (sort) {
+    if (sort === "low_to_high") {
+      orderByClause = "ORDER BY net_price ASC";
+    } else if (sort === "high_to_low") {
+      orderByClause = "ORDER BY net_price DESC";
+    }
   }
 
   // Handling category filter
@@ -535,6 +546,10 @@ app.post("/find-products", (req, res) => {
 
   if (whereClauses.length > 0) {
     query += ` WHERE ${whereClauses.join(" AND ")}`;
+  }
+
+  if (orderByClause) {
+    query += ` ${orderByClause}`;
   }
 
   query += " LIMIT ? OFFSET ?";

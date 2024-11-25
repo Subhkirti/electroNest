@@ -60,7 +60,7 @@ export default function Product() {
   const discountValue = searchParams.get("discount")?.split(",");
   const sortValue = searchParams.get("sort");
   const pageNumber = searchParams.get("page");
-  const stockValue = searchParams.get("stock");
+  const stockValue = searchParams.get("availability");
   const [categoryBreadcrumbs, setCategoryBreadcrumbs] = useState<
     CategoryBreadcrumbs[]
   >([]);
@@ -82,7 +82,7 @@ export default function Product() {
       minPrice: minPriceList,
       maxPrice: maxPriceList,
       discount: discountValue || [],
-      sort: sortValue || "low_to_high",
+      sort: sortValue || "",
       pageNumber: pageNumber ? parseInt(pageNumber) - 1 : 1,
       pageSize: 10,
       stock: stockValue,
@@ -121,26 +121,43 @@ export default function Product() {
     // eslint-disable-next-line
   }, [categories]);
 
-  function handleOnSearchFilter(value: string, sectionId: string) {
+  function handleOnSearchFilter(
+    value: string,
+    sectionId: string,
+    singleSelection?: boolean
+  ) {
     const searchParams = new URLSearchParams(location.search);
-    let filterValue = searchParams.getAll(sectionId);
 
-    if (filterValue?.length > 0 && filterValue[0]?.split(",").includes(value)) {
-      // eslint-disable-next-line
-      filterValue = filterValue[0]?.split(",")?.filter((item) => item != value);
-
-      if (filterValue?.length === 0) {
-        searchParams.delete(sectionId);
-      }
+    if (singleSelection) {
+      // For single-selection sections, replace the existing value with the new one
+      searchParams.set(sectionId, value);
     } else {
-      filterValue.push(value);
+      // For multi-selection sections, add or remove the value
+      let filterValue = searchParams.getAll(sectionId);
+
+      if (
+        filterValue?.length > 0 &&
+        filterValue[0]?.split(",").includes(value)
+      ) {
+        // Remove the value if it already exists
+        filterValue = filterValue[0]
+          ?.split(",")
+          ?.filter((item) => item !== value);
+
+        if (filterValue?.length === 0) {
+          searchParams.delete(sectionId);
+        }
+      } else {
+        filterValue.push(value);
+      }
+
+      if (filterValue?.length > 0) {
+        searchParams.set(sectionId, filterValue.join(","));
+      }
     }
 
-    if (filterValue?.length > 0) {
-      searchParams.set(sectionId, filterValue.join(","));
-      const query = searchParams.toString();
-      navigate({ search: `?${query}` });
-    }
+    const query = searchParams.toString();
+    navigate({ search: `?${query}` });
   }
 
   function clearFilters() {
@@ -210,7 +227,11 @@ export default function Product() {
                             <input
                               defaultValue={option.value}
                               onChange={() =>
-                                handleOnSearchFilter(option.value, section.id)
+                                handleOnSearchFilter(
+                                  option.value,
+                                  section.id,
+                                  section?.singleSelection
+                                )
                               }
                               id={`filter-mobile-${section.id}-${optionIdx}`}
                               name={`${section.id}[]`}
@@ -258,17 +279,19 @@ export default function Product() {
                   <div className="py-1">
                     {sortOptions.map((option) => (
                       <MenuItem key={option.name}>
-                        <a
-                          href={option.href}
+                        <div
+                          onClick={() =>
+                            handleOnSearchFilter(option.value, "sort", true)
+                          }
                           className={classNames(
-                            option.current
-                              ? "font-medium text-gray-900"
+                            sortValue === option.value
+                              ? "text-primary"
                               : "text-gray-500",
-                            "block px-4 py-2 text-sm data-[focus]:bg-gray-100"
+                            "block cursor-pointer px-4 py-2 text-sm data-[focus]:bg-gray-100"
                           )}
                         >
                           {option.name}
-                        </a>
+                        </div>
                       </MenuItem>
                     ))}
                   </div>
@@ -344,7 +367,11 @@ export default function Product() {
                             <input
                               defaultValue={option.value}
                               onChange={() =>
-                                handleOnSearchFilter(option.value, section.id)
+                                handleOnSearchFilter(
+                                  option.value,
+                                  section.id,
+                                  section?.singleSelection
+                                )
                               }
                               id={`filter-${section.id}-${optionIdx}`}
                               name={`${section.id}[]`}

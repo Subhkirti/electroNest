@@ -30,7 +30,10 @@ function ProductCard({ product }: { product: Product }) {
       <div className="productCardText bg-white p-3">
         {/* description section */}
         <div>
-          <p className="font-bold opacity-60">{product?.brand}</p>
+          {product?.stock <= 0 && (
+            <span className="font-normal text-sm text-red">(Out of stock)</span>
+          )}
+          <p className="font-bold opacity-60">{product?.brand} </p>
           <p className="font-medium text-black opacity-70">
             {textTruncate(product?.productName, 70)}
           </p>
