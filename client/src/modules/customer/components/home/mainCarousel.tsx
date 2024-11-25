@@ -37,7 +37,7 @@ const MainCarousel = () => {
           role="presentation"
           key={index}
           alt=""
-          className="w-screen aspect-h-1 lg:h-[90vh] object-fill cursor-pointer"
+          className="w-screen aspect-h-1 lg:h-[600px] object-fill cursor-pointer"
           onClick={() => navigate(carousel.path)}
         />
       ))}
