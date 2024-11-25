@@ -32,6 +32,7 @@ import { ExpandMore } from "@mui/icons-material";
 import { CategoryState } from "../../types/productTypes";
 import { getCart, getCartItems } from "../../../../store/customer/cart/action";
 import { getCategoryPath } from "../../utils/productUtils";
+import Search from "./search";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -47,7 +48,7 @@ export default function Navbar() {
   const [showMore, setShowMore] = useState(false);
   const { categories } = useSelector((state: RootState) => state.product);
   const { cart, cartItems } = useSelector((state: RootState) => state.cart);
-
+  const [searchOpen, setSearchOpen] = useState(false);
   const openUserMenu = Boolean(anchorEl);
   const user = getCurrentUser();
   const authText = user
@@ -106,8 +107,8 @@ export default function Navbar() {
   };
 
   // Split categories into two parts: first 4 categories and the rest
-  const firstFourCategories = categories.slice(0, 4);
-  const remainingCategories = categories.slice(4);
+  const firstFourCategories = categories.slice(0, 3);
+  const remainingCategories = categories.slice(3);
   return (
     <div className="bg-white mb-10">
       {/* Mobile menu */}
@@ -390,76 +391,71 @@ export default function Navbar() {
               </Popover.Group>
 
               <div className="ml-auto flex items-center">
-                <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  {user && (
-                    <div>
-                      <Tooltip
-                        arrow={true}
-                        title={`${user.name}`}
-                        placement="top"
-                      >
-                        <Avatar
-                          className="text-white"
-                          onClick={handleUserClick}
-                          aria-controls={open ? "basic-menu" : undefined}
-                          aria-haspopup="true"
-                          aria-expanded={open ? "true" : undefined}
-                          sx={{
-                            bgcolor: deepPurple[500],
-                            color: "white",
-                            cursor: "pointer",
+                {!searchOpen && (
+                  <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
+                    {user && (
+                      <div>
+                        <Tooltip
+                          arrow={true}
+                          title={`${user.name}`}
+                          placement="top"
+                        >
+                          <Avatar
+                            className="text-white"
+                            onClick={handleUserClick}
+                            aria-controls={open ? "basic-menu" : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? "true" : undefined}
+                            sx={{
+                              bgcolor: deepPurple[500],
+                              color: "white",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {user?.avatarText}
+                          </Avatar>
+                        </Tooltip>
+
+                        <Menu
+                          id="basic-menu"
+                          anchorEl={anchorEl}
+                          open={openUserMenu}
+                          onClose={handleCloseUserMenu}
+                          MenuListProps={{
+                            "aria-labelledby": "basic-button",
                           }}
                         >
-                          {user?.avatarText}
-                        </Avatar>
-                      </Tooltip>
+                          <MenuItem
+                            onClick={() =>
+                              user.role === "admin" &&
+                              navigate(AdminAppRoutes.dashboard)
+                            }
+                          >
+                            {"Profile"}
+                          </MenuItem>
+                          <MenuItem onClick={handleMyOrderClick}>
+                            {"My Orders"}
+                          </MenuItem>
+                        </Menu>
+                      </div>
+                    )}
 
-                      <Menu
-                        id="basic-menu"
-                        anchorEl={anchorEl}
-                        open={openUserMenu}
-                        onClose={handleCloseUserMenu}
-                        MenuListProps={{
-                          "aria-labelledby": "basic-button",
-                        }}
-                      >
-                        <MenuItem
-                          onClick={() =>
-                            user.role === "admin" &&
-                            navigate(AdminAppRoutes.dashboard)
-                          }
-                        >
-                          {"Profile"}
-                        </MenuItem>
-                        <MenuItem onClick={handleMyOrderClick}>
-                          {"My Orders"}
-                        </MenuItem>
-                      </Menu>
-                    </div>
-                  )}
-
-                  <Button
-                    onClick={handleAuth}
-                    className="text-sm text-primary font-medium"
-                  >
-                    {authText}
-                  </Button>
-                </div>
-
+                    <Button
+                      onClick={handleAuth}
+                      className="text-sm text-primary font-medium"
+                    >
+                      {authText}
+                    </Button>
+                  </div>
+                )}
                 {/* Search */}
-                <div className="flex items-center lg:ml-6">
-                  <p
-                    onClick={() => navigate("/products/search")}
-                    className="p-2 text-gray-400 hover:text-gray-500"
-                  >
-                    <span className="sr-only">Search</span>
 
-                    <MagnifyingGlassIcon
-                      className="h-6 w-6"
-                      aria-hidden="true"
-                    />
-                  </p>
-                </div>
+                {location?.pathname === AppRoutes.home && (
+                  <Search
+                    searchOpen={searchOpen}
+                    setSearchOpen={setSearchOpen}
+                  />
+                )}
 
                 {/* Cart */}
                 <div className="ml-4 flow-root lg:ml-6">

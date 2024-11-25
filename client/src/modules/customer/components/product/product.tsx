@@ -54,6 +54,7 @@ export default function Product() {
   const params = useParams();
   const queryString = decodeURIComponent(location.search);
   const searchParams = new URLSearchParams(queryString);
+  const queryValue = searchParams.get("query") || "";
   const colorValue = searchParams.get("color")?.split(",");
   const priceValue = searchParams.get("price");
   const discountValue = searchParams.get("discount")?.split(",");
@@ -85,6 +86,7 @@ export default function Product() {
       pageNumber: pageNumber ? parseInt(pageNumber) - 1 : 1,
       pageSize: 10,
       stock: stockValue,
+      searchQuery: queryValue,
     };
 
     const timer = setTimeout(() => {

@@ -466,6 +466,7 @@ app.post("/find-products", (req, res) => {
     sort,
     pageNumber,
     pageSize,
+    searchQuery,
   } = req.body;
 
   const limit = parseInt(pageSize);
@@ -482,13 +483,13 @@ app.post("/find-products", (req, res) => {
 
   // Handling minPrice filter
   if (minPrice && minPrice.length > 0) {
-    whereClauses.push("price >= ?");
+    whereClauses.push("net_price >= ?");
     queryParams.push(Math.min(...minPrice));
   }
 
   // Handling maxPrice filter
   if (maxPrice && maxPrice.length > 0) {
-    whereClauses.push("price <= ?");
+    whereClauses.push("net_price <= ?");
     queryParams.push(Math.max(...maxPrice));
   }
 
@@ -500,6 +501,7 @@ app.post("/find-products", (req, res) => {
   }
 
   if (stock) {
+    console.log('stock:', stock)
     whereClauses.push("quantity > 0");
     queryParams.push(stock);
   }
@@ -520,6 +522,12 @@ app.post("/find-products", (req, res) => {
   if (itemId) {
     whereClauses.push("item_id	 = ?");
     queryParams.push(itemId);
+  }
+
+  if (searchQuery) {
+    whereClauses.push("(product_name LIKE ? OR description LIKE ?)");
+    const likeQuery = `%${searchQuery}%`;
+    queryParams.push(likeQuery, likeQuery);
   }
 
   // Create the SQL query with dynamic WHERE clauses

@@ -30,8 +30,6 @@ export default function ProductDetails() {
     (state: RootState) => state.product
   );
 
-  console.log("product:", product);
-
   useEffect(() => {
     // Fetch product details
     const timer = setTimeout(() => {

@@ -1,4 +1,5 @@
 interface ProductSearchReqBody {
+  searchQuery?: string;
   categoryId: string;
   sectionId: string;
   itemId: string;
