@@ -1,6 +1,7 @@
 import { NavigateFunction } from "react-router-dom";
 import AppRoutes from "../../../common/appRoutes";
 import { CategoryBreadcrumbs, CategoryState } from "../types/productTypes";
+import { OrderStatus } from "../types/orderTypes";
 
 const productFilters = [
   {
@@ -59,6 +60,46 @@ const sortOptions = [
   {
     name: "Price: High to Low",
     value: "high_to_low",
+  },
+];
+
+const orderStatuses = [
+  {
+    label: "Pending",
+    value: OrderStatus.PENDING,
+  },
+  {
+    label: "Placed",
+    value: OrderStatus.PLACED,
+  },
+  {
+    label: "Order Confirmed",
+    value: OrderStatus.ORDER_CONFIRMED,
+  },
+  {
+    label: "Shipped",
+    value: OrderStatus.SHIPPED,
+  },
+  {
+    label: "Out For Delivery",
+    value: OrderStatus.OUT_FOR_DELIVERY,
+  },
+
+  {
+    label: "Delivered",
+    value: OrderStatus.DELIVERED,
+  },
+  {
+    label: "Cancelled",
+    value: OrderStatus.CANCELLED,
+  },
+  {
+    label: "Refunded",
+    value: OrderStatus.REFUNDED,
+  },
+  {
+    label: "Returned",
+    value: OrderStatus.RETURNED,
   },
 ];
 
@@ -151,6 +192,7 @@ function getCategoryPath({
 export {
   productFilters,
   sortOptions,
+  orderStatuses,
   loadCategoryBreadCrumbs,
   getCheckoutStep,
   getQuerySearch,

@@ -60,10 +60,24 @@ const productsHeader = [
   "Actions",
 ];
 
-function formattedDateTime(dateString: Date) {
+function formattedDateTime(dateString?: Date | string): string {
   const date = dateString ? new Date(dateString) : new Date();
-  const readableDate = date.toLocaleString(); // format sample, "10/17/2024, 3:57:31 PM"
-  return readableDate;
+  
+  // Format date part
+  const datePart = new Intl.DateTimeFormat('en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+
+  // Format time part
+  const timePart = new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(date);
+
+  return `${datePart} (${timePart})`;
 }
 
 const stripHtml = (html: string) => {

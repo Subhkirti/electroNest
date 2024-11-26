@@ -298,6 +298,107 @@ app.get("/orders", (req, res) => {
   );
 });
 
+// Filter Orders Api
+app.get("/orders/filter", (req, res) => {
+  const userId = req.query.id;
+  const statusFilters = req.query.status ? req.query.status.split(",") : [];
+  const pageNumber = parseInt(req.query.pageNumber) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 10;
+  const offset = (pageNumber - 1) * pageSize;
+
+  // Building the query dynamically based on filters
+  let filterCondition = `WHERE user_id = ?`;
+  if (statusFilters.length > 0) {
+    filterCondition += ` AND status IN (${statusFilters.map(() => "?").join(",")})`;
+  }
+
+  // Query to fetch orders
+  const fetchOrdersQuery = `
+    SELECT * 
+    FROM ${ordersTableName} 
+    ${filterCondition} 
+    ${req.query.pageNumber ? `LIMIT ? OFFSET ?` : ""}
+  `;
+
+  // Query parameters
+  const queryParams = [
+    userId,
+    ...statusFilters,
+    ...(req.query.pageNumber ? [pageSize, offset] : []),
+  ];
+
+  connection.query(fetchOrdersQuery, queryParams, (err, ordersResult) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ status: 500, message: "Error fetching filtered orders" });
+    }
+
+    if (ordersResult.length === 0) {
+      return res.status(200).json({
+        status: 200,
+        data: [],
+        totalCount: 0,
+      });
+    }
+
+    // Extract product IDs from the orders
+    const productIds = ordersResult.map((order) => order.product_id);
+
+    // Query to fetch product details for the extracted product IDs
+    const fetchProductsQuery = `
+      SELECT * 
+      FROM products 
+      WHERE product_id IN (?)
+    `;
+
+    connection.query(fetchProductsQuery, [productIds], (productErr, productsResult) => {
+      if (productErr) {
+        return res
+          .status(500)
+          .json({ status: 500, message: "Error fetching product details" });
+      }
+
+      // Map product details by product_id for easier lookup
+      const productDetailsMap = {};
+      productsResult.forEach((product) => {
+        productDetailsMap[product.product_id] = product;
+      });
+
+      // Add product details to each order
+      const formattedOrders = ordersResult.map((order) => ({
+        ...order,
+        product_details: productDetailsMap[order.product_id] || null,
+      }));
+
+      // Query to get the total count of filtered orders
+      const countQuery = `
+        SELECT COUNT(*) AS totalCount 
+        FROM ${ordersTableName} 
+        ${filterCondition}
+      `;
+
+      const countParams = [userId, ...statusFilters];
+
+      connection.query(countQuery, countParams, (countErr, countResult) => {
+        if (countErr) {
+          return res
+            .status(500)
+            .json({ status: 500, message: "Error counting filtered orders" });
+        }
+
+        const totalCount = countResult[0].totalCount;
+
+        return res.status(200).json({
+          status: 200,
+          data: formattedOrders,
+          totalCount,
+        });
+      });
+    });
+  });
+});
+
 
 // Get order details by ID
 app.get("/order-details", (req, res) => {

@@ -38,6 +38,7 @@ import NotFound from "../../../../common/components/notFound";
 import { FilterAltOff } from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
 import Breadcrumbs from "../productDetails/breadcrumbs";
+import ProductTotalCount from "./productTotalCount";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -313,30 +314,15 @@ export default function Product() {
             <div className={"grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-5"}>
               {/* Web Filters */}
               <form className="hidden lg:block">
-                <div className="flex justify-between py-4 border-b border-black">
-                  <div className="flex flex-col">
-                    <p className="text-xl font-semibold">Filters </p>
-                    {totalCount > 0 && (
-                      <p className="text-gray-500 text-[12px] bg-gray-200 px-2 rounded-lg">
-                        {totalCount}
-                        {totalCount > 1
-                          ? totalCount > 100
-                            ? "+ products"
-                            : " products"
-                          : " product"}
-                      </p>
-                    )}
-                  </div>
-
-                  {searchParams?.size > 0 && (
-                    <Tooltip title="Clear Filters">
-                      <FilterAltOff
-                        className="cursor-pointer"
-                        onClick={clearFilters}
-                      />
-                    </Tooltip>
-                  )}
-                </div>
+                <ProductTotalCount totalCount={totalCount} />
+                {searchParams?.size > 0 && (
+                  <Tooltip title="Clear Filters">
+                    <FilterAltOff
+                      className="cursor-pointer"
+                      onClick={clearFilters}
+                    />
+                  </Tooltip>
+                )}
                 {productFilters.map((section) => (
                   <Disclosure
                     key={section.id}

@@ -1,23 +1,30 @@
-import { AdjustOutlined } from "@mui/icons-material";
+import { AdjustOutlined, Alarm } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { Order } from "../../types/orderTypes";
-import { formatAmount } from "../../../admin/utils/productUtil";
+import { Order, OrderStatus } from "../../types/orderTypes";
+import {
+  formatAmount,
+  formattedDateTime,
+} from "../../../admin/utils/productUtil";
+import { orderStatuses } from "../../utils/productUtils";
 
 function OrderCard({ order }: { order: Order }) {
-  const productDetail = order.productDetails;
   const navigate = useNavigate();
+  const productDetail = order?.productDetails;
+  const orderStatus = orderStatuses.find(
+    (status: { value: string; label: string }) => status.value === order.status
+  );
 
   return productDetail ? (
     <div
       onClick={() => navigate(`/orders/${order?.orderId}`)}
-      className="p-5 shadow-md rounded-md hover:shadow-lg border"
+      className="p-5 hover:shadow-md rounded-md border cursor-pointer"
     >
       <Grid container spacing={2} justifyContent={"space-between"}>
         <Grid item xs={6}>
           <div className="flex cursor-pointer">
             <img
-              className="w-[5rem] h-[5rem] object-cover object-top"
+              className="w-[8rem] h-[8rem]"
               src={productDetail.images[0]}
               alt="product-image"
             />
@@ -27,26 +34,35 @@ function OrderCard({ order }: { order: Order }) {
               <p className="opacity-50 text-xs font-semibold">
                 Size: {productDetail.size}
               </p>
-              <p className="opacity-50 text-xs font-semibold">Color: {productDetail.color} </p>
+              <p className="opacity-50 text-xs font-semibold">
+                Quantity: {order.quantity}
+              </p>
+              <p className="opacity-50 text-xs font-semibold capitalize">
+                Color: {productDetail.color}
+              </p>
+              <p>{formatAmount(order.transactionAmount)}</p>
             </div>
           </div>
         </Grid>
 
-        <Grid item xs={2}>
-          <p>{formatAmount(productDetail.netPrice)}</p>
-        </Grid>
-
         <Grid item xs={4}>
-          <div className="">
+          {orderStatus?.value === OrderStatus.PENDING ? (
             <p className="space-x-1 flex items-center">
-              <AdjustOutlined
-                sx={{ width: "15px", height: "15px" }}
-                className="text-secondary"
-              />
-              <span>Delivered on March 03</span>
+              <Alarm fontSize={"small"} className="text-grey" />
+              <span>{orderStatus?.label}</span>
             </p>
-            <p className="text-xs">Your item has been delivered.</p>
-          </div>
+          ) : (
+            <div className="">
+              <p className="space-x-1 flex items-center">
+                <AdjustOutlined fontSize={"small"} className="text-secondary" />
+
+                <span>{`${orderStatus?.label} on ${formattedDateTime(
+                  order.updatedAt
+                )}`}</span>
+              </p>
+              <p className="text-xs">Your item has been delivered.</p>
+            </div>
+          )}
         </Grid>
       </Grid>
     </div>

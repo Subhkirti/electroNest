@@ -15,8 +15,10 @@ function orderReducer(state: OrderState = initState, action: RootAction) {
     case ActionTypes.CREATE_ORDER_REQUEST:
     case ActionTypes.GET_ORDER_BY_ID_REQUEST:
     case ActionTypes.GET_ORDER_HISTORY_REQUEST:
+    case ActionTypes.GET_ORDER_BY_FILTERS_REQUEST:
       return { ...state, isLoading: true, error: null };
     case ActionTypes.GET_ORDER_HISTORY_SUCCESS:
+    case ActionTypes.GET_ORDER_BY_FILTERS_SUCCESS:
       return {
         ...state,
         isLoading: false,
@@ -43,6 +45,7 @@ function orderReducer(state: OrderState = initState, action: RootAction) {
     case ActionTypes.CREATE_ORDER_FAILURE:
     case ActionTypes.GET_ORDER_BY_ID_FAILURE:
     case ActionTypes.GET_ORDER_HISTORY_FAILURE:
+    case ActionTypes.GET_ORDER_BY_FILTERS_FAILURE:
       return { ...state, isLoading: false, error: action?.payload };
     default:
       return state;

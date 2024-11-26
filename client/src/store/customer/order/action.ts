@@ -66,6 +66,37 @@ const getOrderById = (orderId: number) => async (dispatch: ActionDispatch) => {
   }
 };
 
+/* get orders by filters*/
+const getOrdersByFilters =
+  (pageNumber: number, pageSize: number, statuses: string[]) =>
+  async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.GET_ORDER_BY_FILTERS_REQUEST });
+
+    try {
+      const res = await axios.get(
+        `${
+          ApiUrls.filterOrders
+        }?id=${userId}&pageNumber=${pageNumber}&pageSize=${
+          pageSize || 10
+        }&status=${statuses}`,
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.GET_ORDER_BY_FILTERS_SUCCESS,
+        payload: {
+          data: res?.data?.data.length > 0 ? res?.data?.data.map(orderMap) : [],
+          totalCount: res?.data?.totalCount,
+        },
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_ORDER_BY_FILTERS_FAILURE,
+      });
+    }
+  };
+
 /* place/create order */
 const createOrder =
   ({
@@ -156,4 +187,10 @@ const verifyPayment = async ({
     navigate(AppRoutes.products);
   }
 };
-export { getOrderHistory, getOrderById, createOrder, verifyPayment };
+export {
+  getOrderHistory,
+  getOrderById,
+  createOrder,
+  verifyPayment,
+  getOrdersByFilters,
+};
