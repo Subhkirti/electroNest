@@ -68,7 +68,7 @@ export default function Navbar() {
       clearTimeout(timer);
     };
     // eslint-disable-next-line
-  }, []);
+  }, [anchorEl]);
 
   const handleUserClick = (event: { currentTarget: any }) => {
     setAnchorEl(event.currentTarget);
