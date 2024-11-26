@@ -8,12 +8,15 @@ import HomeSectionCarousel from "./homeSectionCarousel";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { getHomeProductsCarousel } from "../../../../store/customer/product/action";
+import ViewMoreButton from "../../../../common/components/viewMoreButton";
+import Loader from "../../../../common/components/loader";
 
 function HomeScreen() {
   const user = getCurrentUser();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { productsCarousel } = useSelector((state: RootState) => state.product);
+  const { logoutLoader } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     if (user) navigate(AppRoutes.home);
@@ -27,7 +30,9 @@ function HomeScreen() {
     // eslint-disable-next-line
   }, []);
 
-  return (
+  return logoutLoader ? (
+    <Loader suspenseLoader={true} />
+  ) : (
     <div className="absolute left-0 right-0">
       <MainCarousel />
 
@@ -43,6 +48,13 @@ function HomeScreen() {
             )
           );
         })}
+      </div>
+      <div className="flex justify-center">
+        <ViewMoreButton
+          onClick={() => {
+            navigate(AppRoutes.products);
+          }}
+        />
       </div>
       <Footer />
     </div>

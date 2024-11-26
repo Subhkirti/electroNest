@@ -32,6 +32,7 @@ type ActionDispatch = (arg0: RootAction) => void;
 interface AuthState {
   user: User | null;
   isLoading: boolean;
+  logoutLoader: boolean;
   error: string | null;
 }
 
