@@ -60,7 +60,12 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
         transactionAmount
       );
       if (!orderId) throw new Error("Error inserting order");
-      res = await createPayment(userId, orderId, transactionAmount, totalAmount);
+      res = await createPayment(
+        userId,
+        orderId,
+        transactionAmount,
+        totalAmount
+      );
     }
 
     return {
@@ -86,7 +91,12 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
       transactionAmount
     );
     if (!orderId) throw new Error("Error inserting order");
-    const res = await createPayment(userId, orderId, transactionAmount, transactionAmount);
+    const res = await createPayment(
+      userId,
+      orderId,
+      transactionAmount,
+      transactionAmount
+    );
     return {
       status: 200,
       message: "Order and payment created successfully",
@@ -175,7 +185,7 @@ async function createPayment(userId, orderId, amount, totalAmount) {
           orderId,
           amount,
           receipt,
-          totalAmount
+          totalAmount,
         }),
       }
     )
@@ -206,36 +216,88 @@ function executeQuery(query, params = []) {
 // Fetch all orders (with pagination)
 app.get("/orders", (req, res) => {
   const userId = req.query.id;
+  const pageNumber = parseInt(req.query.pageNumber) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 10;
+  const offset = (pageNumber - 1) * pageSize;
+
+  // Query to fetch orders
+  const fetchOrdersQuery = `SELECT * FROM ${ordersTableName} WHERE user_id = ? ${req.query.pageNumber ? `LIMIT ? OFFSET ?` : ""}`;
+
+  // Fetch orders first
   connection.query(
-    `SELECT * FROM ${ordersTableName} WHERE user_id = ?`,
-    [userId],
-    (err, result) => {
+    fetchOrdersQuery,
+    req.query.pageNumber ? [userId, pageSize, offset] : [userId],
+    (err, ordersResult) => {
       if (err) {
         return res
           .status(500)
           .json({ status: 500, message: "Error fetching orders" });
       }
 
-      // Query to get the total count of orders
-      connection.query(
-        `SELECT COUNT(*) AS totalCount FROM ${ordersTableName}`,
-        (countErr, countResult) => {
+      if (ordersResult.length === 0) {
+        return res.status(200).json({
+          status: 200,
+          data: [],
+          totalCount: 0,
+        });
+      }
+
+      // Extract product IDs from the orders
+      const productIds = ordersResult.map((order) => order.product_id);
+
+      // Query to fetch product details for the extracted product IDs
+      const fetchProductsQuery = `
+        SELECT * 
+        FROM products 
+        WHERE product_id IN (?)
+      `;
+
+      connection.query(fetchProductsQuery, [productIds], (productErr, productsResult) => {
+        if (productErr) {
+          return res
+            .status(500)
+            .json({ status: 500, message: "Error fetching product details" });
+        }
+
+        // Map product details by product_id for easier lookup
+        const productDetailsMap = {};
+        productsResult.forEach((product) => {
+          productDetailsMap[product.product_id] = product;
+        });
+
+        // Add product details to each order
+        const formattedOrders = ordersResult.map((order) => ({
+          ...order,
+          product_details: productDetailsMap[order.product_id] || null,
+        }));
+
+        // Query to get the total count of orders for the user
+        const countQuery = `
+          SELECT COUNT(*) AS totalCount 
+          FROM ${ordersTableName} 
+          WHERE user_id = ?
+        `;
+
+        connection.query(countQuery, [userId], (countErr, countResult) => {
           if (countErr) {
             return res
               .status(500)
               .json({ status: 500, message: "Error counting orders" });
           }
+
           const totalCount = countResult[0].totalCount;
+
           return res.status(200).json({
             status: 200,
-            data: result,
+            data: formattedOrders,
             totalCount,
           });
-        }
-      );
+        });
+      });
     }
   );
 });
+
 
 // Get order details by ID
 app.get("/order-details", (req, res) => {

@@ -7,6 +7,7 @@ const initState: OrderState = {
   razorpayOrderId: null,
   isLoading: false,
   error: null,
+  totalCount: 0,
 };
 
 function orderReducer(state: OrderState = initState, action: RootAction) {
@@ -20,7 +21,8 @@ function orderReducer(state: OrderState = initState, action: RootAction) {
         ...state,
         isLoading: false,
         error: null,
-        orders: action?.payload,
+        orders: action?.payload?.data,
+        totalCount: action?.payload.totalCount,
         order: action?.payload?.[0],
       };
     case ActionTypes.GET_ORDER_BY_ID_SUCCESS:

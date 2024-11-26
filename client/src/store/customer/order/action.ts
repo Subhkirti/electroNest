@@ -16,27 +16,37 @@ import { getCart } from "../cart/action";
 
 const user = getCurrentUser();
 const userId = user?.id || 0;
+
 /* get order history */
-const getOrderHistory = () => async (dispatch: ActionDispatch) => {
-  dispatch({ type: ActionTypes.GET_ORDER_HISTORY_REQUEST });
+const getOrderHistory =
+  (pageNumber?: number, pageSize?: number) =>
+  async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.GET_ORDER_HISTORY_REQUEST });
 
-  try {
-    const res = await axios.get(
-      `${ApiUrls.getOrderHistory}?id=${userId}`,
-      headersConfig
-    );
+    try {
+      const res = await axios.get(
+        pageNumber != undefined
+          ? `${
+              ApiUrls.getOrderHistory
+            }?id=${userId}&pageNumber=${pageNumber}&pageSize=${pageSize || 10}`
+          : `${ApiUrls.getOrderHistory}?id=${userId}`,
+        headersConfig
+      );
 
-    dispatch({
-      type: ActionTypes.GET_ORDER_HISTORY_SUCCESS,
-      payload: res?.data?.data.length > 0 ? res?.data?.data.map(orderMap) : [],
-    });
-  } catch (error) {
-    handleCatchError({
-      error,
-      actionType: ActionTypes.GET_ORDER_HISTORY_FAILURE,
-    });
-  }
-};
+      dispatch({
+        type: ActionTypes.GET_ORDER_HISTORY_SUCCESS,
+        payload: {
+          data: res?.data?.data.length > 0 ? res?.data?.data.map(orderMap) : [],
+          totalCount: res?.data?.totalCount,
+        },
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_ORDER_HISTORY_FAILURE,
+      });
+    }
+  };
 
 /* get order details by id */
 const getOrderById = (orderId: number) => async (dispatch: ActionDispatch) => {

@@ -76,6 +76,7 @@ interface OrderState {
   orders: [];
   order: {} | null;
   isLoading: boolean;
+  totalCount: number;
   razorpayOrderId: string | null;
   error: string | null;
 }

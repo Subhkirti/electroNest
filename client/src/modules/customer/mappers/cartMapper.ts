@@ -42,6 +42,12 @@ function orderMap(doc: any): Order {
     addressId: doc?.address_id || 0,
     orderId: doc?.id || 0,
     status: doc?.status || OrderStatus.PENDING,
+    productId: doc?.product_id || 0,
+    quantity: doc?.quantity || 0,
+    transactionAmount: doc?.transaction_amount || 0,
+    productDetails: doc?.product_details
+      ? productMap(doc?.product_details)
+      : null,
   };
 }
 export { cartItemsMap, cartMap, orderMap };

@@ -1,3 +1,5 @@
+import { Product } from "./productTypes";
+
 interface OrderReqBody {
   userId: number;
   cartId?: number;
@@ -31,11 +33,15 @@ enum PaymentStatus {
 interface Order {
   orderId: number;
   userId: number;
-  cartId: number;
+  cartId?: number;
   addressId: number;
   status: OrderStatus;
   createdAt: Date;
   updatedAt: Date;
+  productId: number;
+  quantity: number;
+  transactionAmount: number;
+  productDetails: Product | null;
 }
 
 export type { OrderReqBody, Order };
