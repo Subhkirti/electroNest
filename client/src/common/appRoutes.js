@@ -11,9 +11,9 @@ const AppRoutes = {
   productDetail: "/product/:productId",
   checkout: "/checkout",
   payment: "/payment",
-  orders: "/account/orders",
-  orderDetail: "/account/order/:orderId",
+  orderDetail: "/orders/:orderId",
   notFound: "/not-found",
+  orders: "/orders",
 };
 
 export default AppRoutes;

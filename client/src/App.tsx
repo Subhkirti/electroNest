@@ -7,8 +7,13 @@ import AdminRoutes from "./routes/admin/adminRoutes";
 import "./App.css";
 import { ScrollToTop } from "./modules/customer/utils/homeUtils";
 import { ToastContainer } from "react-toastify";
+import Loader from "./common/components/loader";
+import { useSelector } from "react-redux";
+import { RootState } from "./store/storeTypes";
 
 function App() {
+  const { logoutLoader } = useSelector((state: RootState) => state.auth);
+
   return (
     <Suspense
       fallback={
@@ -19,11 +24,12 @@ function App() {
     >
       <ErrorBoundary>
         <ScrollToTop />
-        <ToastContainer toastClassName="font-montserrat text-black"/>
+        <ToastContainer toastClassName="font-montserrat text-black" />
         <Routes>
           <Route path="/*" element={<CustomerRoutes />}></Route>
           <Route path="/admin/*" element={<AdminRoutes />}></Route>
         </Routes>
+        {logoutLoader && <Loader suspenseLoader={true} fixed={true} />}
       </ErrorBoundary>
     </Suspense>
   );

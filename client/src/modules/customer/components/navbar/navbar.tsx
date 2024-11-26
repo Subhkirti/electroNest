@@ -101,9 +101,20 @@ export default function Navbar() {
     setShowMore(false);
   };
 
-  const handleMyOrderClick = () => {
+  const handleClickMenu = (
+    e: { preventDefault: () => void },
+    type: "orders" | "profile"
+  ) => {
+    e.preventDefault();
     handleCloseUserMenu();
-    navigate("/account/order");
+
+    if (type === "orders") {
+      navigate(AppRoutes.orders);
+    } else if (type === "profile") {
+      user?.role === "admin"
+        ? navigate(AdminAppRoutes.dashboard)
+        : user?.id && navigate(`/user/${user?.id}`);
+    }
   };
 
   // Split categories into two parts: first 4 categories and the rest
@@ -426,16 +437,13 @@ export default function Navbar() {
                           }}
                         >
                           <MenuItem
-                            onClick={() => {
-                              user.role === "admin"
-                                ? navigate(AdminAppRoutes.dashboard)
-                                : user?.id && navigate(`/user/${user?.id}`);
-                              handleCloseUserMenu();
-                            }}
+                            onClick={(e) => handleClickMenu(e, "profile")}
                           >
                             {"Profile"}
                           </MenuItem>
-                          <MenuItem onClick={handleMyOrderClick}>
+                          <MenuItem
+                            onClick={(e) => handleClickMenu(e, "orders")}
+                          >
                             {"My Orders"}
                           </MenuItem>
                         </Menu>

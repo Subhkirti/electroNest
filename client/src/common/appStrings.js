@@ -53,6 +53,8 @@ const AppStrings = {
   pageNotExist: "The page you're looking for doesn't exist or has been moved.",
   pleaseAddDeliveryAddress: "Please add delivery address.",
   userDetailsNotFound: "User details not Found!",
+  ordersNotFound: "Orders not Found!",
+
 
   /* success messages */
   categoryAddedSuccessfully: "Category added successfully",

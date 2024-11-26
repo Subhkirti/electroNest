@@ -19,7 +19,7 @@ function CustomerRoutes() {
             <Route
               key={route.path}
               path={route.path}
-              element={<route.component />}
+              element={ <route.component />}
             />
           ))}
           <Route path="*" element={<PageNotFound />} />

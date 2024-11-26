@@ -8,8 +8,8 @@ const Cart = lazy(() => import("../../modules/customer/components/cart/cart"));
 const CheckoutStepper = lazy(() =>
   import("../../modules/customer/components/checkout/checkoutStepper")
 );
-const Order = lazy(() =>
-  import("../../modules/customer/components/order/order")
+const Orders = lazy(() =>
+  import("../../modules/customer/components/order/orders")
 );
 const OrderDetails = lazy(() =>
   import("../../modules/customer/components/order/orderDetails")
@@ -22,8 +22,9 @@ const authRoutes = [
   },
   {
     path: AppRoutes.orders,
-    component: Order,
+    component: Orders,
   },
+
   {
     path: AppRoutes.orderDetail,
     component: OrderDetails,
