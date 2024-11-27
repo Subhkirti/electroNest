@@ -11,8 +11,13 @@ import { AppDispatch } from "../../../../store/storeTypes";
 import { useDispatch } from "react-redux";
 import { updateOrderStatus } from "../../../../store/customer/order/action";
 
-function OrderCard({ order }: { order: Order }) {
-  console.log('order:', order)
+function OrderCard({
+  order,
+  isDetailPage,
+}: {
+  order: Order;
+  isDetailPage?: boolean;
+}) {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const productDetail = order?.productDetails;
@@ -92,12 +97,14 @@ function OrderCard({ order }: { order: Order }) {
                   {AppStrings.cancelOrder}
                 </Button>
               )}
-              <Button
-                className="text-secondary bg-secondary bg-opacity-20 text-sm"
-                onClick={() => navigate(`/orders/${order?.orderId}`)}
-              >
-                {AppStrings.viewDetails}
-              </Button>
+              {!isDetailPage && (
+                <Button
+                  className="text-secondary bg-secondary bg-opacity-20 text-sm"
+                  onClick={() => navigate(`/orders/${order?.orderId}`)}
+                >
+                  {AppStrings.viewDetails}
+                </Button>
+              )}
             </div>
           </div>
         </Grid>

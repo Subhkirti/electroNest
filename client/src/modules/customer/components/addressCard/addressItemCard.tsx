@@ -24,9 +24,10 @@ function AddressItemCard({
   const dispatch = useDispatch<AppDispatch>();
   const user = getCurrentUser();
 
-  const isAddressSelected =
-    (activeAddress?.addressId === address?.addressId && address?.isActive) ||
-    false;
+  const isAddressSelected = isOrderSummary
+    ? true
+    : (activeAddress?.addressId === address?.addressId && address?.isActive) ||
+      false;
 
   return address ? (
     <div
@@ -80,9 +81,7 @@ function AddressItemCard({
             })}
           </p>
 
-          {user?.mobile && user?.mobile > 0 && (
-            <p>{user?.mobile}</p>
-          )}
+          {user?.mobile && user?.mobile > 0 && <p>{user?.mobile}</p>}
 
           {isAddressSelected && !isOrderSummary && (
             <Button

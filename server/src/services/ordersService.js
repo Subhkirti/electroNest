@@ -455,10 +455,29 @@ app.get("/order-details", (req, res) => {
       }
       if (result.length === 0) {
         return res
-          .status(404)
-          .json({ status: 404, message: "Order not found" });
+          .status(200)
+          .json({ status: 200, message: "Order not found" });
       }
-      return res.status(200).json({ status: 200, data: result[0] });
+      // Query to fetch product details for the extracted product IDs
+      const fetchProductsQuery = "SELECT * FROM products WHERE product_id = ?";
+      connection.query(
+        fetchProductsQuery,
+        [result[0]?.product_id],
+        (productErr, productsResult) => {
+          if (productErr) {
+            return res
+              .status(500)
+              .json({ status: 500, message: "Error fetching product details" });
+          }
+          // Add product details to each order
+          const formattedOrders = result.map((order) => ({
+            ...order,
+            product_details: productsResult?.[0],
+          }));
+
+          return res.status(200).json({ status: 200, data: formattedOrders[0] });
+        }
+      );
     }
   );
 });
@@ -570,7 +589,7 @@ app.get("/order/status-history", (req, res) => {
       .json({ status: 400, message: "Order ID is required" });
   }
 
-  const query = `SELECT status, updated_at FROM ${orderStatusTableName} WHERE order_id = ? ORDER BY updated_at DESC`;
+  const query = `SELECT * FROM ${orderStatusTableName} WHERE order_id = ? ORDER BY updated_at DESC`;
   connection.query(query, [orderId], (err, result) => {
     if (err)
       return res

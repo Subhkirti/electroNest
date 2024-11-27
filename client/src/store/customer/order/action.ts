@@ -12,7 +12,10 @@ import {
   OrderStatus,
 } from "../../../modules/customer/types/orderTypes";
 import { getCurrentUser } from "../../../modules/customer/utils/localStorageUtils";
-import { orderMap } from "../../../modules/customer/mappers/cartMapper";
+import {
+  orderHistoryMap,
+  orderMap,
+} from "../../../modules/customer/mappers/cartMapper";
 import { NavigateFunction } from "react-router-dom";
 import AppRoutes from "../../../common/appRoutes";
 import { getCart } from "../cart/action";
@@ -97,6 +100,31 @@ const getOrdersByFilters =
       handleCatchError({
         error,
         actionType: ActionTypes.GET_ORDER_BY_FILTERS_FAILURE,
+      });
+    }
+  };
+
+/* get orders history */
+const getOrderHistory =
+  (orderId: number) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.GET_ORDER_HISTORY_REQUEST });
+
+    try {
+      const res = await axios.get(
+        `${ApiUrls.getOrderHistory}?orderId=${orderId}`,
+        headersConfig
+      );
+      dispatch({
+        type: ActionTypes.GET_ORDER_HISTORY_SUCCESS,
+        payload:
+          res?.data?.data.length > 0
+            ? res?.data?.data.map(orderHistoryMap)
+            : [],
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_ORDER_HISTORY_FAILURE,
       });
     }
   };
@@ -243,6 +271,7 @@ const updateOrderStatus =
 
 export {
   getOrders,
+  getOrderHistory,
   getOrderById,
   createOrder,
   verifyPayment,

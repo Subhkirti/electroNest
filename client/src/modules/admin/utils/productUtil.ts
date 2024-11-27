@@ -62,22 +62,48 @@ const productsHeader = [
 
 function formattedDateTime(dateString?: Date | string): string {
   const date = dateString ? new Date(dateString) : new Date();
-  
+
   // Format date part
-  const datePart = new Intl.DateTimeFormat('en-US', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
+  const datePart = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   }).format(date);
 
   // Format time part
-  const timePart = new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
+  const timePart = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
     hour12: true,
   }).format(date);
 
   return `${datePart} | ${timePart}`;
+}
+
+function formattedDate(dateString?: Date | string): string {
+  const date = dateString ? new Date(dateString) : new Date();
+
+  // Format date part
+  const datePart = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+
+  return datePart;
+}
+
+function formattedTime(dateString?: Date | string): string {
+  const date = dateString ? new Date(dateString) : new Date();
+
+  // Format time part
+  const timePart = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+
+  return timePart;
 }
 
 const stripHtml = (html: string) => {
@@ -170,4 +196,6 @@ export {
   formatAmount,
   stripHtml,
   formatAmountRange,
+  formattedDate,
+  formattedTime,
 };

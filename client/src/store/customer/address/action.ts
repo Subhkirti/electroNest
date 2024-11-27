@@ -16,13 +16,15 @@ import { addressMap } from "../../../modules/customer/mappers/userMapper";
 import { User } from "../../../modules/customer/types/userTypes";
 
 const user = getCurrentUser();
-const userId = user?.id || 0;
+const currentUserId = user?.id || 0;
 
 const getAllAddresses = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_ADDRESSES_REQUEST });
   try {
     const res = await axios.get(
-      userId ? `${ApiUrls.getAddresses}id=${userId}` : ApiUrls.getCartItems,
+      currentUserId
+        ? `${ApiUrls.getAddresses}id=${currentUserId}`
+        : ApiUrls.getCartItems,
       headersConfig
     );
     dispatch({
@@ -38,29 +40,53 @@ const getAllAddresses = () => async (dispatch: ActionDispatch) => {
   }
 };
 
-const getActiveAddress = (id?: number) => async (dispatch: ActionDispatch) => {
-  dispatch({ type: ActionTypes.GET_ACTIVE_ADDRESS_REQUEST });
-  try {
-    const res = await axios.get(
-      id
-        ? `${ApiUrls.getAddresses}id=${id}&active=true`
-        : userId
-        ? `${ApiUrls.getAddresses}id=${userId}&active=true`
-        : ApiUrls.getCartItems,
-      headersConfig
-    );
-    dispatch({
-      type: ActionTypes.GET_ACTIVE_ADDRESS_SUCCESS,
-      payload:
-        res?.data?.data?.length > 0 ? addressMap(res?.data?.data[0]) : null,
-    });
-  } catch (error) {
-    handleCatchError({
-      error,
-      actionType: ActionTypes.GET_ACTIVE_ADDRESS_FAILURE,
-    });
-  }
-};
+const getActiveAddress =
+  (userId?: number) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.GET_ACTIVE_ADDRESS_REQUEST });
+    try {
+      const res = await axios.get(
+        userId
+          ? `${ApiUrls.getAddresses}id=${userId}&active=true`
+          : currentUserId
+          ? `${ApiUrls.getAddresses}id=${currentUserId}&active=true`
+          : ApiUrls.getAddresses,
+        headersConfig
+      );
+      dispatch({
+        type: ActionTypes.GET_ACTIVE_ADDRESS_SUCCESS,
+        payload:
+          res?.data?.data?.length > 0 ? addressMap(res?.data?.data[0]) : null,
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_ACTIVE_ADDRESS_FAILURE,
+      });
+    }
+  };
+
+const getAddressById =
+  (addressId: number) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.GET_ADDRESS_BY_ID_REQUEST });
+    try {
+      const res = await axios.get(
+        currentUserId && addressId
+          ? `${ApiUrls.getAddresses}id=${currentUserId}&addressId=${addressId}`
+          : `${ApiUrls.getAddresses}id=${currentUserId}`,
+        headersConfig
+      );
+      dispatch({
+        type: ActionTypes.GET_ADDRESS_BY_ID_SUCCESS,
+        payload:
+          res?.data?.data?.length > 0 ? addressMap(res?.data?.data[0]) : null,
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_ADDRESS_BY_ID_FAILURE,
+      });
+    }
+  };
 
 const addAddress =
   (reqData: AddressReqBody) => async (dispatch: ActionDispatch) => {
@@ -69,7 +95,7 @@ const addAddress =
     try {
       const res = await axios.post(
         ApiUrls.addAddress,
-        { ...reqData, userId },
+        { ...reqData, userId: currentUserId },
         headersConfig
       );
 
@@ -159,4 +185,5 @@ export {
   addAddress,
   getActiveAddress,
   setActiveAddress,
+  getAddressById
 };

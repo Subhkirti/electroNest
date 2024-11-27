@@ -29,47 +29,43 @@ app.post("/address/add", (req, res) => {
   const addPhoneNoInUsersQuery = `UPDATE ${usersTableName} SET mobile = ? WHERE id = ?`;
   const findAddressQuery = `SELECT * FROM ${tableName} WHERE id = ?`;
 
-  connection.query(
-    addPhoneNoInUsersQuery,
-    [mobile, userId],
-    (err, result) => {
-      if (err) {
-        return res
-          .status(500)
-          .json({ status: 500, message: "Error adding phone number" });
-      }
-      connection.query(
-        addAddressQuery,
-        [userId, firstName, lastName, street, city, state, zipCode, landmark],
-        (err, result) => {
-          if (err) {
-            return res
-              .status(500)
-              .json({ status: 500, message: "Error adding address" });
-          }
+  connection.query(addPhoneNoInUsersQuery, [mobile, userId], (err, result) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ status: 500, message: "Error adding phone number" });
+    }
+    connection.query(
+      addAddressQuery,
+      [userId, firstName, lastName, street, city, state, zipCode, landmark],
+      (err, result) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ status: 500, message: "Error adding address" });
+        }
 
-          connection.query(
-            findAddressQuery,
-            [result.insertId],
-            (err, results) => {
-              if (err) {
-                return res.status(500).json({
-                  status: 500,
-                  message: "Error while finding address details",
-                });
-              }
-
-              res.status(200).json({
-                status: 200,
-                message: "Address added successfully",
-                data: results?.[0],
+        connection.query(
+          findAddressQuery,
+          [result.insertId],
+          (err, results) => {
+            if (err) {
+              return res.status(500).json({
+                status: 500,
+                message: "Error while finding address details",
               });
             }
-          );
-        }
-      );
-    }
-  );
+
+            res.status(200).json({
+              status: 200,
+              message: "Address added successfully",
+              data: results?.[0],
+            });
+          }
+        );
+      }
+    );
+  });
 });
 
 // Activate an address, to set the current delivery address from multiple addresses
@@ -134,6 +130,7 @@ app.post("/address/set-active", (req, res) => {
 // Fetch all active addresses for a specific user
 app.get("/addresses", (req, res) => {
   const userId = req.query?.id;
+  const addressId = req.query?.addressId;
   const onlyActive = req.query?.active === "true";
 
   if (!userId) {
@@ -144,20 +141,27 @@ app.get("/addresses", (req, res) => {
 
   const getAddressesQuery = onlyActive
     ? `SELECT * FROM ${tableName} WHERE user_id = ? AND active = true`
+    : addressId && userId
+    ? `SELECT * FROM ${tableName} WHERE user_id = ? AND id = ?`
     : `SELECT * FROM ${tableName} WHERE user_id = ?`;
 
-  connection.query(getAddressesQuery, [userId], (err, result) => {
-    if (err) {
-      return res
-        .status(500)
-        .json({ status: 500, message: "Error fetching addresses" });
-    }
+  connection.query(
+    getAddressesQuery,
+    userId && addressId ? [userId, addressId] : [userId],
+    (err, result) => {
+      if (err) {
+        console.log("err:", err);
+        return res
+          .status(500)
+          .json({ status: 500, message: "Error fetching addresses" });
+      }
 
-    res.status(200).json({
-      status: 200,
-      data: result,
-    });
-  });
+      res.status(200).json({
+        status: 200,
+        data: result,
+      });
+    }
+  );
 });
 
 // Update an existing address
@@ -183,42 +187,37 @@ app.put("/address/edit", (req, res) => {
   const updateAddressQuery = `UPDATE ${tableName} SET first_name = ?, last_name = ?, street = ?, city = ?, state = ?, zip_code = ?, landmark = ? WHERE id = ?`;
   const addPhoneNoInUsersQuery = `UPDATE ${usersTableName} SET mobile = ? WHERE id = ?`;
 
-  connection.query(
-    addPhoneNoInUsersQuery,
-    [mobile, userId],
-    (err, result) => {
-      if (err) {
-        return res
-          .status(500)
-          .json({ status: 500, message: "Error adding phone number" });
-      }
-      connection.query(
-        updateAddressQuery,
-        [firstName, lastName, street, city, state, zipCode, landmark, id],
-        (err, result) => {
-          if (err) {
-            return res
-              .status(500)
-              .json({ status: 500, message: "Error updating address" });
-          }
+  connection.query(addPhoneNoInUsersQuery, [mobile, userId], (err, result) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ status: 500, message: "Error adding phone number" });
+    }
+    connection.query(
+      updateAddressQuery,
+      [firstName, lastName, street, city, state, zipCode, landmark, id],
+      (err, result) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ status: 500, message: "Error updating address" });
+        }
 
-          if (result.affectedRows === 0) {
-            return res.status(404).json({
-              status: 404,
-              message: "Address not found",
-            });
-          }
-
-          res.status(200).json({
-            status: 200,
-            message: "Address updated successfully",
+        if (result.affectedRows === 0) {
+          return res.status(404).json({
+            status: 404,
+            message: "Address not found",
           });
         }
-      );
-    }
-  );
-});
 
+        res.status(200).json({
+          status: 200,
+          message: "Address updated successfully",
+        });
+      }
+    );
+  });
+});
 
 // Delete an address
 app.delete("/address/delete", (req, res) => {

@@ -403,7 +403,7 @@ export default function Navbar() {
 
               <div className="ml-auto flex items-center">
                 {!searchOpen && (
-                  <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
+                  <div className="mr-4 flex flex-1 items-center justify-end space-x-3">
                     {user && (
                       <div>
                         <Tooltip
@@ -449,13 +449,14 @@ export default function Navbar() {
                         </Menu>
                       </div>
                     )}
-
-                    <Button
-                      onClick={handleAuth}
-                      className="text-sm text-primary font-medium"
-                    >
-                      {authText}
-                    </Button>
+                    <div className="hidden lg:flex">
+                      <Button
+                        onClick={handleAuth}
+                        className="text-sm text-primary font-medium"
+                      >
+                        {authText}
+                      </Button>
+                    </div>
                   </div>
                 )}
                 {/* Search */}

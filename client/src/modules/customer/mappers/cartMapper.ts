@@ -1,5 +1,5 @@
 import { Cart, CartItem } from "../types/cartTypes";
-import { Order, OrderStatus } from "../types/orderTypes";
+import { Order, OrderHistory, OrderStatus } from "../types/orderTypes";
 import { productMap } from "./productsMapper";
 
 function cartItemsMap(doc: any): CartItem {
@@ -51,4 +51,14 @@ function orderMap(doc: any): Order {
       : null,
   };
 }
-export { cartItemsMap, cartMap, orderMap };
+
+function orderHistoryMap(doc: any): OrderHistory {
+  return {
+    id: doc?.id || 0,
+    createdAt: doc?.created_at || new Date(),
+    updatedAt: doc?.updated_at || new Date(),
+    orderId: doc?.id || 0,
+    status: doc?.status || OrderStatus.PENDING,
+  };
+}
+export { cartItemsMap, cartMap, orderMap, orderHistoryMap };

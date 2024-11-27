@@ -1,9 +1,11 @@
 import { OrderState, RootAction } from "../../storeTypes";
+import { getOrderHistory } from "./action";
 import ActionTypes from "./actionTypes";
 
 const initState: OrderState = {
   orders: [],
   order: null,
+  orderHistory: [],
   razorpayOrderId: null,
   isLoading: false,
   error: null,
@@ -17,6 +19,7 @@ function orderReducer(state: OrderState = initState, action: RootAction) {
     case ActionTypes.GET_ORDERS_REQUEST:
     case ActionTypes.GET_ORDER_BY_FILTERS_REQUEST:
     case ActionTypes.UPDATE_ORDER_STATUS_REQUEST:
+    case ActionTypes.GET_ORDER_HISTORY_REQUEST:
       return { ...state, isLoading: true, error: null };
     case ActionTypes.GET_ORDERS_SUCCESS:
     case ActionTypes.GET_ORDER_BY_FILTERS_SUCCESS:
@@ -30,7 +33,6 @@ function orderReducer(state: OrderState = initState, action: RootAction) {
       };
     case ActionTypes.UPDATE_ORDER_STATUS_SUCCESS:
       const { orderId, status } = action?.payload;
-      console.log('action?.payload:', action?.payload)
       return {
         ...state,
         isLoading: false,
@@ -49,6 +51,14 @@ function orderReducer(state: OrderState = initState, action: RootAction) {
         error: null,
         order: action?.payload,
       };
+
+    case ActionTypes.GET_ORDER_HISTORY_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        orderHistory: action?.payload,
+      };
     case ActionTypes.CREATE_ORDER_SUCCESS:
       return {
         ...state,
@@ -62,6 +72,7 @@ function orderReducer(state: OrderState = initState, action: RootAction) {
     case ActionTypes.GET_ORDERS_FAILURE:
     case ActionTypes.GET_ORDER_BY_FILTERS_FAILURE:
     case ActionTypes.UPDATE_ORDER_STATUS_FAILURE:
+    case ActionTypes.GET_ORDER_HISTORY_FAILURE:
       return { ...state, isLoading: false, error: action?.payload };
     default:
       return state;

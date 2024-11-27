@@ -22,6 +22,7 @@ function addressReducer(
     case ActionTypes.REMOVE_ADDRESS_REQUEST:
     case ActionTypes.SET_ACTIVE_ADDRESS_REQUEST:
     case ActionTypes.GET_ACTIVE_ADDRESS_REQUEST:
+    case ActionTypes.GET_ADDRESS_BY_ID_REQUEST:
       return { ...state, isLoading: true, error: null };
     case ActionTypes.ADD_ADDRESS_SUCCESS:
       return {
@@ -42,6 +43,13 @@ function addressReducer(
           action?.payload?.length > 0
             ? [...state.addresses, ...action?.payload]
             : state.addresses,
+      };
+    case ActionTypes.GET_ADDRESS_BY_ID_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        address: action.payload,
       };
     case ActionTypes.UPDATE_ADDRESS_SUCCESS:
       return {
@@ -91,6 +99,7 @@ function addressReducer(
     case ActionTypes.GET_ADDRESSES_FAILURE:
     case ActionTypes.REMOVE_ADDRESS_FAILURE:
     case ActionTypes.SET_ACTIVE_ADDRESS_FAILURE:
+    case ActionTypes.GET_ACTIVE_ADDRESS_FAILURE:
     case ActionTypes.GET_ACTIVE_ADDRESS_FAILURE:
       return { ...state, isLoading: false, error: action?.payload || null };
 

@@ -40,10 +40,18 @@ interface Order {
   updatedAt: Date;
   productId: number;
   quantity: number;
-  receiptId:number;
+  receiptId: number;
   transactionAmount: number;
   productDetails: Product | null;
 }
 
-export type { OrderReqBody, Order };
+interface OrderHistory {
+  id: number;
+  orderId: number;
+  status: OrderStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type { OrderReqBody, Order, OrderHistory };
 export { OrderStatus, PaymentStatus };

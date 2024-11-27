@@ -111,7 +111,7 @@ const orderStatuses: {
   {
     label: "Cancelled",
     value: OrderStatus.CANCELLED,
-    description: "You had cancels the order before shipment",
+    description: "You had cancelled the order before shipment",
     icon: AppIcons.imgOrderCancel,
   },
   {
