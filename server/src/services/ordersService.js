@@ -1,13 +1,27 @@
 const connection = require("../connection");
 const app = require("../app");
 const ordersTableName = "orders";
+const orderStatusTableName = "order_status";
 const paymentsTableName = "payments";
 const PORT = process.env.PORT;
 checkOrdersTableExistence();
+checkOrderStatusTableExistence();
+
+const OrderStatus = {
+  PENDING: "pending",
+  PLACED: "placed",
+  ORDER_CONFIRMED: "orderConfirmed",
+  SHIPPED: "shipped",
+  OUT_FOR_DELIVERY: "outForDelivery",
+  DELIVERED: "delivered",
+  CANCELLED: "cancelled",
+  FAILED: "failed",
+  REFUNDED: "refunded",
+  REFUNDED_INITIATED: "refundInitiated",
+};
 
 app.post("/order/create", async (req, res) => {
   const { userId, cartId, addressId, status, productId } = req.body;
-
   if (!userId || !addressId) {
     return res
       .status(400)
@@ -39,9 +53,6 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
         cart?.[0]?.total_discount_price +
         cart?.[0]?.total_delivery_charges
       : 0;
-
-    console.log("totalAmount:", totalAmount);
-
     let res;
     if (!cartItems.length) {
       return { status: 400, message: "No items found in cart" };
@@ -51,15 +62,17 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
       const transactionAmount =
         (item.price + item.delivery_charges - item.discount_price) *
         item.quantity;
-
+      // If order does not exist, insert a new order
       const orderId = await insertOrder(
         userId,
         addressId,
-        status || "pending",
+        status || OrderStatus.PENDING,
         item.product_id,
         item.quantity,
         transactionAmount
       );
+
+      await insertOrderStatusHistory(orderId, status || OrderStatus.PENDING);
       if (!orderId) throw new Error("Error inserting order");
       res = await createPayment(
         userId,
@@ -83,14 +96,17 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
     }
 
     const transactionAmount = product.net_price + product.delivery_charges;
+
+    // If order does not exist, insert a new order
     const orderId = await insertOrder(
       userId,
       addressId,
-      status || "pending",
+      status || OrderStatus.PENDING,
       productId,
       1,
       transactionAmount
     );
+
     if (!orderId) throw new Error("Error inserting order");
     const res = await createPayment(
       userId,
@@ -212,6 +228,13 @@ function executeQuery(query, params = []) {
       else resolve(results);
     });
   });
+}
+
+async function insertOrderStatusHistory(orderId, status) {
+  return executeQuery(
+    `INSERT INTO ${orderStatusTableName} (order_id, status) VALUES (?, ?)`,
+    [orderId, status]
+  );
 }
 
 // Fetch all orders (with pagination)
@@ -441,89 +464,112 @@ app.get("/order-details", (req, res) => {
 });
 
 // Update order status API (send receipt Id while creating order, and orderId when order is already placed)
+
 app.put("/order/update-status", (req, res) => {
   const { receiptId, status, userId, orderId } = req.body;
-
-  // Valid statuses
-  const validStatuses = [
-    "pending",
-    "placed",
-    "orderConfirmed",
-    "shipped",
-    "outForDelivery",
-    "delivered",
-    "cancelled",
-    "failed",
-    "refundInitiated",
-    "refunded",
-  ];
-
-  // Validate request
   if (!orderId || !status || !userId) {
     return res
       .status(400)
-      .json({ status: 400, message: "Receipt ID and status are required" });
+      .json({ status: 400, message: "Missing required fields" });
   }
 
+  const validStatuses = [
+    OrderStatus.PENDING,
+    OrderStatus.PLACED,
+    OrderStatus.ORDER_CONFIRMED,
+    OrderStatus.SHIPPED,
+    OrderStatus.OUT_FOR_DELIVERY,
+    OrderStatus.DELIVERED,
+    OrderStatus.CANCELLED,
+    OrderStatus.FAILED,
+    OrderStatus.REFUNDED,
+    OrderStatus.REFUNDED_INITIATED,
+  ];
   if (!validStatuses.includes(status)) {
-    return res
-      .status(400)
-      .json({ status: 400, message: "Invalid status provided" });
+    return res.status(400).json({ status: 400, message: "Invalid status" });
   }
 
   const updateQuery =
-    receiptId && !orderId
-      ? `UPDATE ${ordersTableName} SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND receipt = ?`
+    receiptId && orderId
+      ? `UPDATE ${ordersTableName} SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND receipt = ? AND id = ?`
       : `UPDATE ${ordersTableName} SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND id = ?`;
+
   connection.query(
     updateQuery,
-    receiptId ? [status, userId, receiptId] : [status, userId, orderId],
-    (err, result) => {
-      if (err) {
-        console.error("Error updating order status:", err);
+    receiptId
+      ? [status, userId, receiptId, orderId]
+      : [status, userId, orderId],
+    async (err, result) => {
+      if (err)
         return res
           .status(500)
           .json({ status: 500, message: "Error updating order status" });
-      }
-
-      if (result.affectedRows === 0) {
+      if (result.affectedRows === 0)
         return res
           .status(404)
           .json({ status: 404, message: "Order not found" });
-      }
-      if ((status === "failed" || status === "cancelled") && receiptId) {
+
+      // Insert into order_status
+      await insertOrderStatusHistory(orderId, status);
+
+      if (
+        (status === OrderStatus.FAILED || status === OrderStatus.CANCELLED) &&
+        receiptId
+      ) {
+        
+        setTimeout(async () => {
+          status === OrderStatus.CANCELLED &&
+            (await insertOrderStatusHistory(
+              orderId,
+              OrderStatus.REFUNDED_INITIATED
+            ));
+        }, 2000);
+
         const updatePaymentQuery = `UPDATE ${paymentsTableName} SET payment_status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND receipt_id = ?`;
         connection.query(
           updatePaymentQuery,
           [status, userId, receiptId],
           (err, result) => {
-            if (err) {
-              console.error("Error updating payment status:", err);
+            if (err)
               return res.status(500).json({
                 status: 500,
                 message: "Error updating payment status",
               });
-            }
-
-            if (result.affectedRows === 0) {
+            if (result.affectedRows === 0)
               return res
                 .status(404)
                 .json({ status: 404, message: "Payment not found" });
-            }
-            return res.status(200).json({
+            res.status(200).json({
               status: 200,
               message: "Order status updated successfully",
             });
           }
         );
       } else {
-        return res.status(200).json({
-          status: 200,
-          message: "Order status updated successfully",
-        });
+        res
+          .status(200)
+          .json({ status: 200, message: "Order status updated successfully" });
       }
     }
   );
+});
+
+app.get("/order/status-history", (req, res) => {
+  const orderId = req.query.orderId;
+  if (!orderId) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Order ID is required" });
+  }
+
+  const query = `SELECT status, updated_at FROM ${orderStatusTableName} WHERE order_id = ? ORDER BY updated_at DESC`;
+  connection.query(query, [orderId], (err, result) => {
+    if (err)
+      return res
+        .status(500)
+        .json({ status: 500, message: "Error fetching order status history" });
+    res.status(200).json({ status: 200, data: result });
+  });
 });
 
 // Check if the orders table exists and create it if not
@@ -555,6 +601,37 @@ function checkOrdersTableExistence() {
         connection.query(createTableQuery, (err) => {
           if (err) console.error("Error creating orders table:", err);
           else console.log("Orders table created successfully.");
+        });
+      }
+    }
+  );
+}
+
+// Check if the orders table exists and create it if not
+function checkOrderStatusTableExistence() {
+  const checkQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = ? AND table_name = ?`;
+  connection.query(
+    checkQuery,
+    [process.env.DB_NAME, orderStatusTableName],
+    (err, results) => {
+      if (err) {
+        console.error("Error checking order status table existence:", err);
+        return;
+      }
+
+      if (results[0].count === 0) {
+        const createTableQuery = `
+        CREATE TABLE ${orderStatusTableName} (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        order_id INT NOT NULL,
+        status ENUM("pending", "placed", "orderConfirmed", "shipped", "outForDelivery", "delivered", "cancelled", "failed", "refundInitiated", "refunded") NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+        )`;
+        connection.query(createTableQuery, (err) => {
+          if (err) console.error("Error creating orders table:", err);
+          else console.log("Order Status table created successfully.");
         });
       }
     }

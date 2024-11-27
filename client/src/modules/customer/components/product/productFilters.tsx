@@ -379,7 +379,7 @@ export default function ProductFilters() {
                     isGoBack={true}
                   />
                 ) : (
-                  <div className="flex flex-wrap justify-center bg-white py-5">
+                  <div className="flex flex-wrap justify-start bg-white py-5">
                     {/* Products grid */}
                     {products.map((product, index) => {
                       return <ProductCard key={index} product={product} />;

@@ -5,7 +5,7 @@ import OrderCard from "./orderCard";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import {
-  getOrderHistory,
+  getOrders,
   getOrdersByFilters,
 } from "../../../../store/customer/order/action";
 import Loader from "../../../../common/components/loader";
@@ -28,7 +28,7 @@ function Orders() {
     const timer = setTimeout(() => {
       statusValues?.length
         ? dispatch(getOrdersByFilters(pageNumber + 1, pageSize, statusValues))
-        : dispatch(getOrderHistory(pageNumber + 1, pageSize));
+        : dispatch(getOrders(pageNumber + 1, pageSize));
     }, 10);
 
     return () => {
@@ -73,7 +73,7 @@ function Orders() {
             />
           </>
         ) : (
-          <NotFound message={AppStrings.ordersNotFound} isGoBack={true} />
+          <NotFound message={AppStrings.ordersNotFound} />
         )}
       </Grid>
     </Grid>

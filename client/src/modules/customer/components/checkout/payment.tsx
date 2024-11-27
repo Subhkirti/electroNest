@@ -22,6 +22,7 @@ function Payment() {
   const [paymentError, setPaymentError] = useState("");
   const receiptId = getQuerySearch("receipt_id");
   const razorpayOrderId = getQuerySearch("razorpay_id");
+  const orderId = getQuerySearch("order_id");
   const { error, isLoading: razorpayLoading, Razorpay } = useRazorpay();
   const { cart } = useSelector((state: RootState) => state.cart);
   const totalAmount = cart
@@ -57,7 +58,7 @@ function Payment() {
   }, [paymentError, seconds]);
 
   const paymentDialog = () => {
-    if (!razorpayOrderId || !receiptId || !totalAmount) {
+    if (!razorpayOrderId || !receiptId || !totalAmount || !orderId) {
       navigate(-1);
       return;
     }
@@ -83,6 +84,7 @@ function Payment() {
         await verifyPayment({
           cartId: cart?.cartId || 0,
           receiptId,
+          orderId,
           razorpayPaymentId: response.razorpay_payment_id,
           razorpaySignature: response.razorpay_signature,
           razorpayOrderId: response.razorpay_order_id,
@@ -96,6 +98,7 @@ function Payment() {
           dispatch(
             updateOrderStatus({
               status: "failed",
+              orderId: Number(orderId),
               receiptId: Number(receiptId),
             })
           );

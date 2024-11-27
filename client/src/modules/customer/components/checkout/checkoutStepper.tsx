@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
 import {
   createOrder,
-  getOrderHistory,
+  getOrders,
 } from "../../../../store/customer/order/action";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
@@ -20,7 +20,12 @@ import Loader from "../../../../common/components/loader";
 import AppRoutes from "../../../../common/appRoutes";
 import RenderActiveStep from "./renderActiveStep";
 
-const checkoutSteps = ["Checkout", "Add Delivery Address", "Order Summary", "Payment"];
+const checkoutSteps = [
+  "Checkout",
+  "Add Delivery Address",
+  "Order Summary",
+  "Payment",
+];
 
 export default function CheckoutStepper() {
   const activeStep = getCheckoutStep();
@@ -29,6 +34,7 @@ export default function CheckoutStepper() {
   const userId = user?.id || 0;
   const receiptId = getQuerySearch("receipt_id");
   const razorpayOrderId = getQuerySearch("razorpay_id");
+  const orderId = getQuerySearch("order_id");
   const productId = getQuerySearch("product_id");
   const dispatch = useDispatch<AppDispatch>();
   const { isLoading, orders } = useSelector((state: RootState) => state.order);
@@ -40,7 +46,7 @@ export default function CheckoutStepper() {
 
   useEffect(() => {
     if (activeStep === 3) {
-      !orders.length && dispatch(getOrderHistory());
+      !orders.length && dispatch(getOrders());
     }
   }, [activeStep]);
 
@@ -57,7 +63,7 @@ export default function CheckoutStepper() {
     }
     if (activeStep === 3) {
       return navigate(
-        `?step=4&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`
+        `?step=4&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}&order_id=${orderId}`
       );
     }
   };
@@ -102,7 +108,9 @@ export default function CheckoutStepper() {
           ))}
         </Stepper>
       )}
-      {activeStep < checkoutSteps.length && (cart || productId) && <NavigatorButtons />}
+      {activeStep < checkoutSteps.length && (cart || productId) && (
+        <NavigatorButtons />
+      )}
 
       <div className="mt-4">
         <RenderActiveStep activeStep={activeStep} onNextCallback={handleNext} />

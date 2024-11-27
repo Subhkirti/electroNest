@@ -18,23 +18,23 @@ const user = getCurrentUser();
 const userId = user?.id || 0;
 
 /* get order history */
-const getOrderHistory =
+const getOrders =
   (pageNumber?: number, pageSize?: number) =>
   async (dispatch: ActionDispatch) => {
-    dispatch({ type: ActionTypes.GET_ORDER_HISTORY_REQUEST });
+    dispatch({ type: ActionTypes.GET_ORDERS_REQUEST });
 
     try {
       const res = await axios.get(
         pageNumber != undefined
           ? `${
-              ApiUrls.getOrderHistory
+              ApiUrls.getOrders
             }?id=${userId}&pageNumber=${pageNumber}&pageSize=${pageSize || 10}`
-          : `${ApiUrls.getOrderHistory}?id=${userId}`,
+          : `${ApiUrls.getOrders}?id=${userId}`,
         headersConfig
       );
 
       dispatch({
-        type: ActionTypes.GET_ORDER_HISTORY_SUCCESS,
+        type: ActionTypes.GET_ORDERS_SUCCESS,
         payload: {
           data: res?.data?.data.length > 0 ? res?.data?.data.map(orderMap) : [],
           totalCount: res?.data?.totalCount,
@@ -43,7 +43,7 @@ const getOrderHistory =
     } catch (error) {
       handleCatchError({
         error,
-        actionType: ActionTypes.GET_ORDER_HISTORY_FAILURE,
+        actionType: ActionTypes.GET_ORDERS_FAILURE,
       });
     }
   };
@@ -117,7 +117,7 @@ const createOrder =
         headersConfig
       );
       if (res?.data?.data) {
-        const { receiptId, razorpayOrderId } = res?.data?.data;
+        const { receiptId, razorpayOrderId, orderId } = res?.data?.data;
 
         dispatch({
           type: ActionTypes.CREATE_ORDER_SUCCESS,
@@ -127,7 +127,7 @@ const createOrder =
         // navigation
         reqData?.cartId
           ? navigate({
-              search: `step=3&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}`,
+              search: `step=3&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}&order_id=${orderId}`,
             })
           : reqData?.productId &&
             navigate({
@@ -148,13 +148,15 @@ const createOrder =
 const verifyPayment = async ({
   cartId,
   receiptId,
+  orderId,
   razorpayOrderId,
   navigate,
   dispatch,
   razorpayPaymentId,
   razorpaySignature,
 }: {
-  cartId: number;
+  orderId: string;
+  cartId: number | string;
   receiptId: string;
   razorpayOrderId: string;
   navigate: NavigateFunction;
@@ -168,6 +170,7 @@ const verifyPayment = async ({
       {
         cartId,
         receiptId,
+        orderId,
         razorpayOrderId,
         paymentId: razorpayPaymentId,
         signature: razorpaySignature,
@@ -203,6 +206,7 @@ const updateOrderStatus =
     dispatch({
       type: ActionTypes.UPDATE_ORDER_STATUS_REQUEST,
     });
+
     try {
       const response = await axios.put(
         ApiUrls.updateOrderStatus,
@@ -223,13 +227,13 @@ const updateOrderStatus =
     } catch (error) {
       handleCatchError({
         error,
-        actionType: ActionTypes.GET_ORDER_HISTORY_FAILURE,
+        actionType: ActionTypes.GET_ORDERS_FAILURE,
       });
     }
   };
 
 export {
-  getOrderHistory,
+  getOrders,
   getOrderById,
   createOrder,
   verifyPayment,

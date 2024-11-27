@@ -2,6 +2,7 @@ const connection = require("../connection");
 const app = require("../app");
 const Razorpay = require("razorpay");
 const paymentsTableName = "payments";
+const orderStatusTableName = "order_status";
 const ordersTableName = "orders";
 var {
   validatePaymentVerification,
@@ -60,6 +61,7 @@ app.post("/payment/create", (req, res) => {
                 message: "Payment order created successfully",
                 data: {
                   receiptId: receipt,
+                  orderId,
                   razorpayOrderId: razorpayOrder.id,
                   amount: options.amount / 100, // Convert back to INR
                 },
@@ -85,6 +87,7 @@ app.post("/payment/create", (req, res) => {
                 message: "Payment order created successfully",
                 data: {
                   receiptId: receipt,
+                  orderId,
                   razorpayOrderId: razorpayOrderId,
                   amount: options.amount / 100, // Convert back to INR
                 },
@@ -99,9 +102,10 @@ app.post("/payment/create", (req, res) => {
 
 // Verify Payment API
 app.post("/payment/verify", (req, res) => {
-  const { razorpayOrderId, paymentId, signature, receiptId, cartId } = req.body;
+  const { razorpayOrderId, paymentId, signature, receiptId, cartId, orderId } =
+    req.body;
 
-  if (!razorpayOrderId || !paymentId || !signature || !receiptId) {
+  if (!razorpayOrderId || !paymentId || !signature || !receiptId || !orderId) {
     return paymentVerificationFailed();
   }
 
@@ -132,40 +136,49 @@ app.post("/payment/verify", (req, res) => {
             return paymentVerificationFailed();
           }
 
-          if (cartId) {
-            // Get the cart ID related to the order (if applicable)
-            connection.query(
-              `DELETE FROM cart_items WHERE cart_id = ?`,
-              [cartId],
-              (err, cartResult) => {
-                if (err) {
-                  return paymentVerificationFailed();
-                }
-                // Delete cart items if the order was created from a cart
+          connection.query(
+            `INSERT INTO ${orderStatusTableName} (order_id, status) VALUES (?, ?)`,
+            [orderId, "placed"],
+            (err, results) => {
+              if (err) {
+                return paymentVerificationFailed();
+              }
+              if (cartId) {
+                // Get the cart ID related to the order (if applicable)
                 connection.query(
-                  `DELETE FROM cart WHERE id = ?`,
+                  `DELETE FROM cart_items WHERE cart_id = ?`,
                   [cartId],
-                  (err) => {
+                  (err, cartResult) => {
                     if (err) {
                       return paymentVerificationFailed();
                     }
+                    // Delete cart items if the order was created from a cart
+                    connection.query(
+                      `DELETE FROM cart WHERE id = ?`,
+                      [cartId],
+                      (err) => {
+                        if (err) {
+                          return paymentVerificationFailed();
+                        }
 
-                    return res.status(200).json({
-                      status: 200,
-                      message:
-                        "Payment verified, order updated, and cart cleared successfully",
-                    });
+                        return res.status(200).json({
+                          status: 200,
+                          message:
+                            "Payment verified, order updated, and cart cleared successfully",
+                        });
+                      }
+                    );
                   }
                 );
+              } else {
+                // If no cart is associated, just return success response
+                return res.status(200).json({
+                  status: 200,
+                  message: "Payment verified and order updated successfully",
+                });
               }
-            );
-          } else {
-            // If no cart is associated, just return success response
-            return res.status(200).json({
-              status: 200,
-              message: "Payment verified and order updated successfully",
-            });
-          }
+            }
+          );
         }
       );
     }
@@ -217,7 +230,6 @@ function checkPaymentsTableExistence() {
           FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
         )`;
 
-      
       connection.query(createTableQuery, (err) => {
         if (err) console.error("Error creating payments table:", err);
         else console.log("Payments table created successfully.");

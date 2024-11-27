@@ -126,7 +126,7 @@ function OrderFilter({
 
       {/* mobile filter section ends here */}
 
-      <div className="h-auto border rounded-md bg-white p-5 sticky top-5 hidden lg:block">
+      <div className="h-auto border rounded-md bg-white p-5 hidden lg:block">
         {/* Mobile filter dialog */}
 
         <ProductTotalCount totalCount={totalCount} />
