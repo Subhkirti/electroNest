@@ -176,7 +176,7 @@ function Orders() {
   }) => {
     return async (dispatch: AppDispatch) => {
       try {
-        await dispatch(updateOrderStatus(payload)); // Update optimistically
+        await dispatch(updateOrderStatus(payload));
         await dispatch(getOrders()); // Refetch after updating
       } catch (error) {
         console.error("Failed to update and refetch", error);
