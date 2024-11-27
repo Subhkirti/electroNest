@@ -11,7 +11,7 @@ function ProductCard({ product }: { product: Product }) {
   return product.productId ? (
     <div
       onClick={() => navigate(product.path)}
-      className="productCard relative hover:shadow-lg hover:border-gray-300 border rounded-md w-[16rem] bg-white m-2 transition-all cursor-pointer"
+      className="productCard relative hover:shadow-lg hover:border-gray-300 border rounded-md w-[15rem] bg-white m-2 transition-all cursor-pointer"
     >
       {/* image section */}
       <div className="aspect-w-1 aspect-h-1 flex justify-center my-4 hover:scale-105 transition-all duration-700 px-3">
