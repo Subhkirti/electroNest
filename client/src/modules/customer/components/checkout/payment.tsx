@@ -5,7 +5,10 @@ import { getCheckoutStep, getQuerySearch } from "../../utils/productUtils";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
 import { getCurrentUser } from "../../utils/localStorageUtils";
-import { verifyPayment } from "../../../../store/customer/order/action";
+import {
+  updateOrderStatus,
+  verifyPayment,
+} from "../../../../store/customer/order/action";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { toast } from "react-toastify";
@@ -90,6 +93,12 @@ function Payment() {
       modal: {
         ondismiss() {
           setPaymentError("Transaction Failed.");
+          dispatch(
+            updateOrderStatus({
+              status: "failed",
+              receiptId: Number(receiptId),
+            })
+          );
         },
       },
       theme: {

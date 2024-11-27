@@ -1,6 +1,7 @@
 const connection = require("../connection");
 const app = require("../app");
 const ordersTableName = "orders";
+const paymentsTableName = "payments";
 const PORT = process.env.PORT;
 checkOrdersTableExistence();
 
@@ -221,7 +222,9 @@ app.get("/orders", (req, res) => {
   const offset = (pageNumber - 1) * pageSize;
 
   // Query to fetch orders
-  const fetchOrdersQuery = `SELECT * FROM ${ordersTableName} WHERE user_id = ? ${req.query.pageNumber ? `LIMIT ? OFFSET ?` : ""}`;
+  const fetchOrdersQuery = `SELECT * FROM ${ordersTableName} WHERE user_id = ? ${
+    req.query.pageNumber ? `LIMIT ? OFFSET ?` : ""
+  }`;
 
   // Fetch orders first
   connection.query(
@@ -252,48 +255,52 @@ app.get("/orders", (req, res) => {
         WHERE product_id IN (?)
       `;
 
-      connection.query(fetchProductsQuery, [productIds], (productErr, productsResult) => {
-        if (productErr) {
-          return res
-            .status(500)
-            .json({ status: 500, message: "Error fetching product details" });
-        }
+      connection.query(
+        fetchProductsQuery,
+        [productIds],
+        (productErr, productsResult) => {
+          if (productErr) {
+            return res
+              .status(500)
+              .json({ status: 500, message: "Error fetching product details" });
+          }
 
-        // Map product details by product_id for easier lookup
-        const productDetailsMap = {};
-        productsResult.forEach((product) => {
-          productDetailsMap[product.product_id] = product;
-        });
+          // Map product details by product_id for easier lookup
+          const productDetailsMap = {};
+          productsResult.forEach((product) => {
+            productDetailsMap[product.product_id] = product;
+          });
 
-        // Add product details to each order
-        const formattedOrders = ordersResult.map((order) => ({
-          ...order,
-          product_details: productDetailsMap[order.product_id] || null,
-        }));
+          // Add product details to each order
+          const formattedOrders = ordersResult.map((order) => ({
+            ...order,
+            product_details: productDetailsMap[order.product_id] || null,
+          }));
 
-        // Query to get the total count of orders for the user
-        const countQuery = `
+          // Query to get the total count of orders for the user
+          const countQuery = `
           SELECT COUNT(*) AS totalCount 
           FROM ${ordersTableName} 
           WHERE user_id = ?
         `;
 
-        connection.query(countQuery, [userId], (countErr, countResult) => {
-          if (countErr) {
-            return res
-              .status(500)
-              .json({ status: 500, message: "Error counting orders" });
-          }
+          connection.query(countQuery, [userId], (countErr, countResult) => {
+            if (countErr) {
+              return res
+                .status(500)
+                .json({ status: 500, message: "Error counting orders" });
+            }
 
-          const totalCount = countResult[0].totalCount;
+            const totalCount = countResult[0].totalCount;
 
-          return res.status(200).json({
-            status: 200,
-            data: formattedOrders,
-            totalCount,
+            return res.status(200).json({
+              status: 200,
+              data: formattedOrders,
+              totalCount,
+            });
           });
-        });
-      });
+        }
+      );
     }
   );
 });
@@ -309,7 +316,9 @@ app.get("/orders/filter", (req, res) => {
   // Building the query dynamically based on filters
   let filterCondition = `WHERE user_id = ?`;
   if (statusFilters.length > 0) {
-    filterCondition += ` AND status IN (${statusFilters.map(() => "?").join(",")})`;
+    filterCondition += ` AND status IN (${statusFilters
+      .map(() => "?")
+      .join(",")})`;
   }
 
   // Query to fetch orders
@@ -352,53 +361,56 @@ app.get("/orders/filter", (req, res) => {
       WHERE product_id IN (?)
     `;
 
-    connection.query(fetchProductsQuery, [productIds], (productErr, productsResult) => {
-      if (productErr) {
-        return res
-          .status(500)
-          .json({ status: 500, message: "Error fetching product details" });
-      }
+    connection.query(
+      fetchProductsQuery,
+      [productIds],
+      (productErr, productsResult) => {
+        if (productErr) {
+          return res
+            .status(500)
+            .json({ status: 500, message: "Error fetching product details" });
+        }
 
-      // Map product details by product_id for easier lookup
-      const productDetailsMap = {};
-      productsResult.forEach((product) => {
-        productDetailsMap[product.product_id] = product;
-      });
+        // Map product details by product_id for easier lookup
+        const productDetailsMap = {};
+        productsResult.forEach((product) => {
+          productDetailsMap[product.product_id] = product;
+        });
 
-      // Add product details to each order
-      const formattedOrders = ordersResult.map((order) => ({
-        ...order,
-        product_details: productDetailsMap[order.product_id] || null,
-      }));
+        // Add product details to each order
+        const formattedOrders = ordersResult.map((order) => ({
+          ...order,
+          product_details: productDetailsMap[order.product_id] || null,
+        }));
 
-      // Query to get the total count of filtered orders
-      const countQuery = `
+        // Query to get the total count of filtered orders
+        const countQuery = `
         SELECT COUNT(*) AS totalCount 
         FROM ${ordersTableName} 
         ${filterCondition}
       `;
 
-      const countParams = [userId, ...statusFilters];
+        const countParams = [userId, ...statusFilters];
 
-      connection.query(countQuery, countParams, (countErr, countResult) => {
-        if (countErr) {
-          return res
-            .status(500)
-            .json({ status: 500, message: "Error counting filtered orders" });
-        }
+        connection.query(countQuery, countParams, (countErr, countResult) => {
+          if (countErr) {
+            return res
+              .status(500)
+              .json({ status: 500, message: "Error counting filtered orders" });
+          }
 
-        const totalCount = countResult[0].totalCount;
+          const totalCount = countResult[0].totalCount;
 
-        return res.status(200).json({
-          status: 200,
-          data: formattedOrders,
-          totalCount,
+          return res.status(200).json({
+            status: 200,
+            data: formattedOrders,
+            totalCount,
+          });
         });
-      });
-    });
+      }
+    );
   });
 });
-
 
 // Get order details by ID
 app.get("/order-details", (req, res) => {
@@ -428,6 +440,92 @@ app.get("/order-details", (req, res) => {
   );
 });
 
+// Update order status API (send receipt Id while creating order, and orderId when order is already placed)
+app.put("/order/update-status", (req, res) => {
+  const { receiptId, status, userId, orderId } = req.body;
+
+  // Valid statuses
+  const validStatuses = [
+    "pending",
+    "placed",
+    "orderConfirmed",
+    "shipped",
+    "outForDelivery",
+    "delivered",
+    "cancelled",
+    "failed",
+    "refundInitiated",
+    "refunded",
+  ];
+
+  // Validate request
+  if (!orderId || !status || !userId) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Receipt ID and status are required" });
+  }
+
+  if (!validStatuses.includes(status)) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Invalid status provided" });
+  }
+
+  const updateQuery =
+    receiptId && !orderId
+      ? `UPDATE ${ordersTableName} SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND receipt = ?`
+      : `UPDATE ${ordersTableName} SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND id = ?`;
+  connection.query(
+    updateQuery,
+    receiptId ? [status, userId, receiptId] : [status, userId, orderId],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating order status:", err);
+        return res
+          .status(500)
+          .json({ status: 500, message: "Error updating order status" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "Order not found" });
+      }
+      if ((status === "failed" || status === "cancelled") && receiptId) {
+        const updatePaymentQuery = `UPDATE ${paymentsTableName} SET payment_status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND receipt_id = ?`;
+        connection.query(
+          updatePaymentQuery,
+          [status, userId, receiptId],
+          (err, result) => {
+            if (err) {
+              console.error("Error updating payment status:", err);
+              return res.status(500).json({
+                status: 500,
+                message: "Error updating payment status",
+              });
+            }
+
+            if (result.affectedRows === 0) {
+              return res
+                .status(404)
+                .json({ status: 404, message: "Payment not found" });
+            }
+            return res.status(200).json({
+              status: 200,
+              message: "Order status updated successfully",
+            });
+          }
+        );
+      } else {
+        return res.status(200).json({
+          status: 200,
+          message: "Order status updated successfully",
+        });
+      }
+    }
+  );
+});
+
 // Check if the orders table exists and create it if not
 function checkOrdersTableExistence() {
   const checkQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = ? AND table_name = ?`;
@@ -446,7 +544,7 @@ function checkOrdersTableExistence() {
           id INT AUTO_INCREMENT PRIMARY KEY,
           user_id INT,
           address_id INT,
-          status ENUM('pending', 'placed', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+          status ENUM("pending", "placed", "orderConfirmed", "shipped", "outForDelivery", "delivered", "cancelled", "failed", "refundInitiated", "refunded") DEFAULT 'pending',
           product_id INT,
           quantity INT,
           transaction_amount DECIMAL(10, 2),

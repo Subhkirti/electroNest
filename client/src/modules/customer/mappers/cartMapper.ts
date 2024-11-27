@@ -44,6 +44,7 @@ function orderMap(doc: any): Order {
     status: doc?.status || OrderStatus.PENDING,
     productId: doc?.product_id || 0,
     quantity: doc?.quantity || 0,
+    receiptId: doc?.receipt || 0,
     transactionAmount: doc?.transaction_amount || 0,
     productDetails: doc?.product_details
       ? productMap(doc?.product_details)

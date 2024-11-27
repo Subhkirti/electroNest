@@ -1,7 +1,9 @@
-import { NavigateFunction } from "react-router-dom";
 import AppRoutes from "../../../common/appRoutes";
 import { CategoryBreadcrumbs, CategoryState } from "../types/productTypes";
 import { OrderStatus } from "../types/orderTypes";
+import { SvgIconTypeMap } from "@mui/material";
+import { OverridableComponent } from "@mui/material/OverridableComponent";
+import AppIcons from "../../../common/appIcons";
 
 const productFilters = [
   {
@@ -63,43 +65,72 @@ const sortOptions = [
   },
 ];
 
-const orderStatuses = [
+const orderStatuses: {
+  label: string;
+  value: OrderStatus;
+  description: string;
+  icon: any;
+}[] = [
   {
     label: "Pending",
     value: OrderStatus.PENDING,
+    description: "Order is created but payment is not yet confirmed",
+    icon: AppIcons.imgOrderPending,
   },
   {
     label: "Placed",
     value: OrderStatus.PLACED,
+    description: "Payment is confirmed.",
+    icon: AppIcons.imgOrderPlaced,
   },
   {
     label: "Order Confirmed",
     value: OrderStatus.ORDER_CONFIRMED,
+    description: "Order details are reviewed and approved for processing.",
+    icon: AppIcons.imgOrderConfirmed,
   },
   {
     label: "Shipped",
     value: OrderStatus.SHIPPED,
+    description: "Order is dispatched from the warehouse",
+    icon: AppIcons.imgOrderShipped,
   },
   {
     label: "Out For Delivery",
     value: OrderStatus.OUT_FOR_DELIVERY,
+    description:
+      "Order is with the delivery agent and is on its way to deliver you.",
+    icon: AppIcons.imgOutForDelivery,
   },
-
   {
     label: "Delivered",
     value: OrderStatus.DELIVERED,
+    description: "Your Order has been delivered.",
+    icon: AppIcons.imgOrderDelivered,
   },
   {
     label: "Cancelled",
     value: OrderStatus.CANCELLED,
+    description: "You had cancels the order before shipment",
+    icon: AppIcons.imgOrderCancel,
+  },
+  {
+    label: "Failed",
+    value: OrderStatus.FAILED,
+    description: "Payment processing failed, or order validation failed",
+    icon: AppIcons.imgOrderFailed,
+  },
+  {
+    label: "Refund Initiated",
+    value: OrderStatus.REFUNDED_INITIATED,
+    description: "You had initiated Refund requested.",
+    icon: AppIcons.imgOrderRefundInit,
   },
   {
     label: "Refunded",
     value: OrderStatus.REFUNDED,
-  },
-  {
-    label: "Returned",
-    value: OrderStatus.RETURNED,
+    description: "Refund is processed after cancellation or return.",
+    icon: AppIcons.imgOrderRefunded,
   },
 ];
 

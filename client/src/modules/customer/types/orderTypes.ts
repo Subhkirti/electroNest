@@ -19,7 +19,7 @@ enum OrderStatus {
   CANCELLED = "cancelled",
   FAILED = "failed",
   REFUNDED = "refunded",
-  RETURNED = "returned",
+  REFUNDED_INITIATED = "refundInitiated",
 }
 
 enum PaymentStatus {
@@ -40,6 +40,7 @@ interface Order {
   updatedAt: Date;
   productId: number;
   quantity: number;
+  receiptId:number;
   transactionAmount: number;
   productDetails: Product | null;
 }

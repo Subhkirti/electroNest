@@ -1,5 +1,5 @@
 const AppStrings = {
-  /* customer strings */
+  /* customer portal strings */
   login: "Login",
   logout: "Logout",
   register: "Register",
@@ -21,8 +21,11 @@ const AppStrings = {
   buyNow: "Buy now",
   checkout: "Checkout",
   payment: "Payment",
+  cancelOrder: "Cancel Order",
+  viewDetails: "View Details",
 
-  /* admin strings */
+
+  /* admin portal strings */
   users: "Users",
   shopWith: "Shop with ElectroNest",
   congratulations: "Congratulations",
@@ -54,7 +57,6 @@ const AppStrings = {
   pleaseAddDeliveryAddress: "Please add delivery address.",
   userDetailsNotFound: "User details not Found!",
   ordersNotFound: "Orders not Found!",
-
 
   /* success messages */
   categoryAddedSuccessfully: "Category added successfully",

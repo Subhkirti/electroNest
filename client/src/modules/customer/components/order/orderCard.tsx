@@ -1,5 +1,4 @@
-import { AdjustOutlined, Alarm } from "@mui/icons-material";
-import { Grid } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Order, OrderStatus } from "../../types/orderTypes";
 import {
@@ -7,22 +6,34 @@ import {
   formattedDateTime,
 } from "../../../admin/utils/productUtil";
 import { orderStatuses } from "../../utils/productUtils";
+import AppStrings from "../../../../common/appStrings";
+import { AppDispatch } from "../../../../store/storeTypes";
+import { useDispatch } from "react-redux";
+import { updateOrderStatus } from "../../../../store/customer/order/action";
 
 function OrderCard({ order }: { order: Order }) {
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const productDetail = order?.productDetails;
   const orderStatus = orderStatuses.find(
     (status: { value: string; label: string }) => status.value === order.status
   );
-
+  const cancellationStages = [
+    OrderStatus.PENDING,
+    OrderStatus.PLACED,
+    OrderStatus.ORDER_CONFIRMED,
+  ];
+  const showCancelOrder = orderStatus?.value
+    ? cancellationStages.includes(orderStatus?.value)
+    : false;
   return productDetail ? (
     <div
       onClick={() => navigate(`/orders/${order?.orderId}`)}
       className="p-5 hover:shadow-md rounded-md border cursor-pointer"
     >
       <Grid container spacing={2} justifyContent={"space-between"}>
-        <Grid item xs={6}>
-          <div className="flex cursor-pointer">
+        <Grid item xs={12} lg={6}>
+          <div className="flex  justify-center lg:justify-start cursor-pointer">
             <img
               className="w-[8rem] h-[8rem]"
               src={productDetail.images[0]}
@@ -40,29 +51,48 @@ function OrderCard({ order }: { order: Order }) {
               <p className="opacity-50 text-xs font-semibold capitalize">
                 Color: {productDetail.color}
               </p>
-              <p>{formatAmount(order.transactionAmount)}</p>
+              <p className=" text-secondary text-xs font-semibold capitalize">
+                Price: {formatAmount(order.transactionAmount)}
+              </p>
             </div>
           </div>
         </Grid>
 
-        <Grid item xs={4}>
-          {orderStatus?.value === OrderStatus.PENDING ? (
-            <p className="space-x-1 flex items-center">
-              <Alarm fontSize={"small"} className="text-grey" />
-              <span>{orderStatus?.label}</span>
-            </p>
-          ) : (
-            <div className="">
-              <p className="space-x-1 flex items-center">
-                <AdjustOutlined fontSize={"small"} className="text-secondary" />
-
-                <span>{`${orderStatus?.label} on ${formattedDateTime(
+        <Grid item xs={12} lg={4}>
+          <div className="flex flex-col items-center lg:items-end space-y-6">
+            <div className="space-x-1 flex items-start">
+              <img src={orderStatus?.icon} width={30} alt="order-status-icon" />
+              <div>
+                <p>{`${orderStatus?.label} on ${formattedDateTime(
                   order.updatedAt
-                )}`}</span>
-              </p>
-              <p className="text-xs">Your item has been delivered.</p>
+                )}`}</p>
+                <p className="text-sm text-slate-500">
+                  {orderStatus?.description}
+                </p>
+              </div>
             </div>
-          )}
+            <div className="flex space-x-2 justify-center ">
+              {showCancelOrder && (
+                <Button
+                  onClick={() =>
+                    dispatch(
+                      updateOrderStatus({
+                        orderId: order.orderId,
+                        receiptId: order.receiptId,
+                        status: OrderStatus.CANCELLED,
+                      })
+                    )
+                  }
+                  className="text-red bg-red bg-opacity-20 text-sm"
+                >
+                  {AppStrings.cancelOrder}
+                </Button>
+              )}
+              <Button className="text-secondary bg-secondary bg-opacity-20 text-sm">
+                {AppStrings.viewDetails}
+              </Button>
+            </div>
+          </div>
         </Grid>
       </Grid>
     </div>

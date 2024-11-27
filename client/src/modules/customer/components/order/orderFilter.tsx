@@ -50,7 +50,7 @@ function OrderFilter({
   }
   return (
     <div className="h-auto border rounded-md bg-white p-5 sticky top-5">
-        <ProductTotalCount totalCount={totalCount} />
+      <ProductTotalCount totalCount={totalCount} />
 
       <div className="space-y-4 mt-5">
         <h1 className="font-semibold">ORDER STATUS</h1>
@@ -67,10 +67,12 @@ function OrderFilter({
               />
 
               <label
-                className="ml-3 text-sm text-gray-600"
+                className="ml-3 text-sm text-gray-600 flex space-x-2 items-center"
                 htmlFor={option.value}
               >
-                {option.label}
+                <img src={option?.icon} width={20} alt="order-status-icon" />
+
+                <span>{option.label}</span>
               </label>
             </div>
           );

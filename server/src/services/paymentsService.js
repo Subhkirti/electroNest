@@ -102,9 +102,7 @@ app.post("/payment/verify", (req, res) => {
   const { razorpayOrderId, paymentId, signature, receiptId, cartId } = req.body;
 
   if (!razorpayOrderId || !paymentId || !signature || !receiptId) {
-    return res
-      .status(400)
-      .json({ status: 400, message: "Missing payment details" });
+    return paymentVerificationFailed();
   }
 
   const isSignatureValid = validatePaymentVerification(
@@ -114,9 +112,7 @@ app.post("/payment/verify", (req, res) => {
   );
 
   if (!isSignatureValid) {
-    return res
-      .status(400)
-      .json({ status: 400, message: "Payment signature mismatch" });
+    return paymentVerificationFailed();
   }
 
   // Update payment and order statuses
@@ -125,20 +121,15 @@ app.post("/payment/verify", (req, res) => {
     [razorpayOrderId],
     (err) => {
       if (err) {
-        return res
-          .status(500)
-          .json({ status: 500, message: "Error updating payment status" });
+        return paymentVerificationFailed();
       }
 
       connection.query(
         `UPDATE ${ordersTableName} SET status = 'placed' WHERE LOWER(receipt) = LOWER(?)`,
         [receiptId],
         (err, updateOrderResult) => {
-          console.log("err:", err, receiptId, cartId);
           if (err) {
-            return res
-              .status(500)
-              .json({ status: 500, message: "Error updating order status" });
+            return paymentVerificationFailed();
           }
 
           if (cartId) {
@@ -147,12 +138,8 @@ app.post("/payment/verify", (req, res) => {
               `DELETE FROM cart_items WHERE cart_id = ?`,
               [cartId],
               (err, cartResult) => {
-                console.log("err:", err);
                 if (err) {
-                  return res.status(500).json({
-                    status: 500,
-                    message: "Error clearing cart items after payment",
-                  });
+                  return paymentVerificationFailed();
                 }
                 // Delete cart items if the order was created from a cart
                 connection.query(
@@ -160,11 +147,8 @@ app.post("/payment/verify", (req, res) => {
                   [cartId],
                   (err) => {
                     if (err) {
-                      return res.status(500).json({
-                        status: 500,
-                        message: "Error retrieving cart information for order",
-                      });
-                    }                   
+                      return paymentVerificationFailed();
+                    }
 
                     return res.status(200).json({
                       status: 200,
@@ -186,6 +170,25 @@ app.post("/payment/verify", (req, res) => {
       );
     }
   );
+
+  function paymentVerificationFailed() {
+    connection.query(
+      `UPDATE ${paymentsTableName} SET payment_status = 'failed' WHERE razorpay_order_id = ?`,
+      [razorpayOrderId],
+      (err) => {
+        connection.query(
+          `UPDATE ${ordersTableName} SET status = 'failed' WHERE LOWER(receipt) = LOWER(?)`,
+          [receiptId],
+          (err, updateOrderResult) => {
+            return res.status(400).json({
+              status: 400,
+              message: "Payment verification failed",
+            });
+          }
+        );
+      }
+    );
+  }
 });
 
 // Check if payments table exists and create it if not
@@ -214,6 +217,7 @@ function checkPaymentsTableExistence() {
           FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
         )`;
 
+      
       connection.query(createTableQuery, (err) => {
         if (err) console.error("Error creating payments table:", err);
         else console.log("Payments table created successfully.");

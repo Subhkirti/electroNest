@@ -187,10 +187,52 @@ const verifyPayment = async ({
     navigate(AppRoutes.products);
   }
 };
+
+// (send receipt Id while creating order, and orderId when order is already placed)
+const updateOrderStatus =
+  ({
+    orderId,
+    status,
+    receiptId,
+  }: {
+    orderId?: number;
+    receiptId?: number;
+    status: string;
+  }) =>
+  async (dispatch: ActionDispatch) => {
+    dispatch({
+      type: ActionTypes.UPDATE_ORDER_STATUS_REQUEST,
+    });
+    try {
+      const response = await axios.put(
+        ApiUrls.updateOrderStatus,
+        {
+          orderId,
+          userId,
+          receiptId,
+          status,
+        },
+        headersConfig
+      );
+      console.log("response:", response);
+
+      dispatch({
+        type: ActionTypes.CREATE_ORDER_SUCCESS,
+        payload: null,
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_ORDER_HISTORY_FAILURE,
+      });
+    }
+  };
+
 export {
   getOrderHistory,
   getOrderById,
   createOrder,
   verifyPayment,
   getOrdersByFilters,
+  updateOrderStatus,
 };
