@@ -30,6 +30,9 @@ import AdminAppRoutes from "../../../../common/adminRoutes";
 import { getAllCategories } from "../../../../store/customer/product/action";
 import { ExpandMore } from "@mui/icons-material";
 import { CategoryState } from "../../types/productTypes";
+import { getCart, getCartItems } from "../../../../store/customer/cart/action";
+import { getCategoryPath } from "../../utils/productUtils";
+import Search from "./search";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -44,6 +47,8 @@ export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const { categories } = useSelector((state: RootState) => state.product);
+  const { cart, cartItems } = useSelector((state: RootState) => state.cart);
+  const [searchOpen, setSearchOpen] = useState(false);
   const openUserMenu = Boolean(anchorEl);
   const user = getCurrentUser();
   const authText = user
@@ -55,12 +60,15 @@ export default function Navbar() {
   useEffect(() => {
     const timer = setTimeout(() => {
       !categories?.length && dispatch(getAllCategories());
+      !cart && dispatch(getCart());
+      !cartItems.length && dispatch(getCartItems());
     }, 10);
 
     return () => {
       clearTimeout(timer);
     };
-  }, []);
+    // eslint-disable-next-line
+  }, [anchorEl]);
 
   const handleUserClick = (event: { currentTarget: any }) => {
     setAnchorEl(event.currentTarget);
@@ -81,35 +89,46 @@ export default function Navbar() {
   };
 
   const handleCategoryClick = (category: any, section: any, item: any) => {
-    if (category?.categoryId && section?.sectionId && item?.itemId) {
-      navigate(`/${category.categoryId}/${section.sectionId}/${item.itemId}`);
-    } else if (category?.categoryId && section?.sectionId) {
-      navigate(`/${category.categoryId}/${section.sectionId}`);
-    } else if (category?.categoryId) {
-      navigate(`/${category.categoryId}`);
-    }
+    navigate(
+      getCategoryPath({
+        categoryId: category?.categoryId,
+        sectionId: section?.sectionId,
+        itemId: item?.itemId,
+      })
+    );
     handleCloseUserMenu();
     setOpen(false);
     setShowMore(false);
   };
 
-  const handleMyOrderClick = () => {
+  const handleClickMenu = (
+    e: { preventDefault: () => void },
+    type: "orders" | "profile"
+  ) => {
+    e.preventDefault();
     handleCloseUserMenu();
-    navigate("/account/order");
+
+    if (type === "orders") {
+      navigate(AppRoutes.orders);
+    } else if (type === "profile") {
+      user?.role === "admin"
+        ? navigate(AdminAppRoutes.dashboard)
+        : user?.id && navigate(`/user/${user?.id}`);
+    }
   };
 
   // Split categories into two parts: first 4 categories and the rest
-  const firstFourCategories = categories.slice(0, 4);
-  const remainingCategories = categories.slice(4);
+  const firstFourCategories = categories.slice(0, 3);
+  const remainingCategories = categories.slice(3);
   return (
     <div className="bg-white mb-10">
       {/* Mobile menu */}
       {MobileSideNavbar()}
 
       <header className="relative bg-white">
-        <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
+        {/* <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
           Get free delivery on orders over ₹1000
-        </p>
+        </p> */}
 
         {/* Web menu */}
         <nav aria-label="Top" className="mx-auto">
@@ -383,76 +402,71 @@ export default function Navbar() {
               </Popover.Group>
 
               <div className="ml-auto flex items-center">
-                <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  {user && (
-                    <div>
-                      <Tooltip
-                        arrow={true}
-                        title={`${user.name}`}
-                        placement="top"
-                      >
-                        <Avatar
-                          className="text-white"
-                          onClick={handleUserClick}
-                          aria-controls={open ? "basic-menu" : undefined}
-                          aria-haspopup="true"
-                          aria-expanded={open ? "true" : undefined}
-                          sx={{
-                            bgcolor: deepPurple[500],
-                            color: "white",
-                            cursor: "pointer",
+                {!searchOpen && (
+                  <div className="mr-4 flex flex-1 items-center justify-end space-x-3">
+                    {user && (
+                      <div>
+                        <Tooltip
+                          arrow={true}
+                          title={`${user.name}`}
+                          placement="top"
+                        >
+                          <Avatar
+                            className="text-white"
+                            onClick={handleUserClick}
+                            aria-controls={open ? "basic-menu" : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? "true" : undefined}
+                            sx={{
+                              bgcolor: deepPurple[500],
+                              color: "white",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {user?.avatarText}
+                          </Avatar>
+                        </Tooltip>
+
+                        <Menu
+                          id="basic-menu"
+                          anchorEl={anchorEl}
+                          open={openUserMenu}
+                          onClose={handleCloseUserMenu}
+                          MenuListProps={{
+                            "aria-labelledby": "basic-button",
                           }}
                         >
-                          {user?.avatarText}
-                        </Avatar>
-                      </Tooltip>
-
-                      <Menu
-                        id="basic-menu"
-                        anchorEl={anchorEl}
-                        open={openUserMenu}
-                        onClose={handleCloseUserMenu}
-                        MenuListProps={{
-                          "aria-labelledby": "basic-button",
-                        }}
+                          <MenuItem
+                            onClick={(e) => handleClickMenu(e, "profile")}
+                          >
+                            {"Profile"}
+                          </MenuItem>
+                          <MenuItem
+                            onClick={(e) => handleClickMenu(e, "orders")}
+                          >
+                            {"My Orders"}
+                          </MenuItem>
+                        </Menu>
+                      </div>
+                    )}
+                    <div className="hidden lg:flex">
+                      <Button
+                        onClick={handleAuth}
+                        className="text-sm text-primary font-medium"
                       >
-                        <MenuItem
-                          onClick={() =>
-                            user.role === "admin" &&
-                            navigate(AdminAppRoutes.dashboard)
-                          }
-                        >
-                          {"Profile"}
-                        </MenuItem>
-                        <MenuItem onClick={handleMyOrderClick}>
-                          {"My Orders"}
-                        </MenuItem>
-                      </Menu>
+                        {authText}
+                      </Button>
                     </div>
-                  )}
-
-                  <Button
-                    onClick={handleAuth}
-                    className="text-sm text-primary font-medium"
-                  >
-                    {authText}
-                  </Button>
-                </div>
-
+                  </div>
+                )}
                 {/* Search */}
-                <div className="flex items-center lg:ml-6">
-                  <p
-                    onClick={() => navigate("/products/search")}
-                    className="p-2 text-gray-400 hover:text-gray-500"
-                  >
-                    <span className="sr-only">Search</span>
 
-                    <MagnifyingGlassIcon
-                      className="h-6 w-6"
-                      aria-hidden="true"
-                    />
-                  </p>
-                </div>
+                {location?.pathname === AppRoutes.home && (
+                  <Search
+                    searchOpen={searchOpen}
+                    setSearchOpen={setSearchOpen}
+                  />
+                )}
 
                 {/* Cart */}
                 <div className="ml-4 flow-root lg:ml-6">
@@ -461,12 +475,16 @@ export default function Navbar() {
                     className="group -m-2 flex items-center p-2"
                   >
                     <ShoppingBagIcon
-                      className="h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
+                      className="h-6 w-6  flex-shrink-0 text-gray-400 group-hover:text-gray-500"
                       aria-hidden="true"
                     />
-                    <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                      {0}
-                    </span>
+                    {cart?.totalItems && cart?.totalItems > 0 ? (
+                      <span className="-ml-3 mb-3 bg-yellow-300 px-2 rounded-full text-[12px] font-medium text-gray-700 group-hover:text-gray-800">
+                        {cart?.totalItems}
+                      </span>
+                    ) : (
+                      ""
+                    )}
                     <span className="sr-only">items in cart, view bag</span>
                   </Button>
                 </div>

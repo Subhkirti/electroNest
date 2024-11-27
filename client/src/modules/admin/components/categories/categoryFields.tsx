@@ -32,12 +32,15 @@ function CategoryFields({
     const timer = setTimeout(() => {
       !topLevelCategories.length && dispatch(getTopLevelCategories());
       !secondLevelCategories.length &&
-        dispatch(getSecondLevelCategories(category.categoryName));
+        dispatch(
+          getSecondLevelCategories({ categoryId: category.categoryName })
+        );
     }, 10);
 
     return () => {
       clearTimeout(timer);
     };
+    // eslint-disable-next-line
   }, [category.categoryName]);
 
   return (

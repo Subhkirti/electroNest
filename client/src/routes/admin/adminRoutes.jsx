@@ -1,5 +1,4 @@
 import { Route, Routes } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
 import adminMainRoutes from "./mainRoutes";
 import PageNotFound from "../../common/components/404Page";
 import { useMediaQuery, useTheme } from "@mui/material";
@@ -15,7 +14,7 @@ function AdminRoutes() {
 
   return (
     <div>
-      <ToastContainer />
+    
       <Header isMenuDrawerOpen={openDrawer} />
       <SideBarMenu openDrawer={openDrawer} setOpenDrawer={setOpenDrawer} />
       <div className="admin-container">

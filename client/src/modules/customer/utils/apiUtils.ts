@@ -15,6 +15,7 @@ function handleCatchError({
   error: unknown;
   actionType: string;
 }) {
+  const user = getCurrentUser();
   const dispatch = store.dispatch;
   const axiosError = error as AxiosError<ErrorResponse>;
   const errorMessage =

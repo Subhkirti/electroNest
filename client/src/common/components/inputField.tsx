@@ -3,6 +3,7 @@ import { MenuItem, TextField, IconButton, Tooltip } from "@mui/material";
 import { uploadFile } from "../../store/customer/product/action";
 import AppColors from "../appColors";
 import { InfoOutlined } from "@mui/icons-material";
+import { useLocation } from "react-router-dom";
 
 type DropdownListItem = { label: string; value: any };
 type DropdownKeys = { labelKey: string; valueKey: string };
@@ -40,6 +41,8 @@ export default function InputField({
   multiple,
   infoText,
 }: InputFieldState) {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.includes("admin");
   const isFileType = type === "file";
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -123,30 +126,34 @@ export default function InputField({
       sx={{
         "& .MuiOutlinedInput-root": {
           "& fieldset": {
-            borderColor: AppColors.lightPurple,
+            borderColor: isAdminRoute ? AppColors.lightPurple : AppColors.gray,
           },
           "&:hover fieldset": {
-            borderColor: AppColors.lightPurple,
+            borderColor: isAdminRoute ? AppColors.lightPurple : AppColors.gray,
           },
           "&.Mui-focused fieldset": {
-            borderColor: AppColors.lightPurple,
+            borderColor: isAdminRoute ? AppColors.lightPurple : AppColors.gray,
           },
         },
         "& .MuiInputLabel-root": {
           opacity: 0.6,
-          color: AppColors.white,
+          color: isAdminRoute ? AppColors.white : AppColors.black,
           "&.Mui-focused": {
-            color: isFileType ? AppColors.white : AppColors.lightPurple,
+            color: isAdminRoute
+              ? isFileType
+                ? AppColors.white
+                : AppColors.lightPurple
+              : AppColors.gray,
             opacity: isFileType ? 0.6 : 1,
           },
         },
         "& .MuiInputBase-input": {
-          color: AppColors.white,
+          color: isAdminRoute ? AppColors.white : AppColors.black,
           cursor: isFileType ? "pointer" : "text",
         },
         "& .MuiInputBase-input::placeholder": {
-          color: AppColors.white,
-          opacity: 0.5,
+          color: isAdminRoute ? AppColors.white : AppColors.black,
+          opacity: isAdminRoute ? 0.5 : 1,
         },
       }}
     >

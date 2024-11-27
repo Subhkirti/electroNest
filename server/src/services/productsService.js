@@ -3,9 +3,9 @@ const tableName = "products";
 const topLevelCateTableName = "top_level_categories"; // also known as categories
 const secondLevelCateTableName = "second_level_categories"; // also known as sections
 const thirdLevelCateTableName = "third_level_categories"; // also known as items
-
 const app = require("../app");
 createProductCateSectionItemsTable();
+
 app.post("/product/categories/sections/items", (req, res) => {
   const { categories } = req.body;
 
@@ -211,7 +211,6 @@ app.get("/product/categories", (req, res) => {
 /* Set products list */
 app.post("/product/add", (req, res) => {
   const {
-    thumbnail,
     images,
     brand,
     title,
@@ -221,32 +220,44 @@ app.post("/product/add", (req, res) => {
     price,
     quantity,
     disPercentage,
-    disPrice,
     topLevelCategory,
     secondLevelCategory,
     thirdLevelCategory,
+    stock,
+    rating,
+    warrantyInfo,
+    returnPolicy,
+    deliveryCharges,
   } = req.body;
 
+  const netPrice =
+    Number(price) - Number(price) * (Number(disPercentage) / 100);
   connection.query(
-    `INSERT INTO ${tableName} (product_name, description, price, discount_price, discount_percentage, quantity, brand, color, size, thumbnail, images, category_id, section_id, item_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    `INSERT INTO ${tableName} (product_name, description, price, discount_percentage, net_price, brand, color, size, images, category_id, section_id, item_id, quantity, stock, rating, reviews, warranty_info, return_policy, delivery_charges) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       title,
       description,
       price,
-      disPrice,
       disPercentage,
-      quantity,
+      netPrice,
       brand,
       color,
       size,
-      JSON.stringify(thumbnail),
       JSON.stringify(images),
       topLevelCategory,
       secondLevelCategory,
       thirdLevelCategory,
+      quantity,
+      stock,
+      rating,
+      JSON.stringify([]),
+      warrantyInfo,
+      returnPolicy,
+      deliveryCharges,
     ],
     (err, result) => {
       if (err) {
+        console.log("err:", err);
         return res
           .status(400)
           .json({ status: 400, message: "Error while adding product" });
@@ -281,7 +292,6 @@ app.post("/product/add", (req, res) => {
 app.post("/product/edit", (req, res) => {
   const productId = req.query?.id;
   const {
-    thumbnail,
     images,
     brand,
     title,
@@ -291,29 +301,39 @@ app.post("/product/edit", (req, res) => {
     price,
     quantity,
     disPercentage,
-    disPrice,
     topLevelCategory,
     secondLevelCategory,
     thirdLevelCategory,
+    stock,
+    rating,
+    warrantyInfo,
+    returnPolicy,
+    deliveryCharges,
   } = req.body;
-
+  const netPrice =
+    Number(price) - Number(price) * (Number(disPercentage) / 100);
   connection.query(
-    `UPDATE ${tableName} SET product_name = ?, description = ?, price = ?, discount_price = ?, discount_percentage = ?, quantity = ?, brand = ?, color = ?, size = ?, thumbnail = ?, images = ?, category_id = ?, section_id = ?, item_id = ? WHERE product_id = ?`,
+    `UPDATE ${tableName} SET product_name = ?, description = ?, price = ?, discount_percentage = ?, net_price = ?, brand = ?, color = ?, size = ?, images = ?, category_id = ?, section_id = ?, item_id = ?, quantity = ?, stock = ?, rating = ?, reviews = ?, warranty_info = ?, return_policy = ?, delivery_charges = ? WHERE product_id = ?`,
     [
       title,
       description,
       price,
-      disPrice,
       disPercentage,
-      quantity,
+      netPrice,
       brand,
       color,
       size,
-      JSON.stringify([thumbnail]),
       JSON.stringify(images),
       topLevelCategory,
       secondLevelCategory,
       thirdLevelCategory,
+      quantity,
+      stock,
+      rating,
+      JSON.stringify([]),
+      warrantyInfo,
+      returnPolicy,
+      deliveryCharges,
       productId,
     ],
     (err, result) => {
@@ -446,6 +466,7 @@ app.post("/find-products", (req, res) => {
     sort,
     pageNumber,
     pageSize,
+    searchQuery,
   } = req.body;
 
   const limit = parseInt(pageSize);
@@ -462,13 +483,13 @@ app.post("/find-products", (req, res) => {
 
   // Handling minPrice filter
   if (minPrice && minPrice.length > 0) {
-    whereClauses.push("price >= ?");
+    whereClauses.push("net_price >= ?");
     queryParams.push(Math.min(...minPrice));
   }
 
   // Handling maxPrice filter
   if (maxPrice && maxPrice.length > 0) {
-    whereClauses.push("price <= ?");
+    whereClauses.push("net_price <= ?");
     queryParams.push(Math.max(...maxPrice));
   }
 
@@ -480,8 +501,20 @@ app.post("/find-products", (req, res) => {
   }
 
   if (stock) {
-    whereClauses.push("quantity > 0");
-    queryParams.push(stock);
+    if (stock == "out_of_stock") {
+      whereClauses.push("stock <= 0");
+    } else {
+      whereClauses.push("stock > 0");
+    }
+  }
+
+  let orderByClause = "";
+  if (sort) {
+    if (sort === "low_to_high") {
+      orderByClause = "ORDER BY net_price ASC";
+    } else if (sort === "high_to_low") {
+      orderByClause = "ORDER BY net_price DESC";
+    }
   }
 
   // Handling category filter
@@ -502,11 +535,21 @@ app.post("/find-products", (req, res) => {
     queryParams.push(itemId);
   }
 
+  if (searchQuery) {
+    whereClauses.push("(product_name LIKE ? OR description LIKE ?)");
+    const likeQuery = `%${searchQuery}%`;
+    queryParams.push(likeQuery, likeQuery);
+  }
+
   // Create the SQL query with dynamic WHERE clauses
   let query = `SELECT * FROM ${tableName}`;
 
   if (whereClauses.length > 0) {
     query += ` WHERE ${whereClauses.join(" AND ")}`;
+  }
+
+  if (orderByClause) {
+    query += ` ${orderByClause}`;
   }
 
   query += " LIMIT ? OFFSET ?";
@@ -671,6 +714,64 @@ app.get("/third-level-categories", (req, res) => {
           });
         }
       );
+    }
+  );
+});
+
+/* Get products carousel list for home page */
+app.get("/products-carousel", (req, res) => {
+  const pageNumber = 1;
+  const pageSize = 20;
+  const limit = parseInt(pageSize);
+  const offset = (parseInt(pageNumber) - 1) * limit;
+
+  // First query to get top-level categories
+  connection.query(
+    `SELECT * FROM ${topLevelCateTableName} LIMIT 6`,
+    (err, results) => {
+      if (err) {
+        return res.status(400).json({
+          status: 400,
+          message: "Error while getting top level categories",
+        });
+      }
+
+      // Use Promise.all to handle multiple asynchronous queries
+      const categoryPromises = results.map((category) => {
+        const selectQuery = `SELECT * FROM ${tableName} WHERE LOWER(category_id) = ? LIMIT ? OFFSET ?`;
+        const categoryId = category?.category_id?.trim().toLowerCase();
+        return new Promise((resolve, reject) => {
+          connection.query(
+            selectQuery,
+            [categoryId, limit, offset],
+            (err, products) => {
+              if (err) {
+                reject(err);
+              } else {
+                // Include category and its products
+                resolve({
+                  category,
+                  products,
+                });
+              }
+            }
+          );
+        });
+      });
+
+      Promise.all(categoryPromises)
+        .then((categoriesWithProducts) => {
+          res.status(200).json({
+            status: 200,
+            data: categoriesWithProducts,
+          });
+        })
+        .catch((err) => {
+          res.status(400).json({
+            status: 400,
+            message: "Error while getting products",
+          });
+        });
     }
   );
 });
@@ -1323,6 +1424,7 @@ function createProductCateTable() {
   });
 }
 
+// Create products table
 function createProductsTable() {
   const checkTableQuery = `SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '${process.env.DB_NAME}' AND table_name = ?`;
 
@@ -1340,13 +1442,18 @@ function createProductsTable() {
         product_name VARCHAR(255) NOT NULL,
         description TEXT,
         price DECIMAL(10, 2) NOT NULL,
-        discount_price DECIMAL(10, 2),
+        net_price DECIMAL(10, 2) NOT NULL,
         discount_percentage DECIMAL(5, 2),
-        quantity INT DEFAULT 0,
         brand VARCHAR(255),
         color VARCHAR(50),
         size VARCHAR(50),
-        thumbnail TEXT,
+        quantity INT DEFAULT 1,
+        stock INT DEFAULT 0,
+        rating DECIMAL(5, 2) DEFAULT 0,
+        reviews TEXT,
+        warranty_info VARCHAR(255),
+        return_policy VARCHAR(255),
+        delivery_charges DECIMAL(5, 2) DEFAULT 0,
         images TEXT,
         category_id VARCHAR(255) NOT NULL,
         section_id VARCHAR(255) NOT NULL,

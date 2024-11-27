@@ -3,7 +3,12 @@ import { useEffect, useState } from "react";
 import AppStrings from "../../../../common/appStrings";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
-import { addProduct } from "../../../../store/customer/product/action";
+import {
+  addProduct,
+  getSecondLevelCategories,
+  getThirdLevelCategories,
+  getTopLevelCategories,
+} from "../../../../store/customer/product/action";
 import { ProductReqBody } from "../../../customer/types/productTypes";
 import Loader from "../../../../common/components/loader";
 import ProductFields from "./productFields";
@@ -11,7 +16,7 @@ import {
   resetHeader,
   setHeader,
 } from "../../../../store/customer/header/action";
-import { productInitState } from "../../utils/productUtil";
+import { productInitState, productStateIds } from "../../utils/productUtil";
 import { useNavigate } from "react-router-dom";
 
 function AddProduct() {
@@ -30,7 +35,7 @@ function AddProduct() {
         showBackIcon: true,
       })
     );
-
+    loadCategories();
     // set product details after submission
     const timer = setTimeout(() => {
       if (productRes && productRes.productId) {
@@ -45,13 +50,35 @@ function AddProduct() {
     // eslint-disable-next-line
   }, [product, productRes?.productId]);
 
+  function loadCategories() {
+    dispatch(getTopLevelCategories());
+    if (product.topLevelCategory)
+      dispatch(
+        getSecondLevelCategories({ categoryId: product.topLevelCategory,  newData:true  })
+      );
+    if (product.secondLevelCategory)
+      dispatch(
+        getThirdLevelCategories({ sectionId: product.secondLevelCategory,  newData:true  })
+      );
+  }
+
   function handleOnChange(value: any, fieldId: string) {
     setProduct({ ...product, [fieldId]: value });
   }
 
   async function handleOnAddProduct(e: { preventDefault: () => void }) {
     e.preventDefault();
-    dispatch(addProduct(product, navigate));
+    dispatch(
+      addProduct(
+        {
+          ...product,
+          [productStateIds.images]: (
+            product.images as unknown as string
+          )?.split(","),
+        },
+        navigate
+      )
+    );
   }
 
   return (

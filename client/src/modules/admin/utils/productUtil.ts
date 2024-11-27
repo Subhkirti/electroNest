@@ -1,7 +1,6 @@
 import { ProductReqBody } from "../../customer/types/productTypes";
 
 const productStateIds = {
-  thumbnail: "thumbnail",
   images: "images",
   brand: "brand",
   title: "title",
@@ -11,10 +10,15 @@ const productStateIds = {
   price: "price",
   quantity: "quantity",
   disPercentage: "disPercentage",
-  disPrice: "disPrice",
   topLevelCategory: "topLevelCategory",
   secondLevelCategory: "secondLevelCategory",
   thirdLevelCategory: "thirdLevelCategory",
+  stock: "stock",
+  rating: "rating",
+  reviews: "reviews",
+  warrantyInfo: "warrantyInfo",
+  returnPolicy: "returnPolicy",
+  deliveryCharges: "deliveryCharges",
 };
 
 const categoryStateIds = {
@@ -26,9 +30,12 @@ const categoryStateIds = {
 const productColors = [
   { label: "White", value: "white" },
   { label: "Black", value: "black" },
+  { label: "Premium Black", value: "premium-black" },
   { label: "Red", value: "red" },
   { label: "Green", value: "green" },
+  { label: "Aloe", value: "aloe" },
   { label: "Blue", value: "blue" },
+  { label: "Midnight Blue", value: "midnight-blue" },
   { label: "Yellow", value: "yellow" },
   { label: "Orange", value: "orange" },
   { label: "Purple", value: "purple" },
@@ -53,10 +60,50 @@ const productsHeader = [
   "Actions",
 ];
 
-function formattedDateTime(dateString: Date) {
+function formattedDateTime(dateString?: Date | string): string {
   const date = dateString ? new Date(dateString) : new Date();
-  const readableDate = date.toLocaleString(); // format sample, "10/17/2024, 3:57:31 PM"
-  return readableDate;
+
+  // Format date part
+  const datePart = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+
+  // Format time part
+  const timePart = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+
+  return `${datePart} | ${timePart}`;
+}
+
+function formattedDate(dateString?: Date | string): string {
+  const date = dateString ? new Date(dateString) : new Date();
+
+  // Format date part
+  const datePart = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+
+  return datePart;
+}
+
+function formattedTime(dateString?: Date | string): string {
+  const date = dateString ? new Date(dateString) : new Date();
+
+  // Format time part
+  const timePart = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+
+  return timePart;
 }
 
 const stripHtml = (html: string) => {
@@ -71,19 +118,44 @@ const textTruncate = (text: string, length: number) => {
   return text.substring(0, length) + "...";
 };
 
-function formatAmount(amount: Float32Array | string) {
-  return (
-    "₹ " +
-    Number(amount).toLocaleString("en-IN", {
-      style: "decimal",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    })
-  );
+function formatAmount(amount: number) {
+  return amount
+    ? "₹" +
+        amount.toLocaleString("en-IN", {
+          style: "decimal",
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        })
+    : "₹0";
+}
+//Format the given input into string in suitable terms of 'k', 'M', etc.
+function formatAmountRange(amount: number) {
+  if (amount < 50000) {
+    //return whatever the value it is as minimum value to represent in shorthand is 1000.
+    return `₹ ${amount}`;
+  }
+  const ranges = [
+    { divider: 1e18, suffix: "E" },
+    { divider: 1e15, suffix: "P" },
+    { divider: 1e12, suffix: "T" },
+    { divider: 1e9, suffix: "G" },
+    { divider: 1e6, suffix: "M" },
+    { divider: 1e3, suffix: "k" },
+  ];
+
+  for (let i = 0; i < ranges.length; i++) {
+    if (amount >= ranges[i].divider) {
+      const value =
+        (amount / ranges[i].divider) % 1 !== 0
+          ? (amount / ranges[i].divider).toFixed(1) // Upto only a single digit of the decimal.
+          : amount / ranges[i].divider;
+      return value + ranges[i].suffix;
+    }
+  }
+  return amount.toString();
 }
 
 const productInitState: ProductReqBody = {
-  thumbnail: "",
   images: [],
   brand: "",
   title: "",
@@ -93,10 +165,15 @@ const productInitState: ProductReqBody = {
   color: null,
   size: null,
   disPercentage: null,
-  disPrice: null,
   topLevelCategory: "",
   secondLevelCategory: "",
   thirdLevelCategory: "",
+  stock: 0,
+  rating: 0,
+  reviews: [],
+  warrantyInfo: null,
+  returnPolicy: null,
+  deliveryCharges: 0,
 };
 
 const categoryInitState = {
@@ -118,4 +195,7 @@ export {
   textTruncate,
   formatAmount,
   stripHtml,
+  formatAmountRange,
+  formattedDate,
+  formattedTime,
 };

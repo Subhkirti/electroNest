@@ -13,6 +13,7 @@ import {
 import {
   categoriesMap,
   productMap,
+  productsCarouselMap,
   secondLevelCategoriesMap,
   thirdLevelCategoriesMap,
   topLevelCategoriesMap,
@@ -76,7 +77,17 @@ const getTopLevelCategories =
   };
 
 const getSecondLevelCategories =
-  (categoryId: string, pageNumber?: number, pageSize?: number) =>
+  ({
+    categoryId,
+    pageNumber,
+    pageSize,
+    newData,
+  }: {
+    categoryId: string;
+    pageNumber?: number;
+    pageSize?: number;
+    newData?: boolean;
+  }) =>
   async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.GET_SECOND_LEVEL_CATEGORIES_REQUEST });
 
@@ -99,6 +110,7 @@ const getSecondLevelCategories =
             res?.data?.data?.length > 0
               ? res?.data?.data.map(secondLevelCategoriesMap)
               : [],
+          newData: newData,
           totalCount: res?.data?.totalCount,
         },
       });
@@ -111,7 +123,17 @@ const getSecondLevelCategories =
   };
 
 const getThirdLevelCategories =
-  (sectionId: string, pageNumber?: number, pageSize?: number) =>
+  ({
+    sectionId,
+    pageNumber,
+    pageSize,
+    newData,
+  }: {
+    sectionId: string;
+    pageNumber?: number;
+    pageSize?: number;
+    newData?: boolean;
+  }) =>
   async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.GET_THIRD_LEVEL_CATEGORIES_REQUEST });
 
@@ -134,6 +156,7 @@ const getThirdLevelCategories =
             res?.data?.data?.length > 0
               ? res?.data?.data.map(thirdLevelCategoriesMap)
               : [],
+          newData: newData,
           totalCount: res?.data?.totalCount,
         },
       });
@@ -468,6 +491,26 @@ const uploadFile = async (filePath: File | null) => {
     );
   }
 };
+/* Categories section start here */
+const getHomeProductsCarousel = () => async (dispatch: ActionDispatch) => {
+  dispatch({ type: ActionTypes.GET_PRODUCTS_CAROUSEL_REQUEST });
+
+  try {
+    const res = await axios.get(ApiUrls.getProductsCarousel, );
+
+    dispatch({
+      type: ActionTypes.GET_PRODUCTS_CAROUSEL_SUCCESS,
+      payload:
+        res?.data?.data?.length > 0 ? res?.data?.data.map(productsCarouselMap) : [],
+    });
+  } catch (error) {
+    handleCatchError({
+      error,
+      actionType: ActionTypes.GET_PRODUCTS_CAROUSEL_FAILURE,
+    });
+  }
+};
+
 
 export {
   getProducts,
@@ -487,4 +530,5 @@ export {
   deleteTopLevelCategory,
   deleteSecondLevelCategory,
   deleteThirdLevelCategory,
+  getHomeProductsCarousel
 };

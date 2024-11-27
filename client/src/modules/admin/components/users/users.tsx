@@ -9,18 +9,14 @@ import {
 import ActionButton from "../../../../common/components/actionButton";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
-import { deleteProduct } from "../../../../store/customer/product/action";
-import { Avatar } from "@mui/material";
-import { Delete, Edit, AddShoppingCart, Visibility, PersonAdd } from "@mui/icons-material";
-import {
-  formatAmount,
-  formattedDateTime,
-  textTruncate,
-} from "../../utils/productUtil";
+import { Delete, Edit, Visibility, PersonAdd } from "@mui/icons-material";
+import { formattedDate, formattedDateTime, formattedTime } from "../../utils/productUtil";
 import CustomTable from "../../../../common/components/customTable";
-import { Product } from "../../../customer/types/productTypes";
 import { TableColumn, User } from "../../../customer/types/userTypes";
-import { deleteUser, getAllUsers } from "../../../../store/customer/users/action";
+import {
+  deleteUser,
+  getAllUsers,
+} from "../../../../store/customer/users/action";
 
 const usersColumns: TableColumn<User>[] = [
   { id: "id", label: "User ID" },
@@ -49,12 +45,24 @@ const usersColumns: TableColumn<User>[] = [
   {
     id: "createdAt",
     label: "Created At",
-    render: (value: Date) => formattedDateTime(value),
+    render: (value: Date) => (
+      <div className="flex flx-col">
+        {formattedDate(value)}
+        <br />
+        {formattedTime(value)}
+      </div>
+    ),
   },
   {
     id: "updatedAt",
     label: "Updated At",
-    render: (value: Date) => formattedDateTime(value),
+    render: (value: Date) => (
+      <div className="flex flx-col">
+        {formattedDate(value)}
+        <br />
+        {formattedTime(value)}
+      </div>
+    ),
   },
 ];
 
@@ -80,6 +88,7 @@ function Users() {
     return () => {
       dispatch(resetHeader());
     };
+    // eslint-disable-next-line
   }, []);
 
   const fetchUsers = (page: number, size: number) => {
@@ -91,16 +100,12 @@ function Users() {
       <>
         <ActionButton
           startIcon={Visibility}
-          onClick={() =>
-            navigate(AdminAppRoutes.viewUser + user.id)
-          }
+          onClick={() => navigate(AdminAppRoutes.viewUser + user.id)}
           text={"View"}
         />
         <ActionButton
           startIcon={Edit}
-          onClick={() =>
-            navigate(AdminAppRoutes.editUser + user.id)
-          }
+          onClick={() => navigate(AdminAppRoutes.editUser + user.id)}
           text={"Edit"}
         />
         <ActionButton

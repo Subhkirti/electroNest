@@ -1,14 +1,15 @@
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
+import { ThunkDispatch } from "redux-thunk";
 import { User } from "../modules/customer/types/userTypes";
 import {
   CategoryState,
   Product,
-  SecondLevelCategories,
-  ThirdLevelCategories,
   TopLevelCategories,
 } from "../modules/customer/types/productTypes";
 import { SvgIconTypeMap } from "@mui/material";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
+import { Cart, CartItem } from "../modules/customer/types/cartTypes";
+import { Address } from "../modules/customer/types/addressTypes";
+import { Order, OrderHistory } from "../modules/customer/types/orderTypes";
 
 interface RootState {
   auth: AuthState;
@@ -17,6 +18,7 @@ interface RootState {
   order: OrderState;
   header: HeaderState;
   users: UsersState;
+  address: AddressState;
 }
 
 interface RootAction {
@@ -31,6 +33,15 @@ type ActionDispatch = (arg0: RootAction) => void;
 interface AuthState {
   user: User | null;
   isLoading: boolean;
+  logoutLoader: boolean;
+  error: string | null;
+}
+
+interface AddressState {
+  addresses: Address[];
+  address: Address | null;
+  activeAddress: Address | null;
+  isLoading: boolean;
   error: string | null;
 }
 
@@ -40,6 +51,7 @@ interface ProductState {
   thirdLevelCategories: any[];
   categories: CategoryState[];
   products: Product[];
+  productsCarousel: ProductsCarouselState[];
   product: Product | null;
   newProduct: Product | null;
   isLoading: boolean;
@@ -49,18 +61,25 @@ interface ProductState {
   secondLCategoryCount: number;
   thirdLCategoryCount: number;
 }
+interface ProductsCarouselState {
+  category: TopLevelCategories;
+  products: Product[];
+}
 
 interface CartState {
-  cartItems: [];
-  cart: {} | null;
+  cartItems: CartItem[];
+  cart: Cart | null;
   isLoading: boolean;
   error: string | null;
 }
 
 interface OrderState {
-  orders: [];
-  order: {} | null;
+  orders: Order[];
+  order: Order | null;
+  orderHistory: OrderHistory[];
   isLoading: boolean;
+  totalCount: number;
+  razorpayOrderId: string | null;
   error: string | null;
 }
 
@@ -96,4 +115,5 @@ export type {
   OrderState,
   HeaderState,
   UsersState,
+  AddressState,
 };

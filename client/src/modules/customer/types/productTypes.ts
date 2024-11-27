@@ -1,20 +1,20 @@
 interface ProductSearchReqBody {
+  searchQuery?: string;
   categoryId: string;
   sectionId: string;
   itemId: string;
   pageNumber: number;
   pageSize: number;
-  colors: string[];
-  minPrice: number[];
-  maxPrice: number[];
-  discount: string[];
-  stock: string | null;
-  sort: string;
+  colors?: string[];
+  minPrice?: number[];
+  maxPrice?: number[];
+  discount?: string[];
+  stock?: string | null;
+  sort?: string;
 }
 
 interface ProductReqBody {
-  thumbnail: File | string;
-  images: File[] | string[];
+  images: string[];
   brand: string;
   title: string;
   description: string;
@@ -23,10 +23,15 @@ interface ProductReqBody {
   color: string | null;
   quantity: number | null;
   disPercentage: number | null;
-  disPrice: number | null;
   topLevelCategory: string;
   secondLevelCategory: string;
   thirdLevelCategory: string;
+  stock: number;
+  rating: number;
+  reviews: Review[];
+  warrantyInfo: string | null;
+  returnPolicy: string | null;
+  deliveryCharges: number;
 }
 
 interface TopLevelCategories {
@@ -56,20 +61,34 @@ interface Product {
   productId: number;
   productName: string;
   description: string;
-  price: Float32Array;
-  discountPrice: Float32Array;
-  discountPercentage: Float32Array;
+  price: number;
+  netPrice: number;
+  discountPercentage: number;
   quantity: number;
   brand: string;
   color: string;
+  path: string;
   size: string;
-  thumbnail: string;
   images: string[];
   categoryId: string;
   sectionId: string;
   itemId: string;
   createdAt: Date;
   updatedAt: Date;
+  stock: number;
+  rating: number;
+  reviews: Review[];
+  warrantyInfo: string | null;
+  returnPolicy: string | null;
+  deliveryCharges: number;
+}
+
+interface Review {
+  rating: number;
+  comment: string;
+  date: Date;
+  userName: string;
+  userId: string;
 }
 
 export enum CategoryTypes {
@@ -86,8 +105,6 @@ interface CategoryState {
   sectionId?: string;
   itemId?: string;
   sections?: any[];
-
-
 }
 
 interface CategoryBreadcrumbs {

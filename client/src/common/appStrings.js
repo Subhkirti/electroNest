@@ -1,5 +1,5 @@
 const AppStrings = {
-  /* customer strings */
+  /* customer portal strings */
   login: "Login",
   logout: "Logout",
   register: "Register",
@@ -7,8 +7,24 @@ const AppStrings = {
   alreadyHaveAccount: "if you already have an account?",
   products: "Products",
   goToHome: "Go to Homepage",
+  goBack: "Go Back",
+  viewMore: "View More",
+  cartIsEmpty: "Your cart is empty",
+  startShopping: "Start Shopping",
+  justRelaxFindProducts:
+    "Just relax, let us help you find some first-class products.",
+  addToCart: "Add to cart",
+  addAddress: "Add delivery address",
+  addNewAddress: "Add new address",
+  selectDeliveryAddress: "Select Delivery Address",
+  deliverToThisAddress: "Deliver to this Address",
+  buyNow: "Buy now",
+  checkout: "Checkout",
+  payment: "Payment",
+  cancelOrder: "Cancel Order",
+  viewDetails: "View Details",
 
-  /* admin strings */
+  /* admin portal strings */
   users: "Users",
   shopWith: "Shop with ElectroNest",
   congratulations: "Congratulations",
@@ -24,9 +40,10 @@ const AppStrings = {
   categories: "Categories",
   addCategory: "Add Category",
   dashboard: "Dashboard",
+  orders: "Orders",
   welcomeToDashboard: "Welcome to the Admin Dashboard",
 
-  /* error messages */
+  /* error/success messages */
   passwordError:
     "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.",
   mobileNumberError: "Please enter valid mobile number.",
@@ -35,12 +52,15 @@ const AppStrings = {
   resultsNotFound: "Results not Found!",
   productsNotFound: "Products not Found!",
   productDetailsNotFound: "Product Details not Found!",
-
   oopsPageNotFound: "Oops! Page Not Found",
   pageNotExist: "The page you're looking for doesn't exist or has been moved.",
+  pleaseAddDeliveryAddress: "Please add delivery address.",
+  userDetailsNotFound: "User details not Found!",
+  ordersNotFound: "Orders not Found!",
+  yourOrderHasBeenCancelled: "Your Order has been Cancelled.",
 
-   /* success messages */
-   categoryAddedSuccessfully: "Category added successfully",
+  /* success messages */
+  categoryAddedSuccessfully: "Category added successfully",
 };
 
 export default AppStrings;

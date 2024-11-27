@@ -6,6 +6,9 @@ import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import {
   editProduct,
   findProductsById,
+  getSecondLevelCategories,
+  getThirdLevelCategories,
+  getTopLevelCategories,
 } from "../../../../store/customer/product/action";
 import { ProductReqBody } from "../../../customer/types/productTypes";
 import Loader from "../../../../common/components/loader";
@@ -15,7 +18,7 @@ import {
   setHeader,
 } from "../../../../store/customer/header/action";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { productInitState, productStateIds } from "../../utils/productUtil";
+import { productInitState } from "../../utils/productUtil";
 import AdminAppRoutes from "../../../../common/adminRoutes";
 
 function EditProduct() {
@@ -33,13 +36,14 @@ function EditProduct() {
       // Fetch product details
       dispatch(findProductsById(productId));
     }, 10);
+    loadCategories();
 
     return () => {
       clearTimeout(timer);
       dispatch(resetHeader());
     };
     // eslint-disable-next-line
-  }, [productId]);
+  }, [productId, product?.topLevelCategory, product?.secondLevelCategory]);
 
   useEffect(() => {
     // set header props
@@ -52,9 +56,8 @@ function EditProduct() {
       })
     );
 
-    if (!isLoading && productRes) {
+    if (!isLoading && productRes && !product?.title) {
       setProduct({
-        thumbnail: productRes?.thumbnail?.[0] || "",
         images: productRes?.images || [],
         brand: productRes.brand || "",
         title: productRes.productName || "",
@@ -64,25 +67,40 @@ function EditProduct() {
         color: productRes.color || null,
         size: productRes.size || null,
         disPercentage: Number(productRes.discountPercentage) || 0,
-        disPrice: Number(productRes.discountPrice) || 0,
         topLevelCategory: productRes.categoryId || "",
         secondLevelCategory: productRes.sectionId || "",
         thirdLevelCategory: productRes.itemId || "",
+        stock: productRes?.stock,
+        rating: productRes?.rating,
+        reviews: productRes?.reviews,
+        warrantyInfo: productRes?.warrantyInfo,
+        returnPolicy: productRes?.returnPolicy,
+        deliveryCharges: productRes?.deliveryCharges,
       });
     }
     // eslint-disable-next-line
   }, [isLoading, productRes?.productName]);
 
+  function loadCategories() {
+    dispatch(getTopLevelCategories());
+    if (product.topLevelCategory)
+      dispatch(
+        getSecondLevelCategories({
+          categoryId: product.topLevelCategory,
+          newData: true,
+        })
+      );
+    if (product.secondLevelCategory)
+      dispatch(
+        getThirdLevelCategories({
+          sectionId: product.secondLevelCategory,
+          newData: true,
+        })
+      );
+  }
+
   function handleOnChange(value: any, fieldId: string) {
-    if (fieldId === productStateIds.images) {
-      const previousImages = product.images || [];
-      setProduct({
-        ...product,
-        images: [...previousImages, ...value],
-      });
-    } else {
-      setProduct({ ...product, [fieldId]: value });
-    }
+    setProduct({ ...product, [fieldId]: value });
   }
 
   async function handleOnEditProduct(e: { preventDefault: () => void }) {

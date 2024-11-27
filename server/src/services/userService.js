@@ -75,6 +75,7 @@ app.post("/register", (req, res) => {
                           message: "Failed to register",
                         });
                       }
+                      
                       // Respond with success and token
                       res.status(200).json({
                         status: 200,
@@ -175,6 +176,7 @@ app.get("/users", (req, res) => {
   );
 });
 
+// Add user API for admins
 app.post("/user/add", (req, res) => {
   const { firstName, lastName, email, password, role, mobile } = req.body;
   connection.query(

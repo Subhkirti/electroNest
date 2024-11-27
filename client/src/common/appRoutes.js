@@ -3,14 +3,17 @@ const AppRoutes = {
   register: "/register",
   login: "/login",
   cart: "/cart",
-  thirdLevelProduct: "/:categoryId/:sectionId/:itemId",
-  secondLevelProduct: "/:categoryId/:sectionId",
-  firstLevelProduct: "/:categoryId",
+  profile: "/user/:userId",
+  products: "/products",
+  thirdLevelProduct: "/products/:categoryId/:sectionId/:itemId",
+  secondLevelProduct: "/products/:categoryId/:sectionId",
+  firstLevelProduct: "/products/:categoryId",
   productDetail: "/product/:productId",
   checkout: "/checkout",
-  orders: "/account/orders",
-  orderDetail: "/account/order/:orderId",
+  payment: "/payment",
+  orderDetail: "/orders/:orderId",
   notFound: "/not-found",
+  orders: "/orders",
 };
 
 export default AppRoutes;

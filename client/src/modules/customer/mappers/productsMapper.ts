@@ -1,3 +1,4 @@
+import AppRoutes from "../../../common/appRoutes";
 import {
   Product,
   SecondLevelCategories,
@@ -59,23 +60,36 @@ function thirdLevelCategoriesMap(doc: any): ThirdLevelCategories {
 
 function productMap(doc: any): Product {
   return {
-    productId: doc?.product_id,
-    productName: doc?.product_name,
-    description: doc?.description,
-    price: doc?.price,
-    discountPrice: doc?.discount_price,
-    discountPercentage: doc?.discount_percentage,
-    quantity: doc?.quantity,
-    brand: doc?.brand,
-    color: doc?.color,
-    size: doc?.size,
-    thumbnail: JSON.parse(doc?.thumbnail),
-    images: JSON.parse(doc?.images),
-    categoryId: doc?.category_id,
-    sectionId: doc?.section_id,
-    itemId: doc?.item_id,
-    createdAt: doc?.created_at,
-    updatedAt: doc?.updated_at,
+    productId: doc?.product_id || 0,
+    productName: doc?.product_name || "",
+    description: doc?.description || "",
+    price: doc?.price || 0,
+    netPrice: doc?.net_price || 0,
+    discountPercentage: doc?.discount_percentage || 0,
+    quantity: doc?.quantity || 0,
+    brand: doc?.brand || "",
+    color: doc?.color || "",
+    size: doc?.size || "",
+    path: doc?.product_id ? `/product/${doc?.product_id}` : AppRoutes.products,
+    images: doc?.images.length ? JSON.parse(doc?.images) : [],
+    categoryId: doc?.category_id || "",
+    sectionId: doc?.section_id || "",
+    itemId: doc?.item_id || "",
+    createdAt: doc?.created_at || new Date(),
+    updatedAt: doc?.updated_at || new Date(),
+    stock: doc?.stock || 0,
+    rating: doc?.rating || 0,
+    reviews: doc?.reviews || [],
+    warrantyInfo: doc?.warranty_info || "",
+    returnPolicy: doc?.return_policy || "",
+    deliveryCharges: doc?.delivery_charges || 0,
+  };
+}
+
+function productsCarouselMap(doc: any) {
+  return {
+    category: topLevelCategoriesMap(doc?.category),
+    products: doc?.products.map(productMap),
   };
 }
 
@@ -85,4 +99,5 @@ export {
   thirdLevelCategoriesMap,
   productMap,
   categoriesMap,
+  productsCarouselMap,
 };
