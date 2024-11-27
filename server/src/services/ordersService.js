@@ -516,14 +516,19 @@ app.put("/order/update-status", (req, res) => {
         (status === OrderStatus.FAILED || status === OrderStatus.CANCELLED) &&
         receiptId
       ) {
-        
-        setTimeout(async () => {
-          status === OrderStatus.CANCELLED &&
-            (await insertOrderStatusHistory(
-              orderId,
-              OrderStatus.REFUNDED_INITIATED
-            ));
-        }, 2000);
+        // when order cancelled, then after 2 minutes set it's status to refund initiated
+        if (status === OrderStatus.CANCELLED) {
+          const refundStatus = OrderStatus.REFUNDED_INITIATED;
+          setTimeout(async () => {
+            await insertOrderStatusHistory(orderId, refundStatus);
+            executeQuery(
+              updateQuery,
+              receiptId
+                ? [refundStatus, userId, receiptId, orderId]
+                : [refundStatus, userId, orderId]
+            );
+          }, 20000);
+        }
 
         const updatePaymentQuery = `UPDATE ${paymentsTableName} SET payment_status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND receipt_id = ?`;
         connection.query(
@@ -546,9 +551,12 @@ app.put("/order/update-status", (req, res) => {
           }
         );
       } else {
-        res
-          .status(200)
-          .json({ status: 200, message: "Order status updated successfully" });
+        res.status(200).json({
+          status: 200,
+          message: "Order status updated successfully",
+          orderId,
+          status,
+        });
       }
     }
   );

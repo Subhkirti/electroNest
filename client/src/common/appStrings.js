@@ -43,7 +43,7 @@ const AppStrings = {
   dashboard: "Dashboard",
   welcomeToDashboard: "Welcome to the Admin Dashboard",
 
-  /* error messages */
+  /* error/success messages */
   passwordError:
     "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.",
   mobileNumberError: "Please enter valid mobile number.",
@@ -57,6 +57,8 @@ const AppStrings = {
   pleaseAddDeliveryAddress: "Please add delivery address.",
   userDetailsNotFound: "User details not Found!",
   ordersNotFound: "Orders not Found!",
+  yourOrderHasBeenCancelled: "Your Order has been Cancelled.",
+
 
   /* success messages */
   categoryAddedSuccessfully: "Category added successfully",

@@ -20,7 +20,7 @@ function Orders() {
   const queryString = decodeURIComponent(window.location.search);
   const searchParams = new URLSearchParams(queryString);
   const statusValues = searchParams.get("status")?.split(",") || [];
-  const { isLoading, orders, totalCount } = useSelector(
+  const { isLoading, orders, totalCount, order } = useSelector(
     (state: RootState) => state.order
   );
 
@@ -34,7 +34,7 @@ function Orders() {
     return () => {
       clearTimeout(timer);
     };
-  }, [pageNumber, pageSize, statusValues?.length]);
+  }, [pageNumber, pageSize, statusValues?.length, order?.status]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPageNumber(newPage);

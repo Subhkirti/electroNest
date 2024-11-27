@@ -7,12 +7,16 @@ import { ActionDispatch, AppDispatch } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
 import ApiUrls from "../../../common/apiUrls";
 import { toast } from "react-toastify";
-import { OrderReqBody } from "../../../modules/customer/types/orderTypes";
+import {
+  OrderReqBody,
+  OrderStatus,
+} from "../../../modules/customer/types/orderTypes";
 import { getCurrentUser } from "../../../modules/customer/utils/localStorageUtils";
 import { orderMap } from "../../../modules/customer/mappers/cartMapper";
 import { NavigateFunction } from "react-router-dom";
 import AppRoutes from "../../../common/appRoutes";
 import { getCart } from "../cart/action";
+import AppStrings from "../../../common/appStrings";
 
 const user = getCurrentUser();
 const userId = user?.id || 0;
@@ -150,7 +154,6 @@ const verifyPayment = async ({
   receiptId,
   orderId,
   razorpayOrderId,
-  navigate,
   dispatch,
   razorpayPaymentId,
   razorpaySignature,
@@ -159,7 +162,6 @@ const verifyPayment = async ({
   cartId: number | string;
   receiptId: string;
   razorpayOrderId: string;
-  navigate: NavigateFunction;
   dispatch: AppDispatch;
   razorpayPaymentId: string;
   razorpaySignature: string;
@@ -177,17 +179,18 @@ const verifyPayment = async ({
       },
       headersConfig
     );
+
     if (paymentVerification.data.status >= 200) {
       toast.success("Order placed. Thanks for shopping with us.");
       dispatch(getCart());
-      navigate(AppRoutes.products);
+      window.location.href = AppRoutes.products;
     } else {
       toast.error("Payment verification failed.");
-      navigate(AppRoutes.products);
+      window.location.href = AppRoutes.products;
     }
   } catch (verifyError) {
     toast.error("Payment verification failed.");
-    navigate(AppRoutes.products);
+    window.location.href = AppRoutes.products;
   }
 };
 
@@ -200,7 +203,7 @@ const updateOrderStatus =
   }: {
     orderId?: number;
     receiptId?: number;
-    status: string;
+    status: OrderStatus;
   }) =>
   async (dispatch: ActionDispatch) => {
     dispatch({
@@ -218,16 +221,22 @@ const updateOrderStatus =
         },
         headersConfig
       );
-      console.log("response:", response);
 
-      dispatch({
-        type: ActionTypes.CREATE_ORDER_SUCCESS,
-        payload: null,
-      });
+      if (response?.data?.status >= 200) {
+        setTimeout(() => {
+          dispatch({
+            type: ActionTypes.UPDATE_ORDER_STATUS_SUCCESS,
+            payload: response.data,
+          });
+          if (status === OrderStatus.CANCELLED) {
+            toast.success(AppStrings.yourOrderHasBeenCancelled);
+          }
+        }, 2000);
+      }
     } catch (error) {
       handleCatchError({
         error,
-        actionType: ActionTypes.GET_ORDERS_FAILURE,
+        actionType: ActionTypes.UPDATE_ORDER_STATUS_FAILURE,
       });
     }
   };

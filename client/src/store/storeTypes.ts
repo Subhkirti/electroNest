@@ -9,6 +9,7 @@ import { SvgIconTypeMap } from "@mui/material";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
 import { Cart, CartItem } from "../modules/customer/types/cartTypes";
 import { Address } from "../modules/customer/types/addressTypes";
+import { Order } from "../modules/customer/types/orderTypes";
 
 interface RootState {
   auth: AuthState;
@@ -73,8 +74,8 @@ interface CartState {
 }
 
 interface OrderState {
-  orders: [];
-  order: {} | null;
+  orders: Order[];
+  order: Order | null;
   isLoading: boolean;
   totalCount: number;
   razorpayOrderId: string | null;

@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { updateOrderStatus } from "../../../../store/customer/order/action";
 
 function OrderCard({ order }: { order: Order }) {
+  console.log('order:', order)
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const productDetail = order?.productDetails;
@@ -48,9 +49,14 @@ function OrderCard({ order }: { order: Order }) {
               <p className="opacity-50 text-xs font-semibold capitalize">
                 Color: {productDetail.color}
               </p>
-              <p className=" text-secondary text-xs font-semibold capitalize">
-                Price: {formatAmount(order.transactionAmount)}
-              </p>
+              {!(
+                orderStatus?.value === OrderStatus.PENDING ||
+                orderStatus?.value === OrderStatus.FAILED
+              ) && (
+                <p className=" text-secondary text-xs font-semibold capitalize">
+                  Paid: {formatAmount(order.transactionAmount * order.quantity)}
+                </p>
+              )}
             </div>
           </div>
         </Grid>

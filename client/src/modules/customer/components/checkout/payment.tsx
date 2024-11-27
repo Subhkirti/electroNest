@@ -12,6 +12,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { toast } from "react-toastify";
+import { OrderStatus } from "../../types/orderTypes";
 
 function Payment() {
   const navigate = useNavigate();
@@ -32,13 +33,13 @@ function Payment() {
   useEffect(() => {
     if (activeStep === 4) {
       const beforeUnloadHandler = (event: any) => {
-        navigate(AppRoutes.home);
+        window.location.href = AppRoutes.home;
       };
       window.addEventListener("load", beforeUnloadHandler);
 
       if (paymentError) {
         if (seconds === 0) {
-          navigate(AppRoutes.home);
+          window.location.href = AppRoutes.home;
         }
         if (seconds > 0) {
           const timer = setInterval(() => {
@@ -88,7 +89,6 @@ function Payment() {
           razorpayPaymentId: response.razorpay_payment_id,
           razorpaySignature: response.razorpay_signature,
           razorpayOrderId: response.razorpay_order_id,
-          navigate,
           dispatch,
         });
       },
@@ -97,7 +97,7 @@ function Payment() {
           setPaymentError("Transaction Failed.");
           dispatch(
             updateOrderStatus({
-              status: "failed",
+              status: OrderStatus.FAILED,
               orderId: Number(orderId),
               receiptId: Number(receiptId),
             })

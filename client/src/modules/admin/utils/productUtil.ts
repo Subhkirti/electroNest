@@ -77,7 +77,7 @@ function formattedDateTime(dateString?: Date | string): string {
     hour12: true,
   }).format(date);
 
-  return `${datePart} (${timePart})`;
+  return `${datePart} | ${timePart}`;
 }
 
 const stripHtml = (html: string) => {
