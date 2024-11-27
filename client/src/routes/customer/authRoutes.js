@@ -1,36 +1,30 @@
 import { lazy } from "react";
 import AppRoutes from "../../common/appRoutes";
 
-const ProductDetails = lazy(() =>
-  import("../../modules/customer/components/productDetails/productDetails")
+const Profile = lazy(() =>
+  import("../../modules/customer/components/user/profile")
 );
 const Cart = lazy(() => import("../../modules/customer/components/cart/cart"));
-const Checkout = lazy(() =>
-  import("../../modules/customer/components/checkout/checkout")
+const CheckoutStepper = lazy(() =>
+  import("../../modules/customer/components/checkout/checkoutStepper")
 );
-const Order = lazy(() =>
-  import("../../modules/customer/components/order/order")
+const Orders = lazy(() =>
+  import("../../modules/customer/components/order/orders")
 );
 const OrderDetails = lazy(() =>
   import("../../modules/customer/components/order/orderDetails")
 );
-const Product = lazy(() =>
-  import("../../modules/customer/components/product/product")
-);
 
 const authRoutes = [
   {
-    path: AppRoutes.product,
-    component: Product,
-  },
-  {
-    path: AppRoutes.productDetail,
-    component: ProductDetails,
+    path: AppRoutes.profile,
+    component: Profile,
   },
   {
     path: AppRoutes.orders,
-    component: Order,
+    component: Orders,
   },
+
   {
     path: AppRoutes.orderDetail,
     component: OrderDetails,
@@ -41,7 +35,7 @@ const authRoutes = [
   },
   {
     path: AppRoutes.checkout,
-    component: Checkout,
+    component: CheckoutStepper,
   },
 ];
 

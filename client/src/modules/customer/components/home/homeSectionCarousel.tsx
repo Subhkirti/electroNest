@@ -1,77 +1,50 @@
-import React, { useState } from "react";
-import AliceCarousel from "react-alice-carousel";
-import HomeSectionCard from "../home/homeSectionCard";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import HomeSectionCard from "./homeSectionCard";
+import Carousel from "react-multi-carousel";
+import { carouselBreakpoints } from "../../../../common/constants";
+import { useNavigate } from "react-router-dom";
+import { getCategoryPath } from "../../utils/productUtils";
+import { Product } from "../../types/productTypes";
+import ViewMoreButton from "../../../../common/components/viewMoreButton";
 
 function HomeSectionCarousel({
   productsList,
   sectionName,
 }: {
-  productsList: any[];
+  productsList: Product[];
   sectionName: string;
 }) {
-  const responsive = {
-    0: { items: 1.2 },
-    568: { items: 2.6 },
-    1024: { items: 4.1 },
-  };
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
-
-  const items = productsList.map((product, index) => (
-    <HomeSectionCard product={product} key={index} />
-  ));
-
-  function slidePrev() {
-    setActiveSlideIndex(activeSlideIndex - 1);
-  }
-
-  function slideNext() {
-    setActiveSlideIndex(activeSlideIndex + 1);
-  }
-
-  function onSlideChanged({ item }: { item: number }) {
-    setActiveSlideIndex(item);
-  }
-
+  const navigate = useNavigate();
   return (
-    <div className="border bg-white">
+    <div className="bg-white">
       <h2 className="text-2xl font-extrabold text-gray-800 p-5 capitalize">
         {sectionName}
       </h2>
-      <div className="relative p-5">
-        <AliceCarousel
-          disableButtonsControls
-          disableDotsControls
-          items={items}
-          responsive={responsive}
-          onSlideChanged={onSlideChanged}
-          activeIndex={activeSlideIndex}
-        />
 
-        {activeSlideIndex > 0 && (
-          <div
-            className={
-              "cursor-pointer z-50 absolute top-[8rem] px-2 py-4 rounded-md left-[-20px] bg-white shadow-md"
-            }
-            aria-label="prev"
-            onClick={slidePrev}
-          >
-            <ChevronLeftIcon className="h-6 w-6" />
+      <Carousel
+        responsive={carouselBreakpoints}
+        slidesToSlide={2}
+        className="mb-10"
+        arrows={true}
+      >
+        {productsList?.length > 0 &&
+          productsList.map((product, index) => {
+            return <HomeSectionCard product={product} key={index} />;
+          })}
+        {/* View More button */}
+        {productsList.length > 4 && (
+          <div className="h-full flex items-center">
+            <ViewMoreButton
+              onClick={() => {
+                navigate(
+                  getCategoryPath({
+                    categoryId: productsList[0]?.categoryId,
+                  })
+                );
+              }}
+            />
           </div>
         )}
-
-        {activeSlideIndex < items.length - 4 && (
-          <div
-            className={
-              "cursor-pointer z-50 absolute top-[8rem] px-2 py-4 rounded-md right-[-20px] bg-white shadow-md"
-            }
-            onClick={slideNext}
-            aria-label="next"
-          >
-            <ChevronRightIcon className="h-6 w-6" />
-          </div>
-        )}
-      </div>
+      </Carousel>
     </div>
   );
 }

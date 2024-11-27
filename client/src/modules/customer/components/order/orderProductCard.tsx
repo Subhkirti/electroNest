@@ -9,7 +9,7 @@ function OrderProductCard() {
           <Grid
             item
             container
-            className="shadow-lg rounded-md p-5 border"
+            className="rounded-md p-5 border"
             alignItems={"center"}
             justifyContent={"space-between"}
           >

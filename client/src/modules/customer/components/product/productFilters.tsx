@@ -17,84 +17,152 @@ import {
   FunnelIcon,
   MinusIcon,
   PlusIcon,
-  Squares2X2Icon,
 } from "@heroicons/react/20/solid";
-import watches from "../../../../assets/productsData/watches";
 import ProductCard from "./productCard";
-import { productFilters, sortOptions } from "../../utils/productUtils";
+import {
+  loadCategoryBreadCrumbs,
+  productFilters,
+  sortOptions,
+} from "../../utils/productUtils";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../../../store/storeTypes";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { findProducts } from "../../../../store/customer/product/action";
-import { ProductSearchReqBody } from "../../types/productTypes";
+import {
+  CategoryBreadcrumbs,
+  ProductSearchReqBody,
+} from "../../types/productTypes";
+import Loader from "../../../../common/components/loader";
+import AppStrings from "../../../../common/appStrings";
+import NotFound from "../../../../common/components/notFound";
+import { FilterAltOff } from "@mui/icons-material";
+import { Tooltip } from "@mui/material";
+import Breadcrumbs from "../productDetails/breadcrumbs";
+import ProductTotalCount from "./productTotalCount";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Product() {
+export default function ProductFilters() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const { isLoading, products, totalCount, categories } = useSelector(
+    (state: RootState) => state.product
+  );
   const params = useParams();
   const queryString = decodeURIComponent(location.search);
   const searchParams = new URLSearchParams(queryString);
-  const colorValue = searchParams.get("color");
+  const queryValue = searchParams.get("query") || "";
+  const colorValue = searchParams.get("color")?.split(",");
   const priceValue = searchParams.get("price");
-  const discountValue = searchParams.get("discount");
+  const discountValue = searchParams.get("discount")?.split(",");
   const sortValue = searchParams.get("sort");
   const pageNumber = searchParams.get("page");
-  const stockValue = searchParams.get("stock");
+  const stockValue = searchParams.get("availability");
+  const [categoryBreadcrumbs, setCategoryBreadcrumbs] = useState<
+    CategoryBreadcrumbs[]
+  >([]);
+  const minMaxPrices = priceValue
+    ? priceValue
+        .split(",")
+        .map((priceRange) => priceRange.split("-").map(Number))
+    : [];
+
+  const minPriceList = minMaxPrices.map(([min, max]) => min);
+  const maxPriceList = minMaxPrices.map(([min, max]) => max);
 
   useEffect(() => {
-    const [minPrice, maxPrice] =
-      priceValue === null ? [0, 0] : priceValue.split("-").map(Number);
     const reqData: ProductSearchReqBody = {
-      category: params.levelThree || "",
-      colors: colorValue || "",
-      minPrice,
-      maxPrice,
-      discount: discountValue || "",
-      sort: sortValue || "low_to_high",
-      pageNumber: pageNumber ? parseInt(pageNumber) - 1 : 0,
+      categoryId: params?.categoryId || "",
+      sectionId: params?.sectionId || "",
+      itemId: params?.itemId || "",
+      colors: colorValue || [],
+      minPrice: minPriceList,
+      maxPrice: maxPriceList,
+      discount: discountValue || [],
+      sort: sortValue || "",
+      pageNumber: pageNumber ? parseInt(pageNumber) - 1 : 1,
       pageSize: 10,
       stock: stockValue,
+      searchQuery: queryValue,
     };
-    dispatch(findProducts(reqData));
+
+    const timer = setTimeout(() => {
+      dispatch(findProducts(reqData));
+    }, 10);
+
+    return () => {
+      clearTimeout(timer);
+    };
+
     // eslint-disable-next-line
   }, [
-    params.levelThree,
-    colorValue,
-    priceValue,
-    discountValue,
+    params,
+    colorValue?.length,
+    priceValue?.length,
+    discountValue?.length,
     sortValue,
     pageNumber,
     stockValue,
   ]);
 
-  function handleOnSearchFilter(value: string, sectionId: string) {
+  useEffect(() => {
+    // Fetch category breadcrumbs
+    categories?.length &&
+      setCategoryBreadcrumbs(
+        loadCategoryBreadCrumbs(categories, {
+          categoryId: params?.categoryId,
+          sectionId: params?.sectionId,
+          itemId: params?.itemId,
+        })
+      );
+    // eslint-disable-next-line
+  }, [categories]);
+
+  function handleOnSearchFilter(
+    value: string,
+    sectionId: string,
+    singleSelection?: boolean
+  ) {
     const searchParams = new URLSearchParams(location.search);
-    let filterValue = searchParams.getAll(sectionId);
 
-    if (filterValue?.length > 0 && filterValue[0]?.split(",").includes(value)) {
-      // eslint-disable-next-line
-      filterValue = filterValue[0]?.split(",")?.filter((item) => item != value);
-
-      if (filterValue?.length === 0) {
-        searchParams.delete(sectionId);
-      }
+    if (singleSelection) {
+      // For single-selection sections, replace the existing value with the new one
+      searchParams.set(sectionId, value);
     } else {
-      filterValue.push(value);
+      // For multi-selection sections, add or remove the value
+      let filterValue = searchParams.getAll(sectionId);
+
+      if (
+        filterValue?.length > 0 &&
+        filterValue[0]?.split(",").includes(value)
+      ) {
+        // Remove the value if it already exists
+        filterValue = filterValue[0]
+          ?.split(",")
+          ?.filter((item) => item !== value);
+
+        if (filterValue?.length === 0) {
+          searchParams.delete(sectionId);
+        }
+      } else {
+        filterValue.push(value);
+      }
+
+      if (filterValue?.length > 0) {
+        searchParams.set(sectionId, filterValue.join(","));
+      }
     }
 
-    if (filterValue?.length > 0) {
-      searchParams.set(sectionId, filterValue.join(","));
-      const query = searchParams.toString();
-      navigate({ search: `?${query}` });
-    }
+    const query = searchParams.toString();
+    navigate({ search: `?${query}` });
   }
 
+
+  const dataNotAvailable = !isLoading && products.length === 0;
   return (
     <div className="bg-white">
       <div>
@@ -126,7 +194,7 @@ export default function Product() {
                 </button>
               </div>
 
-              {/* Filters */}
+              {/* Mobiles view Filters */}
               <form className="mt-4 border-t border-gray-200">
                 {productFilters.map((section) => (
                   <Disclosure
@@ -158,7 +226,11 @@ export default function Product() {
                             <input
                               defaultValue={option.value}
                               onChange={() =>
-                                handleOnSearchFilter(option.value, section.id)
+                                handleOnSearchFilter(
+                                  option.value,
+                                  section.id,
+                                  section?.singleSelection
+                                )
                               }
                               id={`filter-mobile-${section.id}-${optionIdx}`}
                               name={`${section.id}[]`}
@@ -184,9 +256,8 @@ export default function Product() {
 
         <main className="mx-auto">
           <div className="flex items-baseline justify-between border-b border-gray-200 pb-6">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-              New Arrivals
-            </h1>
+            {/* Category Breadcrumbs */}
+            <Breadcrumbs categoryBreadcrumbs={categoryBreadcrumbs} />
 
             <div className="flex items-center">
               <Menu as="div" className="relative inline-block text-left">
@@ -207,30 +278,25 @@ export default function Product() {
                   <div className="py-1">
                     {sortOptions.map((option) => (
                       <MenuItem key={option.name}>
-                        <a
-                          href={option.href}
+                        <div
+                          onClick={() =>
+                            handleOnSearchFilter(option.value, "sort", true)
+                          }
                           className={classNames(
-                            option.current
-                              ? "font-medium text-gray-900"
+                            sortValue === option.value
+                              ? "text-primary"
                               : "text-gray-500",
-                            "block px-4 py-2 text-sm data-[focus]:bg-gray-100"
+                            "block cursor-pointer px-4 py-2 text-sm data-[focus]:bg-gray-100"
                           )}
                         >
                           {option.name}
-                        </a>
+                        </div>
                       </MenuItem>
                     ))}
                   </div>
                 </MenuItems>
               </Menu>
 
-              <button
-                type="button"
-                className="-m-2 ml-5 p-2 text-gray-400 hover:text-gray-500 sm:ml-7"
-              >
-                <span className="sr-only">View grid</span>
-                <Squares2X2Icon aria-hidden="true" className="h-5 w-5" />
-              </button>
               <button
                 type="button"
                 onClick={() => setMobileFiltersOpen(true)}
@@ -243,13 +309,14 @@ export default function Product() {
           </div>
 
           <section aria-labelledby="products-heading" className="pb-24 pt-6">
-            <h2 id="products-heading" className="sr-only">
-              Products
-            </h2>
-
-            <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-5">
-              {/* Filters */}
+            <div className={"grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-5"}>
+              {/* Web Filters */}
               <form className="hidden lg:block">
+                <ProductTotalCount
+                  totalCount={totalCount}
+  
+                />
+
                 {productFilters.map((section) => (
                   <Disclosure
                     key={section.id}
@@ -280,7 +347,11 @@ export default function Product() {
                             <input
                               defaultValue={option.value}
                               onChange={() =>
-                                handleOnSearchFilter(option.value, section.id)
+                                handleOnSearchFilter(
+                                  option.value,
+                                  section.id,
+                                  section?.singleSelection
+                                )
                               }
                               id={`filter-${section.id}-${optionIdx}`}
                               name={`${section.id}[]`}
@@ -301,14 +372,23 @@ export default function Product() {
                 ))}
               </form>
 
-              {/* Product grid */}
               <div className="lg:col-span-4 w-full">
-                <div className="flex flex-wrap justify-start bg-white py-5">
-                  {watches.map((product, index) => {
-                    return <ProductCard key={index} product={product} />;
-                  })}
-                </div>
+                {dataNotAvailable ? (
+                  <NotFound
+                    message={AppStrings.productsNotFound}
+                    isGoBack={true}
+                  />
+                ) : (
+                  <div className="flex flex-wrap justify-start bg-white py-5">
+                    {/* Products grid */}
+                    {products.map((product, index) => {
+                      return <ProductCard key={index} product={product} />;
+                    })}
+                  </div>
+                )}
               </div>
+
+              {isLoading && <Loader />}
             </div>
           </section>
         </main>

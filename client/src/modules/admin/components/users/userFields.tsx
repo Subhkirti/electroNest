@@ -13,8 +13,6 @@ function UserFields({
   user: UserReqBody;
   handleOnChange?: (elementValue: any, id: string) => void;
 }) {
-  console.log('user:', user)
-
   return (
     <>
       <Grid item xs={12} lg={6}>

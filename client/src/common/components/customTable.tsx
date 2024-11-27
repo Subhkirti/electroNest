@@ -83,7 +83,7 @@ export default function CustomTable<T>({
           </TableHead>
 
           <TableBody>
-            {data?.length &&
+            {data?.length > 0 &&
               data.map((row, index) => (
                 <TableRow
                   key={index}

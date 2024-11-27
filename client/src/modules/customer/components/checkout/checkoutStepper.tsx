@@ -1,85 +1,149 @@
-import * as React from "react";
+import { useEffect } from "react";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import { useLocation } from "react-router-dom";
-import OrderSummary from "./orderSummary";
-import AddDeliveryAddress from "./addDeliveryAddress";
+import { useNavigate } from "react-router-dom";
+import { getCheckoutStep, getQuerySearch } from "../../utils/productUtils";
+import { toast } from "react-toastify";
+import AppStrings from "../../../../common/appStrings";
+import {
+  createOrder,
+  getOrders,
+} from "../../../../store/customer/order/action";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
+import { getCurrentUser } from "../../utils/localStorageUtils";
+import { OrderStatus } from "../../types/orderTypes";
+import Loader from "../../../../common/components/loader";
+import AppRoutes from "../../../../common/appRoutes";
+import RenderActiveStep from "./renderActiveStep";
 
-const steps = ["Login", "Add Delivery Address", "Order Summary", "Payment"];
+const checkoutSteps = [
+  "Checkout",
+  "Add Delivery Address",
+  "Order Summary",
+  "Payment",
+];
 
 export default function CheckoutStepper() {
-  const [activeStep, setActiveStep] = React.useState(0);
-  const location = useLocation();
-  const querySearch = new URLSearchParams(location.search);
-  const step = parseInt(querySearch.get("step") || "0");
+  const activeStep = getCheckoutStep();
+  const navigate = useNavigate();
+  const user = getCurrentUser();
+  const userId = user?.id || 0;
+  const receiptId = getQuerySearch("receipt_id");
+  const razorpayOrderId = getQuerySearch("razorpay_id");
+  const orderId = getQuerySearch("order_id");
+  const productId = getQuerySearch("product_id");
+  const dispatch = useDispatch<AppDispatch>();
+  const { isLoading, orders } = useSelector((state: RootState) => state.order);
+  const { cart } = useSelector((state: RootState) => state.cart);
+  const { activeAddress } = useSelector((state: RootState) => state.address);
+  const totalAmount = cart
+    ? cart.totalPrice - cart.totalDiscountPrice + cart.totalDeliveryCharges
+    : 0;
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  useEffect(() => {
+    if (activeStep === 3) {
+      !orders.length && dispatch(getOrders());
+    }
+  }, [activeStep]);
+
+  const handleNext = async () => {
+    if (activeStep === 1) {
+      return navigate(
+        productId
+          ? `${AppRoutes.checkout}?step=2&product_id=${productId}`
+          : `${AppRoutes.checkout}?step=2`
+      );
+    }
+    if (activeStep === 2) {
+      return handleAddAddressStep();
+    }
+    if (activeStep === 3) {
+      return navigate(
+        `?step=4&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}&order_id=${orderId}`
+      );
+    }
+  };
+
+  const handleAddAddressStep = () => {
+    if (!activeAddress) {
+      toast.info(AppStrings.pleaseAddDeliveryAddress);
+      return;
+    }
+
+    dispatch(
+      createOrder({
+        reqData: {
+          userId,
+          cartId: cart?.cartId || 0,
+          addressId: activeAddress?.addressId || 0,
+          status: OrderStatus.PENDING,
+          amount: totalAmount,
+          productId: productId ? Number(productId) : 0,
+        },
+        navigate,
+      })
+    );
   };
 
   const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    navigate(`?step=${activeStep - 1}`);
   };
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Stepper
-        activeStep={step}
-        style={{ backgroundColor: "white", padding: "20px 0px" }}
-      >
-        {steps.map((label, index) => {
-          const stepProps: { completed?: boolean } = {};
-          const labelProps: {
-            optional?: React.ReactNode;
-          } = {};
-
-          return (
-            <Step key={label} {...stepProps}>
-              <StepLabel {...labelProps}>{label}</StepLabel>
+      {isLoading && <Loader color="primary" fixed={true} />}
+      {activeStep <= checkoutSteps.length && (
+        <Stepper
+          activeStep={activeStep - 1}
+          style={{ backgroundColor: "white", padding: "20px 0px" }}
+        >
+          {checkoutSteps.map((label, index) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
             </Step>
-          );
-        })}
-      </Stepper>
-      {activeStep === steps.length ? (
-        <React.Fragment>
-          <Typography sx={{ mt: 2, mb: 1 }}>
-            All steps completed - you&apos;re finished
-          </Typography>
-        </React.Fragment>
-      ) : (
-        <React.Fragment>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              pt: 2,
-              bgcolor: "white",
-            }}
-          >
-            <Button
-              color="inherit"
-              disabled={activeStep === 0}
-              onClick={handleBack}
-              sx={{ mr: 1 }}
-            >
-              Back
-            </Button>
-            <Box sx={{ flex: "1 1 auto" }} />
-
-            <Button onClick={handleNext}>
-              {activeStep === steps.length - 1 ? "Finish" : "Next"}
-            </Button>
-          </Box>
-
-          <div className="mt-10">
-            {step === 2 ? <AddDeliveryAddress /> : <OrderSummary />}
-          </div>
-        </React.Fragment>
+          ))}
+        </Stepper>
       )}
+      {activeStep < checkoutSteps.length && (cart || productId) && (
+        <NavigatorButtons />
+      )}
+
+      <div className="mt-4">
+        <RenderActiveStep activeStep={activeStep} onNextCallback={handleNext} />
+      </div>
     </Box>
   );
+
+  // Navigation buttons
+  function NavigatorButtons() {
+    return (
+      <Box className="flex bg-white pt-8">
+        <Button
+          color="inherit"
+          disabled={activeStep === 1}
+          onClick={handleBack}
+          sx={{ mr: 1 }}
+        >
+          Back
+        </Button>
+        <Box sx={{ flex: "1 1 auto" }} />
+        <Button
+          onClick={handleNext}
+          variant="contained"
+          disabled={isLoading}
+          style={{
+            borderRadius: "0px",
+            clipPath:
+              "polygon(75% 0%, 100% 50%, 75% 100%, 0% 100%, 0 50%, 0% 0%)",
+          }}
+        >
+          {activeStep === checkoutSteps.length ? "Finish" : "Next"}
+        </Button>
+      </Box>
+    );
+  }
 }

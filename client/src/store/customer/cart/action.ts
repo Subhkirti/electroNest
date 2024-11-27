@@ -6,14 +6,26 @@ import {
 } from "../../../modules/customer/utils/apiUtils";
 import { ActionDispatch } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
+import { CartReqBody } from "../../../modules/customer/types/cartTypes";
+import { getCurrentUser } from "../../../modules/customer/utils/localStorageUtils";
+import {
+  cartItemsMap,
+  cartMap,
+} from "../../../modules/customer/mappers/cartMapper";
+import { toast } from "react-toastify";
+import AppRoutes from "../../../common/appRoutes";
 
+const userId = getCurrentUser()?.id || 0;
 const getCart = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_CART_REQUEST });
   try {
-    const res = await axios.get(`${ApiUrls.getCart}`, headersConfig);
+    const res = await axios.get(
+      `${ApiUrls.getCart}?id=${userId}`,
+      headersConfig
+    );
     dispatch({
       type: ActionTypes.GET_CART_SUCCESS,
-      payload: res?.data?.data,
+      payload: res?.data?.data ? cartMap(res?.data?.data) : null,
     });
   } catch (error) {
     handleCatchError({
@@ -23,36 +35,66 @@ const getCart = () => async (dispatch: ActionDispatch) => {
   }
 };
 
-const addItemToCart = (reqData: number) => async (dispatch: ActionDispatch) => {
-  dispatch({ type: ActionTypes.ADD_ITEM_TO_CART_REQUEST });
-
-  try {
-    const res = await axios.put(
-      `${ApiUrls.addItemToCart}`,
-      reqData,
-      headersConfig
-    );
-    dispatch({
-      type: ActionTypes.ADD_ITEM_TO_CART_SUCCESS,
-      payload: res?.data?.data,
-    });
-  } catch (error) {
-    handleCatchError({
-      error,
-      actionType: ActionTypes.ADD_ITEM_TO_CART_FAILURE,
-    });
+const getCartItems = () => async (dispatch: ActionDispatch) => {
+  if (userId) {
+    dispatch({ type: ActionTypes.GET_CART_ITEMS_REQUEST });
+    try {
+      const res = await axios.get(
+        `${ApiUrls.getCartItems}id=${userId}`,
+        headersConfig
+      );
+      dispatch({
+        type: ActionTypes.GET_CART_ITEMS_SUCCESS,
+        payload:
+          res?.data?.data?.length > 0 ? res?.data?.data.map(cartItemsMap) : [],
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_CART_ITEMS_FAILURE,
+      });
+    }
   }
 };
 
-const removeItemToCart =
+const addItemToCart =
+  (reqData: CartReqBody) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.ADD_ITEM_TO_CART_REQUEST });
+
+    try {
+      const res = await axios.post(
+        ApiUrls.addItemToCart,
+        reqData,
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.ADD_ITEM_TO_CART_SUCCESS,
+        payload:
+          res?.data?.data?.length > 0 ? res?.data?.data.map(cartItemsMap) : [],
+      });
+      window.location.pathname !== AppRoutes.cart &&
+        res?.data?.message &&
+        toast.success(res?.data?.message, { position: "bottom-center" });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.ADD_ITEM_TO_CART_FAILURE,
+      });
+    }
+  };
+
+const removeItemFromCart =
   (cartItemId: number) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.REMOVE_CART_ITEM_REQUEST });
 
     try {
-      const res = await axios.delete(
-        `${ApiUrls.cartItems}${cartItemId}`,
+      const res = await axios.post(
+        `${ApiUrls.removeItemFromCart}`,
+        { cartItemId, userId },
         headersConfig
       );
+
       dispatch({
         type: ActionTypes.REMOVE_CART_ITEM_SUCCESS,
         payload: res?.data?.data,
@@ -65,13 +107,36 @@ const removeItemToCart =
     }
   };
 
+const reduceItemFromCart =
+  (productId: number) => async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.REDUCE_CART_ITEM_REQUEST });
+
+    try {
+      const res = await axios.post(
+        `${ApiUrls.reduceItemFromCart}`,
+        { userId, productId },
+        headersConfig
+      );
+
+      dispatch({
+        type: ActionTypes.REDUCE_CART_ITEM_SUCCESS,
+        payload: res?.data?.data,
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.REDUCE_CART_ITEM_FAILURE,
+      });
+    }
+  };
+
 const updateItemToCart =
   (cartItemId: number, reqData: any) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.UPDATE_CART_ITEM_REQUEST });
 
     try {
       const res = await axios.put(
-        `${ApiUrls.cartItems}${cartItemId}`,
+        `${ApiUrls.getCartItems}id=${cartItemId}`,
         reqData,
         headersConfig
       );
@@ -87,4 +152,11 @@ const updateItemToCart =
     }
   };
 
-export { getCart, addItemToCart, removeItemToCart, updateItemToCart };
+export {
+  getCart,
+  addItemToCart,
+  removeItemFromCart,
+  reduceItemFromCart,
+  updateItemToCart,
+  getCartItems,
+};

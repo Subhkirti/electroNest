@@ -1,18 +1,17 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import AppRoutes from "../../common/appRoutes";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../../modules/customer/components/navbar/navbar";
 import Footer from "../../modules/customer/components/footer/footer";
 import customerMainRoutes from "./mainRoutes";
-import NotFound from "../../common/components/notFound";
+import PageNotFound from "../../common/components/404Page";
 
 function CustomerRoutes() {
+  const location = useLocation();
   const homePaths = [AppRoutes.home, AppRoutes.login, AppRoutes.register];
 
   return (
     <div>
-      <ToastContainer />
       <Navbar />
       <div className="container">
         <Routes>
@@ -20,14 +19,13 @@ function CustomerRoutes() {
             <Route
               key={route.path}
               path={route.path}
-              element={<route.component />}
+              element={ <route.component />}
             />
           ))}
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
       </div>
-
-      {!homePaths.includes(window.location.pathname) && <Footer />}
+      {!homePaths.includes(location.pathname) && <Footer />}
     </div>
   );
 }

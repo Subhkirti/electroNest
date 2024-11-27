@@ -1,42 +1,34 @@
-import { Box, Typography, Button } from "@mui/material";
-import { useLocation, useNavigate } from "react-router-dom";
-import AppIcons from "../appIcons";
-import AppColors from "../appColors";
+import { Button } from "@mui/material";
 import AppStrings from "../appStrings";
-import AdminAppRoutes from "../adminRoutes";
 import AppRoutes from "../appRoutes";
+import AppIcons from "../appIcons";
+import { useNavigate } from "react-router-dom";
 
-const NotFound = () => {
+function NotFound({
+  message,
+  isGoBack,
+}: {
+  message: string;
+  isGoBack?: boolean;
+}) {
   const navigate = useNavigate();
-  const location = useLocation();
-  const isAdminEnv = location.pathname.includes("/admin");
-
   return (
-    <Box className="flex flex-col items-center justify-center text-center p-[20px]">
-      <img src={AppIcons.img404} alt="Not Found" width="300" />
-      <Typography
-        variant="h4"
-        className="my-4 font-bold"
-        sx={{
-          color: isAdminEnv ? AppColors.white : AppColors.black,
-        }}
-      >
-        {AppStrings.oopsPageNotFound}
-      </Typography>
-      <Typography variant="body1" className="mb-[20px] text-gray-500">
-        {AppStrings.pageNotExist}
-      </Typography>
+    <div className="flex flex-col justify-center space-y-4 items-center">
+      <img
+        width={300}
+        src={AppIcons.imgProductNotFound}
+        alt="product not found"
+      />
+      <p className=" text-slate-800 text-2xl font-semibold">{message}</p>
       <Button
-        variant="contained"
-        color="primary"
-        onClick={() =>
-          navigate(isAdminEnv ? AdminAppRoutes.dashboard : AppRoutes.home)
-        }
+        onClick={() => (isGoBack ? navigate(-1) : navigate(AppRoutes.home))}
+        variant="outlined"
+        className="hover:bg-primary hover:text-white transition ease-in duration-400"
       >
-        {AppStrings.goToHome}
+        {isGoBack ? AppStrings.goBack : AppStrings.goToHome}
       </Button>
-    </Box>
+    </div>
   );
-};
+}
 
 export default NotFound;

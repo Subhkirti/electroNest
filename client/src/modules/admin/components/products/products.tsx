@@ -17,7 +17,9 @@ import { Avatar } from "@mui/material";
 import { Delete, Edit, AddShoppingCart, Visibility } from "@mui/icons-material";
 import {
   formatAmount,
+  formattedDate,
   formattedDateTime,
+  formattedTime,
   textTruncate,
 } from "../../utils/productUtil";
 import CustomTable from "../../../../common/components/customTable";
@@ -27,11 +29,11 @@ import { TableColumn } from "../../../customer/types/userTypes";
 const productColumns: TableColumn<Product>[] = [
   { id: "productId", label: "ID" },
   {
-    id: "thumbnail",
+    id: "images",
     label: "Image",
-    render: (value: string) => (
+    render: (value: string[]) => (
       <Avatar
-        src={value}
+        src={value?.[0]}
         alt={"product-image"}
         variant="rounded"
         sx={{ width: 54, height: 54 }}
@@ -51,18 +53,30 @@ const productColumns: TableColumn<Product>[] = [
     id: "price",
     label: "Price",
     render: (value: string) => (
-      <div className="whitespace-nowrap">{formatAmount(value)}</div>
+      <div className="whitespace-nowrap">{formatAmount(Number(value))}</div>
     ),
   },
   {
     id: "createdAt",
     label: "Created At",
-    render: (value: Date) => formattedDateTime(value),
+    render: (value: Date) => (
+      <div className="flex flx-col">
+        {formattedDate(value)}
+        <br />
+        {formattedTime(value)}
+      </div>
+    ),
   },
   {
     id: "updatedAt",
     label: "Updated At",
-    render: (value: Date) => formattedDateTime(value),
+    render: (value: Date) => (
+      <div className="flex flx-col">
+        {formattedDate(value)}
+        <br />
+        {formattedTime(value)}
+      </div>
+    ),
   },
 ];
 
@@ -90,6 +104,7 @@ function Products() {
     return () => {
       dispatch(resetHeader());
     };
+    // eslint-disable-next-line
   }, []);
 
   const handleFetchProducts = (page: number, size: number) => {

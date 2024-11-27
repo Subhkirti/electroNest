@@ -1,21 +1,30 @@
 import { useEffect } from "react";
 import MainCarousel from "./mainCarousel";
-import phones from "../../../../assets/productsData/phones";
-import watches from "../../../../assets/productsData/watches";
-import laptops from "../../../../assets/productsData/laptops";
-import cameras from "../../../../assets/productsData/cameras";
 import Footer from "../footer/footer";
 import { getCurrentUser } from "../../utils/localStorageUtils";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
 import HomeSectionCarousel from "./homeSectionCarousel";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
+import { getHomeProductsCarousel } from "../../../../store/customer/product/action";
+import ViewMoreButton from "../../../../common/components/viewMoreButton";
 
 function HomeScreen() {
   const user = getCurrentUser();
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { productsCarousel } = useSelector((state: RootState) => state.product);
 
   useEffect(() => {
     if (user) navigate(AppRoutes.home);
+    const timer = setTimeout(() => {
+      !productsCarousel.length && dispatch(getHomeProductsCarousel());
+    }, 10);
+
+    return () => {
+      clearTimeout(timer);
+    };
     // eslint-disable-next-line
   }, []);
 
@@ -24,10 +33,24 @@ function HomeScreen() {
       <MainCarousel />
 
       <div className="space-y-10 py-8 flex flex-col justify-center container">
-        <HomeSectionCarousel productsList={laptops} sectionName="laptops" />
-        <HomeSectionCarousel productsList={watches} sectionName="watches" />
-        <HomeSectionCarousel productsList={phones} sectionName="phones" />
-        <HomeSectionCarousel productsList={cameras} sectionName="cameras" />
+        {productsCarousel.map((carousel, index) => {
+          return (
+            carousel.products.length > 0 && (
+              <HomeSectionCarousel
+                key={index}
+                productsList={carousel.products}
+                sectionName={carousel.category.categoryName}
+              />
+            )
+          );
+        })}
+      </div>
+      <div className="flex justify-center">
+        <ViewMoreButton
+          onClick={() => {
+            navigate(AppRoutes.products);
+          }}
+        />
       </div>
       <Footer />
     </div>

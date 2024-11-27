@@ -17,8 +17,11 @@ const theme = createTheme({
         root: {
           borderRadius: "6px",
           fontSize: "16px",
-          textTransform: "capitalize",
+          textTransform: "initial",
+          boxShadow: "none !important",
+          padding: "10px 30px",
         },
+        
       },
     },
   },

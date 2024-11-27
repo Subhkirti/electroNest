@@ -58,7 +58,7 @@ function AddUser() {
     if (!emailIdRegex.test(user.email)) {
       toast.error(AppStrings.emailIdError);
       return;
-    } else if (!passwordRegEx.test(user.password)) {
+    } else if (user?.password && !passwordRegEx.test(user.password)) {
       toast.error(AppStrings.passwordError);
       return;
     } else {

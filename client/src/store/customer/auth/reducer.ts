@@ -4,6 +4,7 @@ import ActionTypes from "./actionTypes";
 const initState: AuthState = {
   user: null,
   isLoading: false,
+  logoutLoader: false,
   error: null,
 };
 
@@ -15,6 +16,8 @@ function authReducer(
     case ActionTypes.LOGIN_REQUEST:
     case ActionTypes.REGISTER_REQUEST:
       return { ...state, isLoading: true, error: null };
+    case ActionTypes.LOGOUT_REQUEST:
+      return { ...state, logoutLoader: true, error: null, isLoading: false };
     case ActionTypes.REGISTER_SUCCESS:
     case ActionTypes.LOGIN_SUCCESS:
       return {
@@ -26,7 +29,7 @@ function authReducer(
     case ActionTypes.REGISTER_FAILURE:
     case ActionTypes.LOGIN_FAILURE:
       return { ...state, isLoading: false, error: action?.payload || null };
-    case ActionTypes.LOGOUT:
+    case ActionTypes.LOGOUT_SUCCESS:
       return initState;
     default:
       return state;

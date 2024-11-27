@@ -29,6 +29,10 @@ import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import AdminAppRoutes from "../../../../common/adminRoutes";
 import { getAllCategories } from "../../../../store/customer/product/action";
 import { ExpandMore } from "@mui/icons-material";
+import { CategoryState } from "../../types/productTypes";
+import { getCart, getCartItems } from "../../../../store/customer/cart/action";
+import { getCategoryPath } from "../../utils/productUtils";
+import Search from "./search";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -43,6 +47,8 @@ export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const { categories } = useSelector((state: RootState) => state.product);
+  const { cart, cartItems } = useSelector((state: RootState) => state.cart);
+  const [searchOpen, setSearchOpen] = useState(false);
   const openUserMenu = Boolean(anchorEl);
   const user = getCurrentUser();
   const authText = user
@@ -54,12 +60,15 @@ export default function Navbar() {
   useEffect(() => {
     const timer = setTimeout(() => {
       !categories?.length && dispatch(getAllCategories());
+      !cart && dispatch(getCart());
+      !cartItems.length && dispatch(getCartItems());
     }, 10);
 
     return () => {
       clearTimeout(timer);
     };
-  }, []);
+    // eslint-disable-next-line
+  }, [anchorEl]);
 
   const handleUserClick = (event: { currentTarget: any }) => {
     setAnchorEl(event.currentTarget);
@@ -80,34 +89,46 @@ export default function Navbar() {
   };
 
   const handleCategoryClick = (category: any, section: any, item: any) => {
-    if (category?.categoryId && section?.sectionId && item?.itemId) {
-      navigate(`/${category.categoryId}/${section.sectionId}/${item.itemId}`);
-    } else if (category?.categoryId && section?.sectionId) {
-      navigate(`/${category.categoryId}/${section.sectionId}`);
-    } else if (category?.categoryId) {
-      navigate(`/${category.categoryId}`);
-    }
+    navigate(
+      getCategoryPath({
+        categoryId: category?.categoryId,
+        sectionId: section?.sectionId,
+        itemId: item?.itemId,
+      })
+    );
     handleCloseUserMenu();
     setOpen(false);
+    setShowMore(false);
   };
 
-  const handleMyOrderClick = () => {
+  const handleClickMenu = (
+    e: { preventDefault: () => void },
+    type: "orders" | "profile"
+  ) => {
+    e.preventDefault();
     handleCloseUserMenu();
-    navigate("/account/order");
+
+    if (type === "orders") {
+      navigate(AppRoutes.orders);
+    } else if (type === "profile") {
+      user?.role === "admin"
+        ? navigate(AdminAppRoutes.dashboard)
+        : user?.id && navigate(`/user/${user?.id}`);
+    }
   };
 
   // Split categories into two parts: first 4 categories and the rest
-  const firstFourCategories = categories.slice(0, 4);
-  const remainingCategories = categories.slice(4);
+  const firstFourCategories = categories.slice(0, 3);
+  const remainingCategories = categories.slice(3);
   return (
     <div className="bg-white mb-10">
       {/* Mobile menu */}
       {MobileSideNavbar()}
 
       <header className="relative bg-white">
-        <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
+        {/* <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
           Get free delivery on orders over ₹1000
-        </p>
+        </p> */}
 
         {/* Web menu */}
         <nav aria-label="Top" className="mx-auto">
@@ -138,116 +159,115 @@ export default function Navbar() {
               {/* Flyout menus */}
               <Popover.Group className="hidden lg:block lg:self-stretch z-10">
                 <div className="flex h-full space-x-8">
+                  {/* First four menus */}
                   {firstFourCategories.length > 0 &&
-                    firstFourCategories.map(
-                      (category: {
-                        categoryId: string;
-                        categoryName: string;
-                        sections: any[];
-                      }) => (
-                        <Popover key={category.categoryId} className="flex">
-                          {({ open }) => (
-                            <>
-                              <div className="relative flex">
-                                <Popover.Button
-                                  className={classNames(
-                                    open
-                                      ? "border-indigo-600 text-indigo-600"
-                                      : "border-transparent text-gray-700 hover:text-gray-800",
-                                    "relative z-10 -mb-px flex items-center border-b-2 pt-px text-sm font-medium transition-colors duration-200 ease-out focus:outline-none"
-                                  )}
-                                >
-                                  {category.categoryName}
-                                </Popover.Button>
-                              </div>
-
-                              <Transition
-                                as={Fragment}
-                                enter="transition ease-out duration-200"
-                                enterFrom="opacity-0"
-                                enterTo="opacity-100"
-                                leave="transition ease-in duration-150"
-                                leaveFrom="opacity-100"
-                                leaveTo="opacity-0"
+                    firstFourCategories.map((category: CategoryState) => (
+                      <Popover key={category.categoryId} className="flex">
+                        {({ open, close }) => (
+                          <>
+                            <div className="relative flex">
+                              <Popover.Button
+                                onClick={() => setShowMore(false)}
+                                className={classNames(
+                                  open
+                                    ? "border-indigo-600 text-indigo-600"
+                                    : "border-transparent text-gray-700 hover:text-gray-800",
+                                  "relative z-10 -mb-px flex items-center border-b-2 pt-px text-sm font-medium transition-colors duration-200 ease-out focus:outline-none"
+                                )}
                               >
-                                <Popover.Panel className="absolute inset-x-0 top-full text-sm text-gray-500">
-                                  <div
-                                    className="absolute inset-0 top-1/2 bg-white shadow"
-                                    aria-hidden="true"
-                                  />
+                                {category.categoryName}
+                              </Popover.Button>
+                            </div>
 
-                                  <div className="relative bg-white">
-                                    <div className="mx-auto max-w-7xl px-8">
-                                      <div className="grid grid-cols-5 gap-x-4 gap-y-10 py-16">
-                                        {category.sections?.length &&
-                                          category.sections.map(
-                                            (section: {
-                                              sectionId: string;
-                                              sectionName: string;
-                                              items: any[];
-                                            }) => (
-                                              <div key={section.sectionId}>
-                                                <p
-                                                  onClick={() =>
-                                                    !section.items?.length &&
+                            <Transition
+                              as={Fragment}
+                              enter="transition ease-out duration-200"
+                              enterFrom="opacity-0"
+                              enterTo="opacity-100"
+                              leave="transition ease-in duration-150"
+                              leaveFrom="opacity-100"
+                              leaveTo="opacity-0"
+                            >
+                              <Popover.Panel className="absolute inset-x-0 top-full text-sm text-gray-500">
+                                <div
+                                  className="absolute inset-0 top-1/2 bg-white shadow"
+                                  aria-hidden="true"
+                                />
+
+                                <div className="relative bg-white">
+                                  <div className="mx-auto max-w-7xl px-8">
+                                    <div className="grid grid-cols-5 gap-x-4 gap-y-10 py-16">
+                                      {category?.sections &&
+                                        category?.sections?.length > 0 &&
+                                        category.sections.map(
+                                          (section: {
+                                            sectionId: string;
+                                            sectionName: string;
+                                            items: any[];
+                                          }) => (
+                                            <div key={section.sectionId}>
+                                              <p
+                                                onClick={() => {
+                                                  close();
+                                                  !section.items?.length &&
                                                     handleCategoryClick(
                                                       category,
                                                       section,
                                                       null
-                                                    )
-                                                  }
-                                                  id={`${section.sectionName}-heading`}
-                                                  className={
-                                                    section.items?.length
-                                                      ? "border-b-2 border-primary font-medium text-primary pb-2"
-                                                      : "cursor-pointer font-normal hover:text-gray-800 pb-2"
-                                                  }
-                                                >
-                                                  {section.sectionName}
-                                                </p>
-                                                {/* eslint-disable-next-line jsx-a11y/no-redundant-roles */}
-                                                <ul
-                                                  role="list"
-                                                  aria-labelledby={`${section.sectionName}-heading`}
-                                                  className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
-                                                >
-                                                  {section.items?.length
-                                                    ? section.items.map(
-                                                        (item) => (
-                                                          <li
-                                                            key={item.itemId}
-                                                            className="flex"
+                                                    );
+                                                }}
+                                                id={`${section.sectionName}-heading`}
+                                                className={
+                                                  section.items?.length
+                                                    ? "border-b-2 border-primary font-medium text-primary pb-2"
+                                                    : "cursor-pointer font-normal hover:text-gray-800 pb-2"
+                                                }
+                                              >
+                                                {section.sectionName}
+                                              </p>
+                                              {/* eslint-disable-next-line jsx-a11y/no-redundant-roles */}
+                                              <ul
+                                                role="list"
+                                                aria-labelledby={`${section.sectionName}-heading`}
+                                                className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
+                                              >
+                                                {section.items?.length
+                                                  ? section.items.map(
+                                                      (item) => (
+                                                        <li
+                                                          key={item.itemId}
+                                                          className="flex"
+                                                        >
+                                                          <p
+                                                            onClick={() => {
+                                                              close();
+                                                              handleCategoryClick(
+                                                                category,
+                                                                section,
+                                                                item
+                                                              );
+                                                            }}
+                                                            className="cursor-pointer hover:text-gray-800"
                                                           >
-                                                            <p
-                                                              onClick={() =>
-                                                                handleCategoryClick(
-                                                                  category,
-                                                                  section,
-                                                                  item
-                                                                )
-                                                              }
-                                                              className="cursor-pointer hover:text-gray-800"
-                                                            >
-                                                              {item.itemName}
-                                                            </p>
-                                                          </li>
-                                                        )
+                                                            {item.itemName}
+                                                          </p>
+                                                        </li>
                                                       )
-                                                    : null}
-                                                </ul>
-                                              </div>
-                                            )
-                                          )}
-                                      </div>
+                                                    )
+                                                  : null}
+                                              </ul>
+                                            </div>
+                                          )
+                                        )}
                                     </div>
                                   </div>
-                                </Popover.Panel>
-                              </Transition>
-                            </>
-                          )}
-                        </Popover>
-                      )
-                    )}
+                                </div>
+                              </Popover.Panel>
+                            </Transition>
+                          </>
+                        )}
+                      </Popover>
+                    ))}
 
                   {/* "More" Button for additional categories */}
                   {remainingCategories.length > 0 && (
@@ -262,7 +282,9 @@ export default function Navbar() {
                                   : "border-transparent text-gray-700 hover:text-gray-800",
                                 "relative z-10 -mb-px flex items-center border-b-2 pt-px text-sm font-medium transition-colors duration-200 ease-out focus:outline-none"
                               )}
-                              onClick={() => setShowMore(!showMore)} // Toggle the "More" menu
+                              onClick={() => {
+                                setShowMore(!showMore);
+                              }}
                             >
                               More
                             </Popover.Button>
@@ -288,11 +310,7 @@ export default function Navbar() {
                                   <div className="mx-auto max-w-7xl px-8">
                                     <div className="grid grid-cols-5 gap-x-6 gap-y-10 py-16">
                                       {remainingCategories.map(
-                                        (category: {
-                                          categoryId: string;
-                                          categoryName: string;
-                                          sections: any[];
-                                        }) => (
+                                        (category: CategoryState) => (
                                           <div key={category.categoryId}>
                                             <p
                                               id={`${category.categoryName}-heading`}
@@ -300,7 +318,8 @@ export default function Navbar() {
                                             >
                                               {category.categoryName}
                                             </p>
-                                            {category.sections?.length &&
+                                            {category.sections &&
+                                              category.sections?.length > 0 &&
                                               category.sections.map(
                                                 (section: {
                                                   sectionId: string;
@@ -309,15 +328,16 @@ export default function Navbar() {
                                                 }) => (
                                                   <div key={section.sectionId}>
                                                     <p
-                                                      onClick={() =>
+                                                      onClick={() => {
+                                                        close();
                                                         !section.items
                                                           ?.length &&
-                                                        handleCategoryClick(
-                                                          category,
-                                                          section,
-                                                          null
-                                                        )
-                                                      }
+                                                          handleCategoryClick(
+                                                            category,
+                                                            section,
+                                                            null
+                                                          );
+                                                      }}
                                                       id={`${section.sectionName}-heading`}
                                                       className={
                                                         section.items?.length
@@ -343,13 +363,14 @@ export default function Navbar() {
                                                                 className="flex"
                                                               >
                                                                 <p
-                                                                  onClick={() =>
+                                                                  onClick={() => {
+                                                                    close();
                                                                     handleCategoryClick(
                                                                       category,
                                                                       section,
                                                                       item
-                                                                    )
-                                                                  }
+                                                                    );
+                                                                  }}
                                                                   className="cursor-pointer hover:text-gray-800"
                                                                 >
                                                                   {
@@ -381,76 +402,71 @@ export default function Navbar() {
               </Popover.Group>
 
               <div className="ml-auto flex items-center">
-                <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  {user && (
-                    <div>
-                      <Tooltip
-                        arrow={true}
-                        title={`${user.name}`}
-                        placement="top"
-                      >
-                        <Avatar
-                          className="text-white"
-                          onClick={handleUserClick}
-                          aria-controls={open ? "basic-menu" : undefined}
-                          aria-haspopup="true"
-                          aria-expanded={open ? "true" : undefined}
-                          sx={{
-                            bgcolor: deepPurple[500],
-                            color: "white",
-                            cursor: "pointer",
+                {!searchOpen && (
+                  <div className="mr-4 flex flex-1 items-center justify-end space-x-3">
+                    {user && (
+                      <div>
+                        <Tooltip
+                          arrow={true}
+                          title={`${user.name}`}
+                          placement="top"
+                        >
+                          <Avatar
+                            className="text-white"
+                            onClick={handleUserClick}
+                            aria-controls={open ? "basic-menu" : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? "true" : undefined}
+                            sx={{
+                              bgcolor: deepPurple[500],
+                              color: "white",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {user?.avatarText}
+                          </Avatar>
+                        </Tooltip>
+
+                        <Menu
+                          id="basic-menu"
+                          anchorEl={anchorEl}
+                          open={openUserMenu}
+                          onClose={handleCloseUserMenu}
+                          MenuListProps={{
+                            "aria-labelledby": "basic-button",
                           }}
                         >
-                          {user?.avatarText}
-                        </Avatar>
-                      </Tooltip>
-
-                      <Menu
-                        id="basic-menu"
-                        anchorEl={anchorEl}
-                        open={openUserMenu}
-                        onClose={handleCloseUserMenu}
-                        MenuListProps={{
-                          "aria-labelledby": "basic-button",
-                        }}
+                          <MenuItem
+                            onClick={(e) => handleClickMenu(e, "profile")}
+                          >
+                            {"Profile"}
+                          </MenuItem>
+                          <MenuItem
+                            onClick={(e) => handleClickMenu(e, "orders")}
+                          >
+                            {"My Orders"}
+                          </MenuItem>
+                        </Menu>
+                      </div>
+                    )}
+                    <div className="hidden lg:flex">
+                      <Button
+                        onClick={handleAuth}
+                        className="text-sm text-primary font-medium"
                       >
-                        <MenuItem
-                          onClick={() =>
-                            user.role === "admin" &&
-                            navigate(AdminAppRoutes.dashboard)
-                          }
-                        >
-                          {"Profile"}
-                        </MenuItem>
-                        <MenuItem onClick={handleMyOrderClick}>
-                          {"My Orders"}
-                        </MenuItem>
-                      </Menu>
+                        {authText}
+                      </Button>
                     </div>
-                  )}
-
-                  <Button
-                    onClick={handleAuth}
-                    className="text-sm text-primary font-medium"
-                  >
-                    {authText}
-                  </Button>
-                </div>
-
+                  </div>
+                )}
                 {/* Search */}
-                <div className="flex items-center lg:ml-6">
-                  <p
-                    onClick={() => navigate("/products/search")}
-                    className="p-2 text-gray-400 hover:text-gray-500"
-                  >
-                    <span className="sr-only">Search</span>
 
-                    <MagnifyingGlassIcon
-                      className="h-6 w-6"
-                      aria-hidden="true"
-                    />
-                  </p>
-                </div>
+                {location?.pathname === AppRoutes.home && (
+                  <Search
+                    searchOpen={searchOpen}
+                    setSearchOpen={setSearchOpen}
+                  />
+                )}
 
                 {/* Cart */}
                 <div className="ml-4 flow-root lg:ml-6">
@@ -459,12 +475,16 @@ export default function Navbar() {
                     className="group -m-2 flex items-center p-2"
                   >
                     <ShoppingBagIcon
-                      className="h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
+                      className="h-6 w-6  flex-shrink-0 text-gray-400 group-hover:text-gray-500"
                       aria-hidden="true"
                     />
-                    <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                      {0}
-                    </span>
+                    {cart?.totalItems && cart?.totalItems > 0 ? (
+                      <span className="-ml-3 mb-3 bg-yellow-300 px-2 rounded-full text-[12px] font-medium text-gray-700 group-hover:text-gray-800">
+                        {cart?.totalItems}
+                      </span>
+                    ) : (
+                      ""
+                    )}
                     <span className="sr-only">items in cart, view bag</span>
                   </Button>
                 </div>
@@ -517,109 +537,104 @@ export default function Navbar() {
                 </div>
 
                 {/* Links */}
-                {categories.length &&
-                  categories.map(
-                    (category: {
-                      categoryId: string;
-                      categoryName: string;
-                      sections: any[];
-                    }) => {
-                      return (
-                        <Accordion elevation={0} key={category?.categoryId}>
-                          {category.sections.length ? (
-                            <AccordionSummary
-                              expandIcon={<ExpandMore className="text-black" />}
-                              aria-controls="panel1-content"
-                              id="panel1-header"
-                              className="text-black"
-                            >
-                              {category.categoryName}
-                            </AccordionSummary>
-                          ) : (
-                            <AccordionDetails
-                              onClick={() =>
-                                handleCategoryClick(category, null, null)
-                              }
-                              className="text-black cursor-pointer"
-                            >
-                              {category.categoryName}
-                            </AccordionDetails>
-                          )}
+                {categories.length > 0 &&
+                  categories.map((category: CategoryState) => {
+                    return (
+                      <Accordion elevation={0} key={category?.categoryId}>
+                        {category?.sections && category?.sections.length ? (
+                          <AccordionSummary
+                            expandIcon={<ExpandMore className="text-black" />}
+                            aria-controls="panel1-content"
+                            id="panel1-header"
+                            className="text-black"
+                          >
+                            {category.categoryName}
+                          </AccordionSummary>
+                        ) : (
+                          <AccordionDetails
+                            onClick={() =>
+                              handleCategoryClick(category, null, null)
+                            }
+                            className="text-black cursor-pointer"
+                          >
+                            {category.categoryName}
+                          </AccordionDetails>
+                        )}
 
-                          {category.sections.length &&
-                            category.sections.map(
-                              (section: {
-                                sectionId: string;
-                                sectionName: string;
-                                items: any[];
-                              }) => {
-                                return (
-                                  <Accordion
-                                    elevation={0}
-                                    key={section?.sectionId}
-                                  >
-                                    {section.items.length ? (
-                                      <AccordionSummary
-                                        style={{
-                                          boxShadow: "none",
-                                          border: "none",
-                                        }}
-                                        expandIcon={
-                                          <ExpandMore className="text-primary" />
-                                        }
-                                        aria-controls="panel1-content"
-                                        id="panel1-header"
-                                        className="text-primary"
-                                      >
-                                        {section.sectionName}
-                                      </AccordionSummary>
-                                    ) : (
-                                      <AccordionDetails
-                                        onClick={() =>
-                                          handleCategoryClick(
-                                            category,
-                                            section,
-                                            null
-                                          )
-                                        }
-                                        className="text-slate-500 cursor-pointer"
-                                      >
-                                        {section.sectionName}
-                                      </AccordionDetails>
-                                    )}
-
-                                    {section.items.length
-                                      ? section.items.map(
-                                          (item: {
-                                            itemId: string;
-                                            itemName: string;
-                                          }) => {
-                                            return (
-                                              <AccordionDetails
-                                                key={item?.itemId}
-                                                onClick={() =>
-                                                  handleCategoryClick(
-                                                    category,
-                                                    section,
-                                                    item
-                                                  )
-                                                }
-                                                className="text-slate-500 cursor-pointer"
-                                              >
-                                                {item.itemName}
-                                              </AccordionDetails>
-                                            );
-                                          }
+                        {category?.sections &&
+                          category?.sections?.length > 0 &&
+                          category.sections.map(
+                            (section: {
+                              sectionId: string;
+                              sectionName: string;
+                              items: any[];
+                            }) => {
+                              return (
+                                <Accordion
+                                  elevation={0}
+                                  key={section?.sectionId}
+                                >
+                                  {section.items.length ? (
+                                    <AccordionSummary
+                                      style={{
+                                        boxShadow: "none",
+                                        border: "none",
+                                      }}
+                                      expandIcon={
+                                        <ExpandMore className="text-primary" />
+                                      }
+                                      aria-controls="panel1-content"
+                                      id="panel1-header"
+                                      className="text-primary"
+                                    >
+                                      {section.sectionName}
+                                    </AccordionSummary>
+                                  ) : (
+                                    <AccordionDetails
+                                      onClick={() =>
+                                        handleCategoryClick(
+                                          category,
+                                          section,
+                                          null
                                         )
-                                      : null}
-                                  </Accordion>
-                                );
-                              }
-                            )}
-                        </Accordion>
-                      );
-                    }
-                  )}
+                                      }
+                                      className="text-slate-500 cursor-pointer"
+                                    >
+                                      {section.sectionName}
+                                    </AccordionDetails>
+                                  )}
+
+                                  {section.items.length
+                                    ? section.items.map(
+                                        (item: {
+                                          itemId: string;
+                                          itemName: string;
+                                        }) => {
+                                          return (
+                                            <AccordionDetails
+                                              key={item?.itemId}
+                                              onClick={() =>
+                                                handleCategoryClick(
+                                                  category,
+                                                  section,
+                                                  item
+                                                )
+                                              }
+                                              className="text-slate-500 cursor-pointer"
+                                            >
+                                              {item.itemName}
+                                            </AccordionDetails>
+                                          );
+                                        }
+                                      )
+                                    : null}
+                                </Accordion>
+                              );
+                            }
+                          )}
+                      </Accordion>
+                    );
+                  })}
 
                 <div className="space-y-6 border-t border-gray-200 px-4 py-6">
                   <div className="flow-root">

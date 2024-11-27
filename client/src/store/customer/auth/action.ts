@@ -62,9 +62,13 @@ const login =
 
 // logout action
 const logout = () => async (dispatch: ActionDispatch) => {
-  dispatch({ type: ActionTypes.LOGOUT, payload: null });
-  localStorage.clear();
-  window.location.pathname = "/";
+  dispatch({ type: ActionTypes.LOGOUT_REQUEST });
+
+  setTimeout(() => {
+    localStorage.clear();
+    dispatch({ type: ActionTypes.LOGOUT_SUCCESS });
+    window.location.pathname = "/";
+  }, 2000);
 };
 
 export { register, login, logout };

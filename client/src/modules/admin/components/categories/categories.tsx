@@ -6,7 +6,7 @@ import {
 } from "../../../../store/customer/header/action";
 import AppStrings from "../../../../common/appStrings";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
-import { Delete, Edit, PostAdd } from "@mui/icons-material";
+import { Delete, PostAdd } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import AdminAppRoutes from "../../../../common/adminRoutes";
 import CustomTable from "../../../../common/components/customTable";
@@ -32,7 +32,6 @@ import Loader from "../../../../common/components/loader";
 
 function Categories() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
   const {
     isLoading,
     topLevelCategories,
@@ -122,7 +121,7 @@ function Categories() {
         actions={handleTopLevelActions}
       />
 
-      {topLevelCategories.length && (
+      {topLevelCategories.length > 0 && (
         <Box mt={5}>
           <SubHeader
             header={`Second Level Categories: ${secondLevelCategories.length}`}
@@ -133,7 +132,9 @@ function Categories() {
           <CustomTable
             fetchData={(page, size) =>
               topLevelCategories.map((category: TopLevelCategories) => {
-                dispatch(getSecondLevelCategories(category.categoryId));
+                return dispatch(
+                  getSecondLevelCategories({ categoryId: category.categoryId })
+                );
               })
             }
             showPagination={false}
@@ -156,7 +157,9 @@ function Categories() {
           <CustomTable
             fetchData={(page, size) =>
               secondLevelCategories.map((category: SecondLevelCategories) => {
-                dispatch(getThirdLevelCategories(category.sectionId));
+                return dispatch(
+                  getThirdLevelCategories({ sectionId: category.sectionId })
+                );
               })
             }
             showPagination={false}

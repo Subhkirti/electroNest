@@ -13,6 +13,7 @@ import {
 import {
   categoriesMap,
   productMap,
+  productsCarouselMap,
   secondLevelCategoriesMap,
   thirdLevelCategoriesMap,
   topLevelCategoriesMap,
@@ -32,9 +33,7 @@ const getAllCategories = () => async (dispatch: ActionDispatch) => {
     dispatch({
       type: ActionTypes.GET_ALL_CATEGORIES_SUCCESS,
       payload:
-        res?.data?.data?.length > 0
-          ? res?.data?.data.map(categoriesMap)
-          : [],
+        res?.data?.data?.length > 0 ? res?.data?.data.map(categoriesMap) : [],
     });
   } catch (error) {
     handleCatchError({
@@ -78,7 +77,17 @@ const getTopLevelCategories =
   };
 
 const getSecondLevelCategories =
-  (categoryId: string, pageNumber?: number, pageSize?: number) =>
+  ({
+    categoryId,
+    pageNumber,
+    pageSize,
+    newData,
+  }: {
+    categoryId: string;
+    pageNumber?: number;
+    pageSize?: number;
+    newData?: boolean;
+  }) =>
   async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.GET_SECOND_LEVEL_CATEGORIES_REQUEST });
 
@@ -101,6 +110,7 @@ const getSecondLevelCategories =
             res?.data?.data?.length > 0
               ? res?.data?.data.map(secondLevelCategoriesMap)
               : [],
+          newData: newData,
           totalCount: res?.data?.totalCount,
         },
       });
@@ -113,7 +123,17 @@ const getSecondLevelCategories =
   };
 
 const getThirdLevelCategories =
-  (sectionId: string, pageNumber?: number, pageSize?: number) =>
+  ({
+    sectionId,
+    pageNumber,
+    pageSize,
+    newData,
+  }: {
+    sectionId: string;
+    pageNumber?: number;
+    pageSize?: number;
+    newData?: boolean;
+  }) =>
   async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.GET_THIRD_LEVEL_CATEGORIES_REQUEST });
 
@@ -136,6 +156,7 @@ const getThirdLevelCategories =
             res?.data?.data?.length > 0
               ? res?.data?.data.map(thirdLevelCategoriesMap)
               : [],
+          newData: newData,
           totalCount: res?.data?.totalCount,
         },
       });
@@ -300,7 +321,6 @@ const deleteThirdLevelCategory =
 /* Categories section ends here */
 
 /* Products section starts here */
-
 const getProducts =
   (pageNumber: number, pageSize: number) =>
   async (dispatch: ActionDispatch) => {
@@ -331,25 +351,10 @@ const getProducts =
   };
 const findProducts =
   (reqData: ProductSearchReqBody) => async (dispatch: ActionDispatch) => {
-    const {
-      colors,
-      minPrice,
-      maxPrice,
-      discount,
-      category,
-      stock,
-      sort,
-      pageNumber,
-      pageSize,
-    } = reqData;
-
     dispatch({ type: ActionTypes.FIND_PRODUCTS_REQUEST });
 
     try {
-      const res = await axios.get(
-        `${ApiUrls.findProducts}color=${colors}&minPrice=${minPrice}&maxPrice=${maxPrice}&minDiscount=${discount}&category=${category}&stock=${stock}&sort=${sort}&pageNumber=${pageNumber}&pageSize=${pageSize}`
-      );
-
+      const res = await axios.post(`${ApiUrls.findProducts}`, reqData);
       dispatch({
         type: ActionTypes.FIND_PRODUCTS_SUCCESS,
         payload: {
@@ -366,16 +371,16 @@ const findProducts =
     }
   };
 const findProductsById =
-  (productId: number) => async (dispatch: ActionDispatch) => {
+  (productId: string | number) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.FIND_PRODUCT_BY_ID_REQUEST });
 
     try {
-      const res = await axios.get(`${ApiUrls.findProducts}id=${productId}`);
+      const res = await axios.get(`${ApiUrls.productDetails}id=${productId}`);
 
       dispatch({
         type: ActionTypes.FIND_PRODUCT_BY_ID_SUCCESS,
         payload:
-          res?.data?.data?.length > 0 ? productMap(res?.data?.data[0]) : {},
+          res?.data?.data?.length > 0 ? productMap(res?.data?.data[0]) : null,
       });
       res?.data?.data?.length === 0 &&
         toast.info(
@@ -486,6 +491,26 @@ const uploadFile = async (filePath: File | null) => {
     );
   }
 };
+/* Categories section start here */
+const getHomeProductsCarousel = () => async (dispatch: ActionDispatch) => {
+  dispatch({ type: ActionTypes.GET_PRODUCTS_CAROUSEL_REQUEST });
+
+  try {
+    const res = await axios.get(ApiUrls.getProductsCarousel, );
+
+    dispatch({
+      type: ActionTypes.GET_PRODUCTS_CAROUSEL_SUCCESS,
+      payload:
+        res?.data?.data?.length > 0 ? res?.data?.data.map(productsCarouselMap) : [],
+    });
+  } catch (error) {
+    handleCatchError({
+      error,
+      actionType: ActionTypes.GET_PRODUCTS_CAROUSEL_FAILURE,
+    });
+  }
+};
+
 
 export {
   getProducts,
@@ -505,4 +530,5 @@ export {
   deleteTopLevelCategory,
   deleteSecondLevelCategory,
   deleteThirdLevelCategory,
+  getHomeProductsCarousel
 };

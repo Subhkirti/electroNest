@@ -12,6 +12,7 @@ const initState: ProductState = {
   thirdLevelCategories: [],
   categories: [],
   products: [],
+  productsCarousel: [],
   product: null,
   newProduct: null,
   isLoading: false,
@@ -43,7 +44,15 @@ function productReducer(
     case ActionTypes.DELETE_SECOND_LEVEL_CATEGORIES_REQUEST:
     case ActionTypes.DELETE_THIRD_LEVEL_CATEGORIES_REQUEST:
     case ActionTypes.GET_ALL_CATEGORIES_REQUEST:
+    case ActionTypes.GET_PRODUCTS_CAROUSEL_REQUEST:
       return { ...state, isLoading: true, error: null };
+    case ActionTypes.GET_PRODUCTS_CAROUSEL_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        productsCarousel: action?.payload,
+      };
     case ActionTypes.FIND_PRODUCTS_SUCCESS:
       return {
         ...state,
@@ -177,16 +186,18 @@ function productReducer(
         ...state,
         isLoading: false,
         error: null,
-        secondLevelCategories: [
-          ...state.secondLevelCategories.filter(
-            (existingCategory) =>
-              !action.payload?.data.some(
-                (newCategory: SecondLevelCategories) =>
-                  newCategory.sectionId === existingCategory.sectionId
-              )
-          ),
-          ...action.payload?.data,
-        ],
+        secondLevelCategories: action?.payload?.newData
+          ? action.payload?.data
+          : [
+              ...state.secondLevelCategories.filter(
+                (existingCategory) =>
+                  !action.payload?.data.some(
+                    (newCategory: SecondLevelCategories) =>
+                      newCategory.sectionId === existingCategory.sectionId
+                  )
+              ),
+              ...action.payload?.data,
+            ],
         secondLCategoryCount: action.payload?.totalCount,
       };
     case ActionTypes.GET_THIRD_LEVEL_CATEGORIES_SUCCESS:
@@ -194,16 +205,18 @@ function productReducer(
         ...state,
         isLoading: false,
         error: null,
-        thirdLevelCategories: [
-          ...state.thirdLevelCategories.filter(
-            (existingCategory) =>
-              !action.payload?.data.some(
-                (newCategory: ThirdLevelCategories) =>
-                  newCategory.itemId === existingCategory.itemId
-              )
-          ),
-          ...action.payload?.data,
-        ],
+        thirdLevelCategories: action?.payload?.newData
+          ? action.payload?.data
+          : [
+              ...state.thirdLevelCategories.filter(
+                (existingCategory) =>
+                  !action.payload?.data.some(
+                    (newCategory: ThirdLevelCategories) =>
+                      newCategory.itemId === existingCategory.itemId
+                  )
+              ),
+              ...action.payload?.data,
+            ],
         thirdLCategoryCount: action.payload?.totalCount,
       };
 
@@ -245,6 +258,7 @@ function productReducer(
     case ActionTypes.DELETE_SECOND_LEVEL_CATEGORIES_FAILURE:
     case ActionTypes.DELETE_THIRD_LEVEL_CATEGORIES_FAILURE:
     case ActionTypes.GET_ALL_CATEGORIES_FAILURE:
+    case ActionTypes.GET_PRODUCTS_CAROUSEL_FAILURE:
       return { ...state, isLoading: false, error: action?.payload };
     default:
       return state;
