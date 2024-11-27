@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AppStrings from "../../../../common/appStrings";
 import { useNavigate } from "react-router-dom";
 import AdminAppRoutes from "../../../../common/adminRoutes";
@@ -17,7 +17,14 @@ import {
   getOrders,
   updateOrderStatus,
 } from "../../../../store/customer/order/action";
-import { Avatar } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 import {
   formatAmount,
   formattedDate,
@@ -26,6 +33,7 @@ import {
   textTruncate,
 } from "../../utils/productUtil";
 import { orderStatuses } from "../../../customer/utils/productUtils";
+import InputField from "../../../../common/components/inputField";
 
 const orderColumns: TableColumn<Order>[] = [
   { id: "orderId", label: "ID" },
@@ -96,7 +104,11 @@ function Orders() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { orders, totalCount } = useSelector((state: RootState) => state.order);
-
+  const [open, setOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<OrderStatus | string>(
+    ""
+  );
   useEffect(() => {
     dispatch(
       setHeader({
@@ -110,6 +122,29 @@ function Orders() {
     // eslint-disable-next-line
   }, []);
 
+  const handleOpenDialog = (orderId: number) => {
+    setSelectedOrderId(orderId);
+    setOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpen(false);
+    setSelectedOrderId(null);
+    setSelectedStatus("");
+  };
+
+  const handleUpdateStatus = () => {
+    if (selectedOrderId && selectedStatus) {
+      dispatch(
+        updateOrderStatusAndRefetch({
+          orderId: selectedOrderId,
+          status: selectedStatus as OrderStatus,
+        })
+      );
+      handleCloseDialog();
+    }
+  };
+
   const handleFetchOrders = (page: number, size: number) => {
     dispatch(getOrders(page, size));
   };
@@ -119,14 +154,10 @@ function Orders() {
       <div className="flex flex-col space-y-2">
         <ActionButton
           startIcon={Edit}
-          onClick={() =>
-            dispatch(
-              updateOrderStatus({
-                status: OrderStatus.FAILED,
-                orderId: Number(order.orderId),
-              })
-            )
-          }
+          onClick={() => {
+            setSelectedStatus(order.status);
+            handleOpenDialog(order.orderId);
+          }}
           text={"Update Status"}
         />
 
@@ -139,14 +170,64 @@ function Orders() {
     );
   };
 
+  const updateOrderStatusAndRefetch = (payload: {
+    orderId: number;
+    status: OrderStatus;
+  }) => {
+    return async (dispatch: AppDispatch) => {
+      try {
+        await dispatch(updateOrderStatus(payload)); // Update optimistically
+        await dispatch(getOrders()); // Refetch after updating
+      } catch (error) {
+        console.error("Failed to update and refetch", error);
+      }
+    };
+  };
+
   return (
-    <CustomTable
-      fetchData={handleFetchOrders}
-      data={orders}
-      totalCount={totalCount}
-      columns={orderColumns}
-      actions={handleActions}
-    />
+    <>
+      <CustomTable
+        fetchData={handleFetchOrders}
+        data={orders}
+        totalCount={totalCount}
+        columns={orderColumns}
+        actions={handleActions}
+      />
+
+      <Dialog
+        open={open}
+        onClose={handleCloseDialog}
+        classes={{
+          paper:
+            "bg-purple p-10 w-full border border-opacity-40 border-lightpurple",
+        }}
+      >
+        <DialogTitle className="text-slate-100">
+          Update Order Status
+        </DialogTitle>
+        <DialogContent>
+          <InputField
+            label={"Status"}
+            required={true}
+            type="dropdown"
+            value={selectedStatus}
+            dropdownOptions={orderStatuses}
+            id={"updateStatus"}
+            onChange={(value) => setSelectedStatus(value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button
+            onClick={handleUpdateStatus}
+            color="primary"
+            variant="contained"
+          >
+            Update
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
 
