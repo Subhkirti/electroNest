@@ -47,14 +47,13 @@ function Orders() {
     setPageNumber(0);
   };
 
-  return isLoading ? (
-    <Loader suspenseLoader={true} />
-  ) : (
+  return (
     <Grid container justifyContent={"space-between"}>
-      <Grid item xs={2.5}>
+      {isLoading && <Loader suspenseLoader={true} fixed={true} />}
+      <Grid item xs={12} md={3} lg={2.5}>
         <OrderFilter statusValues={statusValues} totalCount={totalCount} />
       </Grid>
-      <Grid item xs={9}>
+      <Grid item xs={12} md={8} lg={9}>
         {orders?.length > 0 ? (
           <>
             <div className="space-y-5">

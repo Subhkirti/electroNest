@@ -4,8 +4,8 @@ import AppRoutes from "../../common/appRoutes";
 const HomeScreen = lazy(() =>
   import("../../modules/customer/components/home/homeScreen")
 );
-const Product = lazy(() =>
-  import("../../modules/customer/components/product/product")
+const ProductFilters = lazy(() =>
+  import("../../modules/customer/components/product/productFilters")
 );
 const ProductDetails = lazy(() =>
   import("../../modules/customer/components/productDetails/productDetails")
@@ -31,19 +31,19 @@ const authLessRoutes = [
   },
   {
     path: AppRoutes.thirdLevelProduct,
-    component: Product,
+    component: ProductFilters,
   },
   {
     path: AppRoutes.secondLevelProduct,
-    component: Product,
+    component: ProductFilters,
   },
   {
     path: AppRoutes.firstLevelProduct,
-    component: Product,
+    component: ProductFilters,
   },
   {
     path: AppRoutes.products,
-    component: Product,
+    component: ProductFilters,
   },
 ];
 

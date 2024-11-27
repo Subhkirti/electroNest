@@ -44,7 +44,7 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Product() {
+export default function ProductFilters() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -161,9 +161,7 @@ export default function Product() {
     navigate({ search: `?${query}` });
   }
 
-  function clearFilters() {
-    navigate(window.location.pathname, { replace: true });
-  }
+
   const dataNotAvailable = !isLoading && products.length === 0;
   return (
     <div className="bg-white">
@@ -314,15 +312,11 @@ export default function Product() {
             <div className={"grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-5"}>
               {/* Web Filters */}
               <form className="hidden lg:block">
-                <ProductTotalCount totalCount={totalCount} />
-                {searchParams?.size > 0 && (
-                  <Tooltip title="Clear Filters">
-                    <FilterAltOff
-                      className="cursor-pointer"
-                      onClick={clearFilters}
-                    />
-                  </Tooltip>
-                )}
+                <ProductTotalCount
+                  totalCount={totalCount}
+  
+                />
+
                 {productFilters.map((section) => (
                   <Disclosure
                     key={section.id}

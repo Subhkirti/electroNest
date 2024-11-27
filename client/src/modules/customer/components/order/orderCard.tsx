@@ -27,13 +27,10 @@ function OrderCard({ order }: { order: Order }) {
     ? cancellationStages.includes(orderStatus?.value)
     : false;
   return productDetail ? (
-    <div
-      onClick={() => navigate(`/orders/${order?.orderId}`)}
-      className="p-5 hover:shadow-md rounded-md border cursor-pointer"
-    >
+    <div className="p-5 hover:shadow-md rounded-md border">
       <Grid container spacing={2} justifyContent={"space-between"}>
         <Grid item xs={12} lg={6}>
-          <div className="flex  justify-center lg:justify-start cursor-pointer">
+          <div className="flex justify-center lg:justify-start">
             <img
               className="w-[8rem] h-[8rem]"
               src={productDetail.images[0]}
@@ -71,6 +68,7 @@ function OrderCard({ order }: { order: Order }) {
                 </p>
               </div>
             </div>
+
             <div className="flex space-x-2 justify-center ">
               {showCancelOrder && (
                 <Button
@@ -88,7 +86,10 @@ function OrderCard({ order }: { order: Order }) {
                   {AppStrings.cancelOrder}
                 </Button>
               )}
-              <Button className="text-secondary bg-secondary bg-opacity-20 text-sm">
+              <Button
+                className="text-secondary bg-secondary bg-opacity-20 text-sm"
+                onClick={() => navigate(`/orders/${order?.orderId}`)}
+              >
                 {AppStrings.viewDetails}
               </Button>
             </div>
