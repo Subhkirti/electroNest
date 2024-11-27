@@ -24,8 +24,8 @@ function OrderTracker() {
   );
 
   return orderHistory?.length > 0 ? (
-    <div className="w-full">
-      <p className="font-semibold text-lg py-3">Tracking History</p>
+    <>
+      <p className="font-bold text-3xl pt-8 text-center">Tracking History</p>
       <Timeline>
         {orderHistory.map((history, index) => {
           const orderStatus = orderStatuses.find(
@@ -33,8 +33,8 @@ function OrderTracker() {
               status.value === history.status
           );
           return (
-            <TimelineItem className="mt-3" key={index}>
-              <TimelineOppositeContent className="mr-10 flex flex-col justify-center">
+            <TimelineItem className="mt-5 " key={index}>
+              <TimelineOppositeContent className="mr-2 lg:mr-8 flex flex-col justify-center">
                 <p className="text-md font-medium capitalize">
                   {formattedDate(history.updatedAt)}
                 </p>
@@ -60,7 +60,7 @@ function OrderTracker() {
                   }}
                 />
               </TimelineSeparator>
-              <TimelineContent className="ml-10 flex items-center space-x-3">
+              <TimelineContent className="ml-2 py-8 lg:ml-8 flex flex-col space-y-2 lg:flex-row items-start lg:space-x-3">
                 <img
                   src={orderStatus?.icon}
                   width={50}
@@ -79,7 +79,7 @@ function OrderTracker() {
           );
         })}
       </Timeline>
-    </div>
+    </>
   ) : (
     <></>
   );
