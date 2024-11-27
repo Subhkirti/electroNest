@@ -17,7 +17,9 @@ import { Avatar } from "@mui/material";
 import { Delete, Edit, AddShoppingCart, Visibility } from "@mui/icons-material";
 import {
   formatAmount,
+  formattedDate,
   formattedDateTime,
+  formattedTime,
   textTruncate,
 } from "../../utils/productUtil";
 import CustomTable from "../../../../common/components/customTable";
@@ -57,12 +59,24 @@ const productColumns: TableColumn<Product>[] = [
   {
     id: "createdAt",
     label: "Created At",
-    render: (value: Date) => formattedDateTime(value),
+    render: (value: Date) => (
+      <div className="flex flx-col">
+        {formattedDate(value)}
+        <br />
+        {formattedTime(value)}
+      </div>
+    ),
   },
   {
     id: "updatedAt",
     label: "Updated At",
-    render: (value: Date) => formattedDateTime(value),
+    render: (value: Date) => (
+      <div className="flex flx-col">
+        {formattedDate(value)}
+        <br />
+        {formattedTime(value)}
+      </div>
+    ),
   },
 ];
 

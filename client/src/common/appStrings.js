@@ -24,7 +24,6 @@ const AppStrings = {
   cancelOrder: "Cancel Order",
   viewDetails: "View Details",
 
-
   /* admin portal strings */
   users: "Users",
   shopWith: "Shop with ElectroNest",
@@ -41,6 +40,7 @@ const AppStrings = {
   categories: "Categories",
   addCategory: "Add Category",
   dashboard: "Dashboard",
+  orders: "Orders",
   welcomeToDashboard: "Welcome to the Admin Dashboard",
 
   /* error/success messages */
@@ -58,7 +58,6 @@ const AppStrings = {
   userDetailsNotFound: "User details not Found!",
   ordersNotFound: "Orders not Found!",
   yourOrderHasBeenCancelled: "Your Order has been Cancelled.",
-
 
   /* success messages */
   categoryAddedSuccessfully: "Category added successfully",
