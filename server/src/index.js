@@ -1,5 +1,6 @@
 const app = require("./app");
 const dotenv = require("dotenv");
+const connection = require("./connection");
 
 // Loading the appropriate .env file based on the NODE_ENV,
 // This key NODE_ENV already set in scripts of package.json, while starting the application
@@ -25,6 +26,14 @@ console.log("PORT:", PORT);
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Welcome to electroNest apis," });
+});
+
+app.get("/api/users", (req, res) => {
+  connection.query("SELECT * FROM users", (req, results) => {
+    res
+      .status(200)
+      .json({ message: "Welcome to electroNest apis,", data: results });
+  });
 });
 
 app.listen(PORT, () => {
