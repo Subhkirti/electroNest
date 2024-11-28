@@ -194,7 +194,7 @@ async function createPayment(userId, orderId, amount, totalAmount) {
 
     const paymentResponse = await fetch(
       process.env.NODE_ENV === "production"
-        ? `https://electro-nest-api.onrender.com/payment/create`
+        ? `https://electronest-backend.onrender.com/payment/create`
         : `http://localhost:${PORT}/payment/create`,
       {
         method: "POST",
