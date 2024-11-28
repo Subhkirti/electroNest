@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
   res.status(200).json({ message: "Welcome to electroNest apis," });
 });
 
-app.get("/api/users", (req, res) => {
+app.get("/userslist", (req, res) => {
   connection.query("SELECT * FROM users", (req, results) => {
     res
       .status(200)
