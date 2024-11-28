@@ -113,11 +113,12 @@ app.get("/product/categories", (req, res) => {
   const getCategoriesQuery = `SELECT * FROM ${topLevelCateTableName}`;
 
   connection.query(getCategoriesQuery, (err, categories) => {
+    console.log("err:", err);
     if (err) {
       console.error("Error fetching categories:", err);
       return res.status(500).json({
         status: 500,
-        message: "Error fetching categories",
+        message: "Error fetching categories" + err,
       });
     }
 
