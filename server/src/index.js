@@ -18,10 +18,6 @@ const ordersRouter = require("./services/ordersService");
 const paymentsRouter = require("./services/paymentsService");
 const addressRouter = require("./services/addressService");
 
-
-
-require("./connection");
-
 app.use(usersRouter);
 app.use(productsRouter);
 app.use(cartRouter);
