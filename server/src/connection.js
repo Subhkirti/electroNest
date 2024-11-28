@@ -8,4 +8,9 @@ const connection = mysql.createPool({
   connectionLimit: 10,
 });
 
+connection.on("error", (err) => {
+  console.error("Database error:", err);
+});
+
+
 module.exports = connection;
