@@ -1,9 +1,10 @@
 const connection = require("../connection");
-const app = require("../app");
 const Razorpay = require("razorpay");
 const paymentsTableName = "payments";
 const orderStatusTableName = "order_status";
 const ordersTableName = "orders";
+const express = require("express");
+const paymentsRouter = express.Router();
 var {
   validatePaymentVerification,
 } = require("razorpay/dist/utils/razorpay-utils");
@@ -17,7 +18,7 @@ var razorpayInstance = new Razorpay({
 checkPaymentsTableExistence();
 
 // Create Payment API
-app.post("/payment/create", (req, res) => {
+paymentsRouter.post("/payment/create", (req, res) => {
   const { userId, orderId, amount, receipt, totalAmount } = req.body;
 
   if (!userId || !orderId || !amount || !receipt || !totalAmount) {
@@ -101,7 +102,7 @@ app.post("/payment/create", (req, res) => {
 });
 
 // Verify Payment API
-app.post("/payment/verify", (req, res) => {
+paymentsRouter.post("/payment/verify", (req, res) => {
   const { razorpayOrderId, paymentId, signature, receiptId, cartId, orderId } =
     req.body;
 
@@ -237,3 +238,4 @@ function checkPaymentsTableExistence() {
     }
   });
 }
+module.exports = paymentsRouter; 

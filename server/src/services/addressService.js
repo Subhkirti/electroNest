@@ -1,12 +1,12 @@
 const connection = require("../connection");
-const app = require("../app");
 const tableName = "addresses";
 const usersTableName = "users";
-
+const express = require("express");
+const addressRouter = express.Router();
 checkAddressTableExistence();
 
 // Add a new address for a user
-app.post("/address/add", (req, res) => {
+addressRouter.post("/address/add", (req, res) => {
   const {
     userId,
     firstName,
@@ -69,7 +69,7 @@ app.post("/address/add", (req, res) => {
 });
 
 // Activate an address, to set the current delivery address from multiple addresses
-app.post("/address/set-active", (req, res) => {
+addressRouter.post("/address/set-active", (req, res) => {
   const { addressId } = req.body;
 
   if (!addressId) {
@@ -128,7 +128,7 @@ app.post("/address/set-active", (req, res) => {
 
 // Fetch all addresses for a specific user
 // Fetch all active addresses for a specific user
-app.get("/addresses", (req, res) => {
+addressRouter.get("/addresses", (req, res) => {
   const userId = req.query?.id;
   const addressId = req.query?.addressId;
   const onlyActive = req.query?.active === "true";
@@ -165,7 +165,7 @@ app.get("/addresses", (req, res) => {
 });
 
 // Update an existing address
-app.put("/address/edit", (req, res) => {
+addressRouter.put("/address/edit", (req, res) => {
   const {
     userId,
     firstName,
@@ -220,7 +220,7 @@ app.put("/address/edit", (req, res) => {
 });
 
 // Delete an address
-app.delete("/address/delete", (req, res) => {
+addressRouter.delete("/address/delete", (req, res) => {
   const addressId = req.query.id;
 
   if (!addressId) {
@@ -290,3 +290,4 @@ function checkAddressTableExistence() {
     }
   });
 }
+module.exports = addressRouter;

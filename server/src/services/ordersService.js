@@ -1,9 +1,10 @@
 const connection = require("../connection");
-const app = require("../app");
 const ordersTableName = "orders";
 const orderStatusTableName = "order_status";
 const paymentsTableName = "payments";
 const PORT = process.env.PORT || 4000;
+const express = require("express");
+const ordersRouter = express.Router();
 checkOrdersTableExistence();
 checkOrderStatusTableExistence();
 
@@ -20,7 +21,7 @@ const OrderStatus = {
   REFUNDED_INITIATED: "refundInitiated",
 };
 
-app.post("/order/create", async (req, res) => {
+ordersRouter.post("/order/create", async (req, res) => {
   const { userId, cartId, addressId, status, productId } = req.body;
   if (!userId || !addressId) {
     return res
@@ -240,7 +241,7 @@ async function insertOrderStatusHistory(orderId, status) {
 }
 
 // Fetch all orders (with pagination)
-app.get("/orders", (req, res) => {
+ordersRouter.get("/orders", (req, res) => {
   const userId = req.query.id;
   const pageNumber = parseInt(req.query.pageNumber) || 1;
   const pageSize = parseInt(req.query.pageSize) || 10;
@@ -331,7 +332,7 @@ app.get("/orders", (req, res) => {
 });
 
 // Filter Orders Api
-app.get("/orders/filter", (req, res) => {
+ordersRouter.get("/orders/filter", (req, res) => {
   const userId = req.query.id;
   const statusFilters = req.query.status ? req.query.status.split(",") : [];
   const pageNumber = parseInt(req.query.pageNumber) || 1;
@@ -438,7 +439,7 @@ app.get("/orders/filter", (req, res) => {
 });
 
 // Get order details by ID
-app.get("/order-details", (req, res) => {
+ordersRouter.get("/order-details", (req, res) => {
   const orderId = req.query.id;
   if (!orderId) {
     return res
@@ -488,7 +489,7 @@ app.get("/order-details", (req, res) => {
 
 // Update order status API (send receipt Id while creating order, and orderId when order is already placed)
 
-app.put("/order/update-status", (req, res) => {
+ordersRouter.put("/order/update-status", (req, res) => {
   const { receiptId, status, userId, orderId } = req.body;
   if (!orderId || !status || !userId) {
     return res
@@ -585,7 +586,7 @@ app.put("/order/update-status", (req, res) => {
   );
 });
 
-app.get("/order/status-history", (req, res) => {
+ordersRouter.get("/order/status-history", (req, res) => {
   const orderId = req.query.orderId;
   if (!orderId) {
     return res
@@ -668,3 +669,4 @@ function checkOrderStatusTableExistence() {
     }
   );
 }
+module.exports = ordersRouter; 

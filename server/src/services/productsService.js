@@ -3,10 +3,11 @@ const tableName = "products";
 const topLevelCateTableName = "top_level_categories"; // also known as categories
 const secondLevelCateTableName = "second_level_categories"; // also known as sections
 const thirdLevelCateTableName = "third_level_categories"; // also known as items
-const app = require("../app");
+const express = require("express");
+const productsRouter = express.Router();
 createProductCateSectionItemsTable();
 
-app.post("/product/categories/sections/items", (req, res) => {
+productsRouter.post("/product/categories/sections/items", (req, res) => {
   const { categories } = req.body;
 
   // Begin a transaction
@@ -108,7 +109,7 @@ app.post("/product/categories/sections/items", (req, res) => {
 });
 
 // Get all categories data
-app.get("/product/categories", (req, res) => {
+productsRouter.get("/product/categories", (req, res) => {
   // Query to get all top-level categories
   const getCategoriesQuery = `SELECT * FROM ${topLevelCateTableName}`;
 
@@ -210,7 +211,7 @@ app.get("/product/categories", (req, res) => {
 });
 
 /* Set products list */
-app.post("/product/add", (req, res) => {
+productsRouter.post("/product/add", (req, res) => {
   const {
     images,
     brand,
@@ -290,7 +291,7 @@ app.post("/product/add", (req, res) => {
 });
 
 /* Edit product details */
-app.post("/product/edit", (req, res) => {
+productsRouter.post("/product/edit", (req, res) => {
   const productId = req.query?.id;
   const {
     images,
@@ -369,7 +370,7 @@ app.post("/product/edit", (req, res) => {
 });
 
 /* Delete product */
-app.delete("/product/delete", (req, res) => {
+productsRouter.delete("/product/delete", (req, res) => {
   const { id } = req.query;
   if (!id) {
     return res
@@ -393,7 +394,7 @@ app.delete("/product/delete", (req, res) => {
 });
 
 /* Get product details by id */
-app.get("/product-details", (req, res) => {
+productsRouter.get("/product-details", (req, res) => {
   const { id } = req.query;
   if (!id) {
     return res
@@ -415,7 +416,7 @@ app.get("/product-details", (req, res) => {
 });
 
 /* Get products list */
-app.get("/products", (req, res) => {
+productsRouter.get("/products", (req, res) => {
   const { pageNumber, pageSize } = req.query;
   const limit = parseInt(pageSize);
   const offset = (parseInt(pageNumber) - 1) * limit;
@@ -454,7 +455,7 @@ app.get("/products", (req, res) => {
 });
 
 /* Find products on the basis of filters */
-app.post("/find-products", (req, res) => {
+productsRouter.post("/find-products", (req, res) => {
   const {
     categoryId,
     sectionId,
@@ -591,7 +592,7 @@ app.post("/find-products", (req, res) => {
 });
 
 /* Get top level categories list */
-app.get("/top-level-categories", (req, res) => {
+productsRouter.get("/top-level-categories", (req, res) => {
   const { pageNumber, pageSize } = req.query;
   const limit = parseInt(pageSize);
   const offset = (parseInt(pageNumber) - 1) * limit;
@@ -630,7 +631,7 @@ app.get("/top-level-categories", (req, res) => {
 });
 
 /* Get second level categories list */
-app.get("/second-level-categories", (req, res) => {
+productsRouter.get("/second-level-categories", (req, res) => {
   const { pageNumber, pageSize, categoryId } = req.query;
   const limit = parseInt(pageSize);
   const offset = (parseInt(pageNumber) - 1) * limit;
@@ -674,7 +675,7 @@ app.get("/second-level-categories", (req, res) => {
 });
 
 /* Get third level categories list */
-app.get("/third-level-categories", (req, res) => {
+productsRouter.get("/third-level-categories", (req, res) => {
   const { pageNumber, pageSize, sectionId } = req.query;
   const limit = parseInt(pageSize);
   const offset = (parseInt(pageNumber) - 1) * limit;
@@ -720,7 +721,7 @@ app.get("/third-level-categories", (req, res) => {
 });
 
 /* Get products carousel list for home page */
-app.get("/products-carousel", (req, res) => {
+productsRouter.get("/products-carousel", (req, res) => {
   const pageNumber = 1;
   const pageSize = 20;
   const limit = parseInt(pageSize);
@@ -778,7 +779,7 @@ app.get("/products-carousel", (req, res) => {
 });
 
 /* Add top level category */
-app.post("/top-level-categories/add", (req, res) => {
+productsRouter.post("/top-level-categories/add", (req, res) => {
   const { categoryName } = req.body;
   const category_id = generateSlug(categoryName);
 
@@ -836,7 +837,7 @@ app.post("/top-level-categories/add", (req, res) => {
 });
 
 /* Add second level category  */
-app.post("/second-level-categories/add", (req, res) => {
+productsRouter.post("/second-level-categories/add", (req, res) => {
   const { categoryName, sectionName } = req.body;
   const category_id = generateSlug(categoryName);
   const section_id = generateSlug(sectionName);
@@ -894,7 +895,7 @@ app.post("/second-level-categories/add", (req, res) => {
 });
 
 /* Add third level category  */
-app.post("/third-level-categories/add", (req, res) => {
+productsRouter.post("/third-level-categories/add", (req, res) => {
   const { sectionName, itemName } = req.body;
   const section_id = generateSlug(sectionName);
   const item_id = generateSlug(itemName);
@@ -953,7 +954,7 @@ app.post("/third-level-categories/add", (req, res) => {
 });
 
 /* Delete top level category */
-app.delete("/top-level-categories/delete", (req, res) => {
+productsRouter.delete("/top-level-categories/delete", (req, res) => {
   const categoryId = req.query.id;
   if (!categoryId) {
     return res
@@ -1039,7 +1040,7 @@ app.delete("/top-level-categories/delete", (req, res) => {
 });
 
 /* Delete second-level category */
-app.delete("/second-level-categories/delete", (req, res) => {
+productsRouter.delete("/second-level-categories/delete", (req, res) => {
   const sectionId = req.query.id;
   if (!sectionId) {
     return res
@@ -1143,7 +1144,7 @@ app.delete("/second-level-categories/delete", (req, res) => {
 });
 
 /* Delete third-level category */
-app.delete("/third-level-categories/delete", (req, res) => {
+productsRouter.delete("/third-level-categories/delete", (req, res) => {
   const itemId = req.query.id;
   if (!itemId) {
     return res
@@ -1487,3 +1488,4 @@ function generateSlug(name) {
         .replace(/^-+|-+$/g, "")
     : ""; // Remove leading and trailing hyphens
 }
+module.exports = productsRouter; 

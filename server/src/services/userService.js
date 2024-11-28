@@ -1,12 +1,14 @@
 const bcrypt = require('bcryptjs');
+const express = require("express");
 const connection = require("../connection");
 const { generateToken } = require("./jwtService");
 const tableName = "users";
-const app = require("../app");
+
 checkTableExistence();
+const usersRouter = express.Router();
 
 // Register(signup) API for new users
-app.post("/register", (req, res) => {
+usersRouter.post("/register", (req, res) => {
   let { firstName, lastName, email, password } = req.body;
 
   connection.query(
@@ -95,7 +97,7 @@ app.post("/register", (req, res) => {
 });
 
 // Login API for existing users
-app.post("/signin", (req, res) => {
+usersRouter.post("/signin", (req, res) => {
   const { email, password } = req.body;
   connection.query(
     `SELECT * FROM ${tableName} WHERE email = ?`,
@@ -139,7 +141,7 @@ app.post("/signin", (req, res) => {
 });
 
 // Fetch all users API
-app.get("/users", (req, res) => {
+usersRouter.get("/users", (req, res) => {
   const { pageNumber, pageSize } = req.query;
   const limit = parseInt(pageSize);
   const offset = (parseInt(pageNumber) - 1) * limit;
@@ -177,7 +179,7 @@ app.get("/users", (req, res) => {
 });
 
 // Add user API for admins
-app.post("/user/add", (req, res) => {
+usersRouter.post("/user/add", (req, res) => {
   const { firstName, lastName, email, password, role, mobile } = req.body;
   connection.query(
     `SELECT * FROM ${tableName} WHERE email = ?`,
@@ -264,7 +266,7 @@ app.post("/user/add", (req, res) => {
 });
 
 /* Get user details by id */
-app.get("/user-details", (req, res) => {
+usersRouter.get("/user-details", (req, res) => {
   const { id } = req.query;
   if (!id) {
     return res
@@ -292,7 +294,7 @@ app.get("/user-details", (req, res) => {
 });
 
 /* Delete user */
-app.delete("/user/delete", (req, res) => {
+usersRouter.delete("/user/delete", (req, res) => {
   const { id } = req.query;
   if (!id) {
     return res
@@ -316,7 +318,7 @@ app.delete("/user/delete", (req, res) => {
 });
 
 /* Edit user details */
-app.post("/user/edit", (req, res) => {
+usersRouter.post("/user/edit", (req, res) => {
   const userId = req.query?.id;
   const { firstName, lastName, email, password, role, mobile } = req.body;
 
@@ -387,3 +389,5 @@ function checkTableExistence() {
     }
   });
 }
+
+module.exports = usersRouter; 

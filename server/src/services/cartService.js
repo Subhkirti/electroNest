@@ -1,12 +1,13 @@
 const connection = require("../connection");
 const cartTableName = "cart";
 const cartItemsTableName = "cart_items";
-const app = require("../app");
+const express = require("express");
+const cartRouter = express.Router();
 checkCartTableExistence();
 checkCartItemsTable();
 
 // Get cart details
-app.get("/cart", (req, res) => {
+cartRouter.get("/cart", (req, res) => {
   const { id } = req.query;
   if (!id) {
     return res
@@ -33,7 +34,7 @@ app.get("/cart", (req, res) => {
 });
 
 // Get cart Items
-app.get("/cart_items", (req, res) => {
+cartRouter.get("/cart_items", (req, res) => {
   const { id } = req.query;
   let cartId;
   if (!id) {
@@ -154,7 +155,7 @@ app.get("/cart_items", (req, res) => {
 });
 
 // Add cart items
-app.post("/cart-items/add", (req, res) => {
+cartRouter.post("/cart-items/add", (req, res) => {
   const { userId, productId, price, discountPercentage, deliveryCharges } =
     req.body;
   const discountPrice = (price * discountPercentage) / 100;
@@ -348,7 +349,7 @@ function updateCartTotal(cartId, callback) {
 }
 
 // Remove an item from the user's cart
-app.post("/cart-items/remove", (req, res) => {
+cartRouter.post("/cart-items/remove", (req, res) => {
   const { userId, cartItemId } = req.body;
 
   // Step 1: Check if the user has an active cart
@@ -426,7 +427,7 @@ app.post("/cart-items/remove", (req, res) => {
 });
 
 // Reduce the quantity of an item in the cart
-app.post("/cart-items/reduce", (req, res) => {
+cartRouter.post("/cart-items/reduce", (req, res) => {
   const { userId, productId } = req.body;
 
   // Step 1: Check if the user has an active cart
@@ -617,3 +618,4 @@ function checkCartItemsTable() {
     }
   );
 }
+module.exports = cartRouter; 

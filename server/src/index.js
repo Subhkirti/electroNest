@@ -1,7 +1,5 @@
 const app = require("./app");
 const dotenv = require("dotenv");
-const connection = require("./connection");
-
 // Loading the appropriate .env file based on the NODE_ENV,
 // This key NODE_ENV already set in scripts of package.json, while starting the application
 const result = dotenv.config({
@@ -12,14 +10,24 @@ if (result.error) {
   throw result.error;
 }
 
+const connection = require("./connection");
+const usersRouter = require("./services/userService");
+const productsRouter = require("./services/productsService");
+const cartRouter = require("./services/cartService");
+const ordersRouter = require("./services/ordersService");
+const paymentsRouter = require("./services/paymentsService");
+const addressRouter = require("./services/addressService");
+
+
+
 require("./connection");
-require("./services/userService");
-require("./services/productsService");
-require("./services/cartService");
-require("./services/ordersService");
-require("./services/paymentsService");
-require("./services/addressService");
-// require("./services/sellersService");
+
+app.use(usersRouter);
+app.use(productsRouter);
+app.use(cartRouter);
+app.use(ordersRouter);
+app.use(paymentsRouter);
+app.use(addressRouter);
 
 const PORT = process.env.PORT || 4000;
 console.log("PORT:", PORT);

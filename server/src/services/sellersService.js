@@ -1,10 +1,11 @@
 const tableName = "sellers";
 const connection = require("../connection");
-const app = require("../app");
+const express = require("express");
+const sellersRouter = express.Router();
 checkSellersTableExistence();
 
 // Get All Sellers
-app.get("/sellers", (req, res) => {
+sellersRouter.get("/sellers", (req, res) => {
   connection.query(`SELECT * FROM ${tableName}`, (err, result) => {
     if (err) {
       return res
@@ -20,7 +21,7 @@ app.get("/sellers", (req, res) => {
 });
 
 // Get Seller detail
-app.get("/seller-detail", (req, res) => {
+sellersRouter.get("/seller-detail", (req, res) => {
   const { id } = req.query;
 
   if (!id) {
@@ -54,7 +55,7 @@ app.get("/seller-detail", (req, res) => {
 });
 
 // Add Seller details
-app.post("/sellers/add", (req, res) => {
+sellersRouter.post("/sellers/add", (req, res) => {
   const {
     user_id,
     store_name,
@@ -103,7 +104,7 @@ app.post("/sellers/add", (req, res) => {
 });
 
 // Delete Seller details
-app.delete("/sellers/delete", (req, res) => {
+sellersRouter.delete("/sellers/delete", (req, res) => {
   const sellerId = req.query?.id;
 
   if (!sellerId) {
@@ -172,3 +173,4 @@ function checkSellersTableExistence() {
     }
   });
 }
+module.exports = sellersRouter; 
