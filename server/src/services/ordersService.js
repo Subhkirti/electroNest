@@ -3,7 +3,7 @@ const app = require("../app");
 const ordersTableName = "orders";
 const orderStatusTableName = "order_status";
 const paymentsTableName = "payments";
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 4000;
 checkOrdersTableExistence();
 checkOrderStatusTableExistence();
 
@@ -193,7 +193,9 @@ async function createPayment(userId, orderId, amount, totalAmount) {
     }
 
     const paymentResponse = await fetch(
-      `http://localhost:${PORT}/payment/create`,
+      process.env.NODE_ENV === "production"
+        ? `https://electro-nest-api.onrender.com/payment/create`
+        : `http://localhost:${PORT}/payment/create`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -475,7 +477,9 @@ app.get("/order-details", (req, res) => {
             product_details: productsResult?.[0],
           }));
 
-          return res.status(200).json({ status: 200, data: formattedOrders[0] });
+          return res
+            .status(200)
+            .json({ status: 200, data: formattedOrders[0] });
         }
       );
     }
