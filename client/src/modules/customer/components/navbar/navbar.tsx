@@ -60,8 +60,8 @@ export default function Navbar() {
   useEffect(() => {
     const timer = setTimeout(() => {
       !categories?.length && dispatch(getAllCategories());
-      !cart && dispatch(getCart());
-      !cartItems.length && dispatch(getCartItems());
+      categories?.length && !cart && dispatch(getCart());
+      categories?.length && !cartItems.length && dispatch(getCartItems());
     }, 10);
 
     return () => {

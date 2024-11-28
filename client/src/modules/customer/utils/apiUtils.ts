@@ -19,7 +19,7 @@ function handleCatchError({
   const dispatch = store.dispatch;
   const axiosError = error as AxiosError<ErrorResponse>;
   const errorMessage =
-    axiosError?.response?.data?.message || AppStrings.somethingWentWrong;
+    axiosError?.response?.data?.message || axiosError?.message || AppStrings.somethingWentWrong;
   toast.error(errorMessage);
   dispatch({
     type: actionType,
