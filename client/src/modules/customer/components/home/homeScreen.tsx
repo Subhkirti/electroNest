@@ -45,13 +45,15 @@ function HomeScreen() {
           );
         })}
       </div>
-      <div className="flex justify-center">
-        <ViewMoreButton
-          onClick={() => {
-            navigate(AppRoutes.products);
-          }}
-        />
-      </div>
+      {productsCarousel.length > 0 && (
+        <div className="flex justify-center">
+          <ViewMoreButton
+            onClick={() => {
+              navigate(AppRoutes.products);
+            }}
+          />
+        </div>
+      )}
       <Footer />
     </div>
   );
