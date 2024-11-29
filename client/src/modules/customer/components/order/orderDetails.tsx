@@ -18,7 +18,9 @@ function OrderDetails() {
   const params = useParams();
   const orderId = params?.orderId ? Number(params?.orderId) : 0;
   const dispatch = useDispatch<AppDispatch>();
-  const { order, isLoading, orderHistory } = useSelector((state: RootState) => state.order);
+  const { order, isLoading, orderHistory } = useSelector(
+    (state: RootState) => state.order
+  );
   const { address } = useSelector((state: RootState) => state.address);
 
   useEffect(() => {
@@ -52,7 +54,7 @@ function OrderDetails() {
           <OrderTracker />
         </>
       ) : (
-        <NotFound message={AppStrings.ordersNotFound} />
+        !isLoading && <NotFound message={AppStrings.ordersNotFound} />
       )}
     </div>
   );

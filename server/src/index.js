@@ -4,7 +4,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, "../client/build")));
+app.use(express.static(path.join(__dirname, "../../client/build")));
 
 // Loading the appropriate .env file based on the NODE_ENV,
 // This key NODE_ENV already set in scripts of package.json, while starting the application
@@ -35,7 +35,7 @@ const PORT = process.env.PORT || 4000;
 
 // Fallback route to handle SPA
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/build", "index.html"));
+  res.sendFile(path.join(__dirname, "../../client/build", "index.html"));
 });
 
 app.get("/", (req, res) => {

@@ -145,7 +145,9 @@ const Profile: React.FC = () => {
       />
     </>
   ) : (
-    <NotFound message={AppStrings.userDetailsNotFound} isGoBack={true} />
+    !isLoading && (
+      <NotFound message={AppStrings.userDetailsNotFound} isGoBack={true} />
+    )
   );
 };
 

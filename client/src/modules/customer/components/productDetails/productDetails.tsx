@@ -174,7 +174,7 @@ export default function ProductDetails() {
           </div>
         </div>
       ) : !product ? (
-        <NotFound message={AppStrings.productDetailsNotFound} />
+        !isLoading && <NotFound message={AppStrings.productDetailsNotFound} />
       ) : null}
     </div>
   );

@@ -73,7 +73,7 @@ function Orders() {
             />
           </>
         ) : (
-          <NotFound message={AppStrings.ordersNotFound} />
+          !isLoading && <NotFound message={AppStrings.ordersNotFound} />
         )}
       </Grid>
     </Grid>
