@@ -139,7 +139,7 @@ app.get("/product/categories", (req, res) => {
         console.error("Error getting categories:", err);
         return res.status(500).json({
           status: 500,
-          message: "Error getting categories: categories",
+          message: `Error getting categories: ${err}`,
         });
       });
   });
