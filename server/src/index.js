@@ -1,5 +1,9 @@
 const app = require("./app");
+const path = require('path');
 const dotenv = require("dotenv");
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../client/build')));
 // Loading the appropriate .env file based on the NODE_ENV,
 // This key NODE_ENV already set in scripts of package.json, while starting the application
 const tableName = "products";
@@ -30,6 +34,11 @@ app.use(paymentsRouter);
 app.use(addressRouter);
 
 const PORT = process.env.PORT || 4000;
+
+// Fallback route to handle SPA
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+});
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Welcome to electroNest apis," });
