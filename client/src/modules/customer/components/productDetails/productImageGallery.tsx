@@ -16,6 +16,7 @@ import { useDispatch } from "react-redux";
 import { addItemToCart } from "../../../../store/customer/cart/action";
 import { getCurrentUser } from "../../utils/localStorageUtils";
 import { AppDispatch } from "../../../../store/storeTypes";
+import { toast } from "react-toastify";
 
 function ProductImageGallery({ product }: { product: Product }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
@@ -192,9 +193,11 @@ function ProductImageGallery({ product }: { product: Product }) {
                   <KeyboardDoubleArrowRight style={{ fontSize: "26px" }} />
                 }
                 onClick={() =>
-                  navigate(
-                    `${AppRoutes.checkout}?product_id=${product.productId}`
-                  )
+                  userId
+                    ? navigate(
+                        `${AppRoutes.checkout}?product_id=${product.productId}`
+                      )
+                    : toast.info("Register/Login yourself to proceed.")
                 }
                 className="lg:w-[50%]  px-8 py-3 shadow-none hover:shadow-none"
               >
