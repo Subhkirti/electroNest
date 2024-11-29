@@ -33,11 +33,6 @@ app.use(addressRouter);
 
 const PORT = process.env.PORT || 4000;
 
-// Fallback route to handle SPA
-// app.get("*", (req, res) => {
-//   res.sendFile(path.join(__dirname, "../../client/build", "index.html"));
-// });
-
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Welcome to electroNest apis," });
 });
