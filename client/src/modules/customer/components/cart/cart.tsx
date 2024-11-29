@@ -6,7 +6,6 @@ import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { getCart, getCartItems } from "../../../../store/customer/cart/action";
 import Loader from "../../../../common/components/loader";
 import EmptyCart from "./EmptyCart";
-import { getCurrentUser } from "../../utils/localStorageUtils";
 
 function Cart({
   isOrderSummary,
@@ -15,7 +14,6 @@ function Cart({
   isOrderSummary?: boolean;
   onNextCallback?: () => void;
 }) {
-  const user = getCurrentUser();
   const { isLoading, cartItems, cart } = useSelector(
     (state: RootState) => state.cart
   );
