@@ -9,7 +9,6 @@ const result = dotenv.config({
 if (result.error) {
   throw result.error;
 }
-
 const connection = require("./connection");
 const usersRouter = require("./services/userService");
 const productsRouter = require("./services/productsService");
@@ -26,7 +25,6 @@ app.use(paymentsRouter);
 app.use(addressRouter);
 
 const PORT = process.env.PORT || 4000;
-console.log("PORT:", PORT);
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Welcome to electroNest apis," });
@@ -39,7 +37,6 @@ app.get("/userslist", (req, res) => {
       .json({ message: "Welcome to electroNest apis,", data: results });
   });
 });
-
 app.listen(PORT, () => {
   console.log(`ElectroNest application is running on: ${PORT}`);
 });
