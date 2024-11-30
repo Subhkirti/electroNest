@@ -175,7 +175,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
     if (results.length > 0) {
       // If the user already has an active cart, use the existing cart ID
       cartId = results[0].id;
-      console.log(`Cart exists for user ${userId}, cart ID: ${cartId}`);
+      console.log(`Cart exists for user ${userId}, cart ID: ${cartId}, ${results}`);
     } else {
       // If no active cart exists, create a new cart
       const createCartQuery = `INSERT INTO ${cartTableName} (user_id, total_price, total_items, total_delivery_charges) VALUES (?, 0, 0, 0)`;
@@ -188,7 +188,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
           });
         }
         cartId = result.insertId;
-        console.log(`Cart created for user ${userId}, cart ID: ${cartId}`);
+        console.log(`Cart created for user ${userId}, cart ID: ${cartId}, ${result}`);
       });
     }
 
