@@ -174,7 +174,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
     let cartId;
     if (results.length > 0) {
       // If the user already has an active cart, use the existing cart ID
-      cartId = results[0].id;
+      cartId = results[0]?.id;
       console.log(`Cart exists for user ${userId}, cart ID: ${cartId}, ${results}`);
     } else {
       // If no active cart exists, create a new cart
@@ -187,8 +187,8 @@ cartRouter.post("/cart-items/add", (req, res) => {
             message: "Error creating cart",
           });
         }
-        cartId = result.insertId;
-        console.log(`Cart created for user ${userId}, cart ID: ${cartId}, ${result}`);
+        cartId = result[0]?.insertId;
+        console.log(`Cart created for user ${userId}, cart ID: ${cartId}, ${result}, ${result[0]}`);
       });
     }
 
