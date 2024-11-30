@@ -194,6 +194,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
 
     // Step 2: Check if the product is already in the user's cart
     const checkProductInCartQuery = `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
+    console.log(`Cart created with cartId: ${cartId}`);
 
     connection.query(
       checkProductInCartQuery,
