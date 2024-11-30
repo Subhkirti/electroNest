@@ -194,7 +194,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
 
     // Step 2: Check if the product is already in the user's cart
     const checkProductInCartQuery = `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
-    console.log(`Cart created with cartId: ${cartId}`);
+
 
     connection.query(
       checkProductInCartQuery,
@@ -207,6 +207,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
             message: "Error checking product in cart",
           });
         }
+        console.log(`Cart created with cartId in (product is in the cart): ${cartId}`);
 
         if (results.length > 0) {
           // If product already exists in the cart, update the quantity
@@ -272,6 +273,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
         } else {
           // If the product is not in the cart, add it
           const addCartItemQuery = `INSERT INTO ${cartItemsTableName} (cart_id, product_id, quantity, price, discount_price, delivery_charges) VALUES (?, ?, ?, ?, ?, ?)`;
+          console.log(`Cart created with cartId in (product is not in the cart): ${cartId}`);
 
           connection.query(
             addCartItemQuery,
