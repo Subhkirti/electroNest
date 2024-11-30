@@ -181,7 +181,11 @@ function ProductImageGallery({ product }: { product: Product }) {
               <Button
                 startIcon={<ShoppingCartOutlined />}
                 variant="outlined"
-                onClick={addToCart}
+                onClick={() =>
+                  userId
+                    ? addToCart()
+                    : toast.info("Register yourself to proceed.")
+                }
                 className="lg:w-[50%] px-8 py-3 shadow-none hover:shadow-none hover:bg-primary hover:border-transparent hover:bg-opacity-10"
               >
                 {AppStrings.addToCart}
@@ -197,7 +201,7 @@ function ProductImageGallery({ product }: { product: Product }) {
                     ? navigate(
                         `${AppRoutes.checkout}?product_id=${product.productId}`
                       )
-                    : toast.info("Register/Login yourself to proceed.")
+                    : toast.info("Register yourself to proceed.")
                 }
                 className="lg:w-[50%]  px-8 py-3 shadow-none hover:shadow-none"
               >

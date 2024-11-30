@@ -161,7 +161,6 @@ export default function ProductFilters() {
     navigate({ search: `?${query}` });
   }
 
-
   const dataNotAvailable = !isLoading && products.length === 0;
   return (
     <div className="bg-white">
@@ -312,10 +311,7 @@ export default function ProductFilters() {
             <div className={"grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-5"}>
               {/* Web Filters */}
               <form className="hidden lg:block">
-                <ProductTotalCount
-                  totalCount={totalCount}
-  
-                />
+                <ProductTotalCount totalCount={totalCount} />
 
                 {productFilters.map((section) => (
                   <Disclosure
@@ -379,16 +375,19 @@ export default function ProductFilters() {
                     isGoBack={true}
                   />
                 ) : (
-                  <div className="flex flex-wrap justify-start bg-white py-5">
-                    {/* Products grid */}
-                    {products.map((product, index) => {
-                      return <ProductCard key={index} product={product} />;
-                    })}
-                  </div>
+                  <>
+                    {isLoading && <Loader suspenseLoader={true} />}
+
+                    <div className="flex flex-wrap justify-center md:justify-start bg-white py-5">
+                      {/* Products grid */}
+
+                      {products.map((product, index) => {
+                        return <ProductCard key={index} product={product} />;
+                      })}
+                    </div>
+                  </>
                 )}
               </div>
-
-              {isLoading && <Loader />}
             </div>
           </section>
         </main>

@@ -2,7 +2,6 @@ import { Fragment, useEffect, useState } from "react";
 import { Dialog, Popover, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
-  MagnifyingGlassIcon,
   ShoppingBagIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -144,7 +143,7 @@ export default function Navbar() {
               </button>
 
               {/* Logo */}
-              <div className="ml-4 flex lg:ml-0 w-[20%]">
+              <div className="ml-4 flex lg:ml-0 w-[40%] lg:w-[20%]">
                 <Link to={AppRoutes.home}>
                   <span className="sr-only">ElectroNest</span>
                   <img

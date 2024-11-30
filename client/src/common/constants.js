@@ -10,16 +10,20 @@ const carouselBreakpoints = {
     items: 4.5,
   },
   desktop: {
-    breakpoint: { max: 3000, min: 1024 },
+    breakpoint: { max: 3000, min: 1240 },
     items: 4.4,
   },
   tablet: {
-    breakpoint: { max: 1024, min: 464 },
-    items: 2.4,
+    breakpoint: { max: 1240, min: 764 },
+    items: 3.2,
   },
   mobile: {
-    breakpoint: { max: 464, min: 0 },
-    items: 1.5,
+    breakpoint: { max: 764, min: 450 },
+    items: 2.3,
+  },
+  extraSmall: {
+    breakpoint: { max: 450, min: 0 },
+    items: 1,
   },
 };
 export {
