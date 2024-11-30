@@ -277,10 +277,10 @@ cartRouter.post("/cart-items/add", (req, res) => {
             [cartId, productId, 1, price, discountPrice, deliveryCharges],
             (err, cartItemsResults) => {
               if (err) {
-                console.error("Error adding product to cart:", err);
+                console.error(`Error adding product to cart: ${err}`, );
                 return res.status(400).json({
                   status: 400,
-                  message: "Failed to add product in cart",
+                  message: `Failed to add product in cart: ${err}`,
                 });
               } else {
                 // Now, update the cart totals after adding the new item
