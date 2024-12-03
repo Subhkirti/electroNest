@@ -10,7 +10,11 @@ import ActionButton from "../../../../common/components/actionButton";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { Delete, Edit, Visibility, PersonAdd } from "@mui/icons-material";
-import { formattedDate, formattedDateTime, formattedTime } from "../../utils/productUtil";
+import {
+  formattedDate,
+  formattedDateTime,
+  formattedTime,
+} from "../../utils/productUtil";
 import CustomTable from "../../../../common/components/customTable";
 import { TableColumn, User } from "../../../customer/types/userTypes";
 import {
@@ -69,7 +73,9 @@ const usersColumns: TableColumn<User>[] = [
 function Users() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { users, totalCount } = useSelector((state: RootState) => state.users);
+  const { users, totalCount, isLoading } = useSelector(
+    (state: RootState) => state.users
+  );
 
   useEffect(() => {
     dispatch(
@@ -119,6 +125,7 @@ function Users() {
 
   return (
     <CustomTable
+      isLoading={isLoading}
       fetchData={fetchUsers}
       data={users}
       totalCount={totalCount}

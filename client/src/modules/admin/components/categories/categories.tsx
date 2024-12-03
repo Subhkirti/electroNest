@@ -115,6 +115,7 @@ function Categories() {
       <CustomTable
         fetchData={(page, size) => dispatch(getTopLevelCategories())}
         data={topLevelCategories}
+        isLoading={isLoading}
         totalCount={topLevelCategories.length}
         columns={topLCategoryColumns}
         showPagination={false}
@@ -130,6 +131,7 @@ function Categories() {
             urlState={{ categoryType: CategoryTypes.secondLevelCategories }}
           />
           <CustomTable
+            isLoading={isLoading}
             fetchData={(page, size) =>
               topLevelCategories.map((category: TopLevelCategories) => {
                 return dispatch(
@@ -155,6 +157,7 @@ function Categories() {
             urlState={{ categoryType: CategoryTypes.thirdLevelCategories }}
           />
           <CustomTable
+            isLoading={isLoading}
             fetchData={(page, size) =>
               secondLevelCategories.map((category: SecondLevelCategories) => {
                 return dispatch(

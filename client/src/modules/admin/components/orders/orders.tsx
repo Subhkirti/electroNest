@@ -34,6 +34,7 @@ import {
 } from "../../utils/productUtil";
 import { orderStatuses } from "../../../customer/utils/productUtils";
 import InputField from "../../../../common/components/inputField";
+import Loader from "../../../../common/components/loader";
 
 const orderColumns: TableColumn<Order>[] = [
   { id: "orderId", label: "ID" },
@@ -103,7 +104,9 @@ const orderColumns: TableColumn<Order>[] = [
 function Orders() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { orders, totalCount } = useSelector((state: RootState) => state.order);
+  const { orders, totalCount, isLoading } = useSelector(
+    (state: RootState) => state.order
+  );
   const [open, setOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | string>(
@@ -186,7 +189,9 @@ function Orders() {
 
   return (
     <>
+      {isLoading && <Loader suspenseLoader={true} fixed={true} />}
       <CustomTable
+        isLoading={isLoading}
         fetchData={handleFetchOrders}
         data={orders}
         totalCount={totalCount}

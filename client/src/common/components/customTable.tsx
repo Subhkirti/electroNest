@@ -18,6 +18,7 @@ import { TableColumn } from "../../modules/customer/types/userTypes";
 interface CustomTableProps<T> {
   fetchData: (page: number, size: number) => void;
   data: T[];
+  isLoading: boolean;
   totalCount: number;
   showPagination?: boolean;
   columns: TableColumn<T>[];
@@ -28,6 +29,7 @@ export default function CustomTable<T>({
   fetchData,
   data,
   totalCount,
+  isLoading,
   showPagination = true,
   columns,
   actions,
@@ -129,8 +131,10 @@ export default function CustomTable<T>({
             sx={{ color: AppColors.lightWhite, mb: 3 }}
           />
         ) : null
-      ) : (
+      ) : isLoading ? (
         <NoResultsFound />
+      ) : (
+        <></>
       )}
     </Paper>
   );

@@ -25,6 +25,7 @@ import {
 import CustomTable from "../../../../common/components/customTable";
 import { Product } from "../../../customer/types/productTypes";
 import { TableColumn } from "../../../customer/types/userTypes";
+import Loader from "../../../../common/components/loader";
 
 const productColumns: TableColumn<Product>[] = [
   { id: "productId", label: "ID" },
@@ -83,7 +84,7 @@ const productColumns: TableColumn<Product>[] = [
 function Products() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { products, totalCount } = useSelector(
+  const { products, totalCount, isLoading } = useSelector(
     (state: RootState) => state.product
   );
 
@@ -138,13 +139,17 @@ function Products() {
   };
 
   return (
-    <CustomTable
-      fetchData={handleFetchProducts}
-      data={products}
-      totalCount={totalCount}
-      columns={productColumns}
-      actions={handleActions}
-    />
+    <>
+      {isLoading && <Loader suspenseLoader={true} fixed={true} />}
+      <CustomTable
+        isLoading={isLoading}
+        fetchData={handleFetchProducts}
+        data={products}
+        totalCount={totalCount}
+        columns={productColumns}
+        actions={handleActions}
+      />
+    </>
   );
 }
 
