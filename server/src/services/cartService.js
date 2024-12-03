@@ -170,7 +170,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
         message: "Error checking user's cart",
       });
     }
-    console.log(`results ===> ${results?.length}, ${results?.id}`);
+    console.log(`results ===> ${results?.length}, ${results?.id}, ${results}`);
     let cartId;
     if (results.length > 0) {
       // If the user already has an active cart, use the existing cart ID
