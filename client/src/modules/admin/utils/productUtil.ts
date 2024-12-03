@@ -118,7 +118,7 @@ const textTruncate = (text: string, length: number) => {
   return text.substring(0, length) + "...";
 };
 
-function formatAmount(amount: number) {
+function formatAmount(amount: number | string) {
   return amount
     ? "₹" +
         amount.toLocaleString("en-IN", {

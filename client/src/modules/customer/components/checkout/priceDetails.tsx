@@ -21,7 +21,11 @@ function PriceDetails({
     (state: RootState) => state.cart
   );
   const totalAmount = cart
-    ? cart.totalPrice - cart.totalDiscountPrice + cart.totalDeliveryCharges
+    ? (
+        cart?.totalPrice -
+        cart?.totalDiscountPrice +
+        cart?.totalDeliveryCharges
+      ).toFixed(2)
     : 0;
 
   return (
