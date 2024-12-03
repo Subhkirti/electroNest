@@ -330,6 +330,12 @@ cartRouter.post("/cart-items/add", (req, res) => {
         }
       );
     }
+    else{
+      return res.status(400).json({
+        status: 400,
+        message: "Error while creating cart",
+      });
+    }
   });
 });
 
