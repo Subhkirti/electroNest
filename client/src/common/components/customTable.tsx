@@ -131,7 +131,7 @@ export default function CustomTable<T>({
             sx={{ color: AppColors.lightWhite, mb: 3 }}
           />
         ) : null
-      ) : isLoading ? (
+      ) : !isLoading ? (
         <NoResultsFound />
       ) : (
         <></>
