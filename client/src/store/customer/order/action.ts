@@ -251,15 +251,13 @@ const updateOrderStatus =
       );
 
       if (response?.data?.status >= 200) {
-        setTimeout(() => {
-          dispatch({
-            type: ActionTypes.UPDATE_ORDER_STATUS_SUCCESS,
-            payload: response.data,
-          });
-          if (status === OrderStatus.CANCELLED) {
-            toast.success(AppStrings.yourOrderHasBeenCancelled);
-          }
-        }, 2000);
+        dispatch({
+          type: ActionTypes.UPDATE_ORDER_STATUS_SUCCESS,
+          payload: response.data,
+        });
+        if (status === OrderStatus.CANCELLED) {
+          toast.success(AppStrings.yourOrderHasBeenCancelled);
+        }
       }
     } catch (error) {
       handleCatchError({

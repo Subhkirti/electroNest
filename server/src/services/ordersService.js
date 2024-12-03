@@ -543,7 +543,6 @@ ordersRouter.put("/order/update-status", (req, res) => {
         // when order cancelled, then after 2 minutes set it's status to refund initiated
         if (status === OrderStatus.CANCELLED) {
           const refundStatus = OrderStatus.REFUNDED_INITIATED;
-          setTimeout(async () => {
             await insertOrderStatusHistory(orderId, refundStatus);
             executeQuery(
               updateQuery,
@@ -551,7 +550,6 @@ ordersRouter.put("/order/update-status", (req, res) => {
                 ? [refundStatus, userId, receiptId, orderId]
                 : [refundStatus, userId, orderId]
             );
-          }, 20000);
         }
 
         const updatePaymentQuery = `UPDATE ${paymentsTableName} SET payment_status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND receipt_id = ?`;

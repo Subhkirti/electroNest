@@ -29,6 +29,9 @@ export default function ProductDetails() {
   const { isLoading, product, categories, products, totalCount } = useSelector(
     (state: RootState) => state.product
   );
+  const { isLoading: cartLoader } = useSelector(
+    (state: RootState) => state.cart
+  );
 
   useEffect(() => {
     // Fetch product details
@@ -60,6 +63,8 @@ export default function ProductDetails() {
 
   return (
     <div className="bg-white">
+      {cartLoader && <Loader suspenseLoader={true} fixed={true} />}
+      
       {isLoading ? (
         <Loader suspenseLoader={true} />
       ) : product ? (

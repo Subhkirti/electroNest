@@ -34,9 +34,8 @@ function Cart({
 
   return (
     <div>
-      {isLoading && !cartItems.length ? (
-        <Loader suspenseLoader={true} />
-      ) : cartItems.length > 0 ? (
+      {isLoading && <Loader suspenseLoader={true} fixed={true} />}
+      {cartItems.length > 0 ? (
         <div className="lg:grid grid-cols-3 relative">
           <div className="col-span-2 space-y-4">
             {cartItems.map((cartItem, index) => {
@@ -59,6 +58,8 @@ function Cart({
             onNextCallback={onNextCallback}
           />
         </div>
+      ) : isLoading ? (
+        <></>
       ) : (
         <EmptyCart />
       )}
