@@ -67,7 +67,7 @@ export default function Navbar() {
       clearTimeout(timer);
     };
     // eslint-disable-next-line
-  }, [anchorEl, categories?.length]);
+  }, [anchorEl, categories?.length, cartItems?.length]);
 
   const handleUserClick = (event: { currentTarget: any }) => {
     setAnchorEl(event.currentTarget);
