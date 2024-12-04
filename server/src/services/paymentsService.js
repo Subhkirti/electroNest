@@ -28,7 +28,7 @@ paymentsRouter.post("/payment/create", (req, res) => {
   }
 
   const options = {
-    amount: totalAmount * 100, // Convert to paise
+    amount: Number(totalAmount) * 100, // Convert to paise
     currency: "INR",
     receipt: `order_receipt_id_${orderId}`,
     notes: { orderId },

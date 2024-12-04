@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import Loader from "../../../../common/components/loader";
 import { RazorpayOrderOptions, useRazorpay } from "react-razorpay";
-import { getCheckoutStep, getQuerySearch } from "../../utils/productUtils";
+import {
+  calculateTotalPrice,
+  getCheckoutStep,
+  getQuerySearch,
+} from "../../utils/productUtils";
 import { useNavigate } from "react-router-dom";
 import AppRoutes from "../../../../common/appRoutes";
 import { getCurrentUser } from "../../utils/localStorageUtils";
@@ -26,9 +30,7 @@ function Payment() {
   const orderId = getQuerySearch("order_id");
   const { error, isLoading: razorpayLoading, Razorpay } = useRazorpay();
   const { cart } = useSelector((state: RootState) => state.cart);
-  const totalAmount = cart
-    ? cart.totalPrice - cart.totalDiscountPrice + cart.totalDeliveryCharges
-    : 0;
+  const totalAmount = calculateTotalPrice(cart);
 
   useEffect(() => {
     if (activeStep === 4) {
@@ -66,7 +68,7 @@ function Payment() {
 
     const options: RazorpayOrderOptions = {
       key: process.env.REACT_APP_RAZORPAY_API_KEY || "",
-      amount: totalAmount * 100,
+      amount: Number(totalAmount) * 100,
       currency: "INR",
       order_id: razorpayOrderId,
       name: "ElectroNest",

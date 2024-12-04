@@ -12,6 +12,7 @@ import {
 } from "../../../admin/utils/userUtil";
 import AppStrings from "../../../../common/appStrings";
 import AddressFields from "./addressFields";
+import Loader from "../../../../common/components/loader";
 
 function AddDeliveryAddress({
   onNextCallback,
@@ -20,7 +21,9 @@ function AddDeliveryAddress({
 }) {
   const dispatch = useDispatch<AppDispatch>();
   const [formData, setFormData] = useState<AddressReqBody>(addressInitState);
-  const { addresses } = useSelector((state: RootState) => state.address);
+  const { isLoading, addresses } = useSelector(
+    (state: RootState) => state.address
+  );
 
   function handleOnChange(value: any, fieldId: string) {
     setFormData({ ...formData, [fieldId]: value });
@@ -38,8 +41,9 @@ function AddDeliveryAddress({
       container
       justifyContent={addresses?.length ? "space-between" : "center"}
     >
-      <AddressCard onNextCallback={onNextCallback} />
+      {isLoading && <Loader suspenseLoader={true} fixed={true} />}
 
+      <AddressCard onNextCallback={onNextCallback} />
       <Grid item xs={12} lg={7}>
         <div className="border rounded-md p-5 bg-white">
           <form onSubmit={handleSubmit}>

@@ -39,7 +39,6 @@ ordersRouter.post("/order/create", async (req, res) => {
     );
     res.status(result.status).json(result);
   } catch (error) {
-    console.error("Error creating order:", error);
     res.status(500).json({ status: 500, message: "Internal server error" });
   }
 });
@@ -49,11 +48,15 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
   if (cartId) {
     const cartItems = await getCartItems(cartId);
     const cart = await getTotalAmountFromCart(cartId);
-    const totalAmount = cart?.[0]
-      ? cart?.[0]?.total_price -
-        cart?.[0]?.total_discount_price +
-        cart?.[0]?.total_delivery_charges
-      : 0;
+    const cartDetail = cart ? cart?.[0] : null;
+    const totalAmount = cartDetail
+      ? (
+          Number(cartDetail?.totalPrice) -
+          Number(cartDetail?.totalDiscountPrice) +
+          Number(cartDetail?.totalDeliveryCharges)
+        ).toFixed(2)
+      : "0.00";
+
     let res;
     if (!cartItems.length) {
       return { status: 400, message: "No items found in cart" };
@@ -543,13 +546,13 @@ ordersRouter.put("/order/update-status", (req, res) => {
         // when order cancelled, then after 2 minutes set it's status to refund initiated
         if (status === OrderStatus.CANCELLED) {
           const refundStatus = OrderStatus.REFUNDED_INITIATED;
-            await insertOrderStatusHistory(orderId, refundStatus);
-            executeQuery(
-              updateQuery,
-              receiptId
-                ? [refundStatus, userId, receiptId, orderId]
-                : [refundStatus, userId, orderId]
-            );
+          await insertOrderStatusHistory(orderId, refundStatus);
+          executeQuery(
+            updateQuery,
+            receiptId
+              ? [refundStatus, userId, receiptId, orderId]
+              : [refundStatus, userId, orderId]
+          );
         }
 
         const updatePaymentQuery = `UPDATE ${paymentsTableName} SET payment_status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND receipt_id = ?`;
@@ -667,4 +670,4 @@ function checkOrderStatusTableExistence() {
     }
   );
 }
-module.exports = ordersRouter; 
+module.exports = ordersRouter;

@@ -4,6 +4,8 @@ import { OrderStatus } from "../types/orderTypes";
 import { SvgIconTypeMap } from "@mui/material";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
 import AppIcons from "../../../common/appIcons";
+import { futimes } from "fs";
+import { Cart } from "../types/cartTypes";
 
 const productFilters = [
   {
@@ -220,6 +222,18 @@ function getCategoryPath({
     return AppRoutes.products;
   }
 }
+
+function calculateTotalPrice(cart: Cart | null) {
+  const totalAmount = cart
+    ? (
+        Number(cart?.totalPrice) -
+        Number(cart?.totalDiscountPrice) +
+        Number(cart?.totalDeliveryCharges)
+      ).toFixed(2)
+    : "0.00";
+  return totalAmount;
+}
+
 export {
   productFilters,
   sortOptions,
@@ -228,4 +242,5 @@ export {
   getCheckoutStep,
   getQuerySearch,
   getCategoryPath,
+  calculateTotalPrice,
 };

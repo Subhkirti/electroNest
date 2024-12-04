@@ -5,7 +5,7 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
-import { getCheckoutStep, getQuerySearch } from "../../utils/productUtils";
+import { calculateTotalPrice, getCheckoutStep, getQuerySearch } from "../../utils/productUtils";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
 import {
@@ -40,9 +40,7 @@ export default function CheckoutStepper() {
   const { isLoading, orders } = useSelector((state: RootState) => state.order);
   const { cart } = useSelector((state: RootState) => state.cart);
   const { activeAddress } = useSelector((state: RootState) => state.address);
-  const totalAmount = cart
-    ? cart.totalPrice - cart.totalDiscountPrice + cart.totalDeliveryCharges
-    : 0;
+  const totalAmount = calculateTotalPrice(cart);
 
   useEffect(() => {
     if (activeStep === 3) {

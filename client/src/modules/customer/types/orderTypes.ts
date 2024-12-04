@@ -5,7 +5,7 @@ interface OrderReqBody {
   cartId?: number;
   addressId: number;
   status: OrderStatus;
-  amount: number;
+  amount: string | number;
   productId?: number;
 }
 

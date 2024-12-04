@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { formatAmount } from "../../../admin/utils/productUtil";
 import AppStrings from "../../../../common/appStrings";
 import AppRoutes from "../../../../common/appRoutes";
+import { calculateTotalPrice } from "../../utils/productUtils";
 
 function PriceDetails({
   isOrderSummary,
@@ -17,13 +18,7 @@ function PriceDetails({
   const navigate = useNavigate();
   const { cart, cartItems } = useSelector((state: RootState) => state.cart);
 
-  const totalAmount = cart
-    ? (
-        Number(cart.totalPrice) -
-        Number(cart.totalDiscountPrice) +
-        Number(cart.totalDeliveryCharges)
-      ).toFixed(2)
-    : "0.00";
+  const totalAmount = calculateTotalPrice(cart);
 
   return (
     <div className="px-5 sticky top-0 h-[100vh] mt-5 lg:mt-0">
