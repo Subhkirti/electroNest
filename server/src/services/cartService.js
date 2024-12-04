@@ -134,7 +134,7 @@ async function getCartItems(cartId, res, message) {
           // Step 4: Get the total count of cart items
           connection.query(
             `SELECT COUNT(*) AS totalCount FROM ${cartItemsTableName} WHERE cart_id = ?`,
-            [id],
+            [cartId],
             (countErr, countResult) => {
               if (countErr) {
                 return res.status(400).json({
