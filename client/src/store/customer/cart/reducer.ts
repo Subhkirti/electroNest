@@ -31,6 +31,8 @@ function cartReducer(state = initState, action: RootAction) {
         cartItems: action?.payload,
       };
     case ActionTypes.ADD_ITEM_TO_CART_SUCCESS:
+      console.log('action.payload:', action.payload)
+
       return {
         ...state,
         isLoading: false,
@@ -40,13 +42,8 @@ function cartReducer(state = initState, action: RootAction) {
             : state.cartItems,
 
         cart:
-          action?.payload?.length > 0
-            ? {
-                ...state.cart,
-                totalItems: state?.cart?.totalItems
-                  ? state?.cart?.totalItems + 1
-                  : 1,
-              }
+          state.cart && action.payload === state.cart.cartId
+            ? { ...state.cart, totalItems: state.cart.totalItems + 1 }
             : state.cart,
       };
     case ActionTypes.REMOVE_CART_ITEM_SUCCESS:
@@ -59,7 +56,7 @@ function cartReducer(state = initState, action: RootAction) {
         cart:
           state.cart?.cartId === action?.payload?.cartId &&
           state.cart?.userId === action?.payload?.userId
-            ? null
+            ? state.cart
             : state.cart,
       };
     case ActionTypes.REDUCE_CART_ITEM_SUCCESS:
@@ -69,7 +66,7 @@ function cartReducer(state = initState, action: RootAction) {
         cart:
           state.cart && action.payload === state.cart.cartId
             ? { ...state.cart, totalItems: state.cart.totalItems - 1 }
-            : null,
+            : state.cart,
       };
     case ActionTypes.UPDATE_CART_ITEM_SUCCESS:
       return {

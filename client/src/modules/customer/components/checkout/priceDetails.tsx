@@ -3,10 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { RootState } from "../../../../store/storeTypes";
 import { useSelector } from "react-redux";
 import { formatAmount } from "../../../admin/utils/productUtil";
-import Loader from "../../../../common/components/loader";
 import AppStrings from "../../../../common/appStrings";
 import AppRoutes from "../../../../common/appRoutes";
-import { getCheckoutStep } from "../../utils/productUtils";
 
 function PriceDetails({
   isOrderSummary,
@@ -17,22 +15,19 @@ function PriceDetails({
 }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isLoading, cart, cartItems } = useSelector(
-    (state: RootState) => state.cart
-  );
+  const { cart, cartItems } = useSelector((state: RootState) => state.cart);
+
   const totalAmount = cart
     ? (
-        cart?.totalPrice -
-        cart?.totalDiscountPrice +
-        cart?.totalDeliveryCharges
+        Number(cart.totalPrice) -
+        Number(cart.totalDiscountPrice) +
+        Number(cart.totalDeliveryCharges)
       ).toFixed(2)
-    : 0;
+    : "0.00";
 
   return (
     <div className="px-5 sticky top-0 h-[100vh] mt-5 lg:mt-0">
-      {isLoading ? (
-        <Loader />
-      ) : cart ? (
+      {cart ? (
         <div className="border rounded-lg p-4 bg-white">
           <div className="flex justify-between">
             <p className="uppercase font-bold opacity-60 pb-3">Price Details</p>
@@ -63,7 +58,7 @@ function PriceDetails({
             <div className="flex justify-between pt-3">
               <span>Delivery Charges</span>
               <span className="text-secondary">
-                {cart?.totalDeliveryCharges > 0
+                {cart.totalDeliveryCharges > 0
                   ? "+ " + formatAmount(cart.totalDeliveryCharges)
                   : "Free"}
               </span>

@@ -200,10 +200,10 @@ cartRouter.post("/cart-items/add", (req, res) => {
 
   const proceedWithCart = (cartId) => {
     console.log("cartId====> ", cartId);
-  
+
     // Step 2: Check if the product is already in the user's cart
     const checkProductInCartQuery = `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
-  
+
     connection.query(
       checkProductInCartQuery,
       [cartId, productId],
@@ -215,7 +215,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
             message: "Error checking product in cart",
           });
         }
-  
+
         if (results.length > 0) {
           // Product exists in the cart, update quantity
           const existingQuantity = results[0].quantity;
@@ -224,10 +224,15 @@ cartRouter.post("/cart-items/add", (req, res) => {
             SET quantity = ?, discount_price = ?, delivery_charges = ?
             WHERE id = ?
         `;
-  
+
           connection.query(
             updateCartItemQuery,
-            [existingQuantity + 1, discountPrice, deliveryCharges, results[0].id],
+            [
+              existingQuantity + 1,
+              discountPrice,
+              deliveryCharges,
+              results[0].id,
+            ],
             (err) => {
               if (err) {
                 console.error("Error updating cart item quantity:", err);
@@ -244,10 +249,17 @@ cartRouter.post("/cart-items/add", (req, res) => {
                       message: "Error updating cart totals",
                     });
                   }
-                  res.status(200).json({
-                    status: 200,
-                    message: "Product quantity updated in cart.",
-                  });
+                  connection.query(
+                    `SELECT * FROM ${cartItemsTableName} where cart_id = ?`,
+                    [cartId],
+                    (err, results) => {
+                      res.status(200).json({
+                        status: 200,
+                        message: "Product quantity updated in cart.",
+                        data: results,
+                      });
+                    }
+                  );
                 });
               }
             }
@@ -255,7 +267,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
         } else {
           // Product not in the cart, add it
           const addCartItemQuery = `INSERT INTO ${cartItemsTableName} (cart_id, product_id, quantity, price, discount_price, delivery_charges) VALUES (?, ?, ?, ?, ?, ?)`;
-  
+
           connection.query(
             addCartItemQuery,
             [cartId, productId, 1, price, discountPrice, deliveryCharges],
@@ -275,10 +287,17 @@ cartRouter.post("/cart-items/add", (req, res) => {
                     message: "Error updating cart totals",
                   });
                 }
-                res.status(200).json({
-                  status: 200,
-                  message: "Product added to cart.",
-                });
+                connection.query(
+                  `SELECT * FROM ${cartItemsTableName} where cart_id = ?`,
+                  [cartId],
+                  (err, results) => {
+                    res.status(200).json({
+                      status: 200,
+                      message: "Product added to cart.",
+                      data: results,
+                    });
+                  }
+                );
               });
             }
           );
@@ -287,7 +306,6 @@ cartRouter.post("/cart-items/add", (req, res) => {
     );
   };
 });
-
 
 // Add in cart: Function to update the total price and total items count in the cart
 function updateCartTotal(cartId, callback) {

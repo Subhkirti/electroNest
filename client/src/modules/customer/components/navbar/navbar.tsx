@@ -60,14 +60,14 @@ export default function Navbar() {
     const timer = setTimeout(() => {
       !categories?.length && dispatch(getAllCategories());
       categories?.length && !cart && dispatch(getCart());
-      categories?.length && !cartItems.length && dispatch(getCartItems());
+      categories?.length && !cartItems?.length && dispatch(getCartItems());
     }, 10);
 
     return () => {
       clearTimeout(timer);
     };
     // eslint-disable-next-line
-  }, [anchorEl, categories?.length, cartItems?.length]);
+  }, [anchorEl, categories?.length, cart?.totalItems]);
 
   const handleUserClick = (event: { currentTarget: any }) => {
     setAnchorEl(event.currentTarget);
