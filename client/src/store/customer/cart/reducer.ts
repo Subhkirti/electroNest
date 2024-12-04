@@ -31,7 +31,6 @@ function cartReducer(state = initState, action: RootAction) {
         cartItems: action?.payload,
       };
     case ActionTypes.ADD_ITEM_TO_CART_SUCCESS:
-      console.log('action.payload:', action.payload)
 
       return {
         ...state,
@@ -42,7 +41,7 @@ function cartReducer(state = initState, action: RootAction) {
             : state.cartItems,
 
         cart:
-          state.cart && action.payload === state.cart.cartId
+          state.cart && action?.payload?.length > 0 && action?.payload?.[0]?.cartId === state.cart.cartId
             ? { ...state.cart, totalItems: state.cart.totalItems + 1 }
             : state.cart,
       };

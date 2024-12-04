@@ -22,8 +22,8 @@ function Cart({
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      dispatch(getCartItems());
-      dispatch(getCart());
+      !cartItems.length && dispatch(getCartItems());
+      !cart && dispatch(getCart());
     }, 10);
 
     return () => {
@@ -31,6 +31,8 @@ function Cart({
     };
     // eslint-disable-next-line
   }, [cartItems.length, cart?.totalItems]);
+
+  console.log('cart:', cart, cartItems)
 
   return (
     <div>

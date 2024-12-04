@@ -42,7 +42,10 @@ cartRouter.get("/cart_items", (req, res) => {
       .status(400)
       .json({ status: 400, message: "Cart Id not found in request" });
   }
+  getCartItems(cartId, res);
+});
 
+function getCartItems(cartId, res, message) {
   connection.query(
     `SELECT * FROM ${cartTableName} WHERE user_id = ?`,
     [id],
@@ -72,6 +75,7 @@ cartRouter.get("/cart_items", (req, res) => {
             return res.status(200).json({
               status: 200,
               data: [],
+              message: message,
               totalCount: 0,
             });
           }
@@ -141,6 +145,7 @@ cartRouter.get("/cart_items", (req, res) => {
                   // Return the cart items along with product details in the response
                   return res.status(200).json({
                     status: 200,
+                    message: message,
                     data: cartItemsWithDetails,
                     totalCount: totalCount,
                   });
@@ -152,7 +157,7 @@ cartRouter.get("/cart_items", (req, res) => {
       );
     }
   );
-});
+}
 
 // Add cart items
 cartRouter.post("/cart-items/add", (req, res) => {
@@ -249,16 +254,10 @@ cartRouter.post("/cart-items/add", (req, res) => {
                       message: "Error updating cart totals",
                     });
                   }
-                  connection.query(
-                    `SELECT * FROM ${cartItemsTableName} where cart_id = ?`,
-                    [cartId],
-                    (err, results) => {
-                      res.status(200).json({
-                        status: 200,
-                        message: "Product quantity updated in cart.",
-                        data: results,
-                      });
-                    }
+                  getCartItems(
+                    cartId,
+                    res,
+                    "Product quantity updated in cart."
                   );
                 });
               }
@@ -287,17 +286,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
                     message: "Error updating cart totals",
                   });
                 }
-                connection.query(
-                  `SELECT * FROM ${cartItemsTableName} where cart_id = ?`,
-                  [cartId],
-                  (err, results) => {
-                    res.status(200).json({
-                      status: 200,
-                      message: "Product added to cart.",
-                      data: results,
-                    });
-                  }
-                );
+                getCartItems(cartId, res, "Product added to cart.");
               });
             }
           );
@@ -383,12 +372,11 @@ cartRouter.post("/cart-items/remove", (req, res) => {
                 .status(500)
                 .json({ status: 500, message: "Failed to delete cart" });
             }
-
-            return res.status(200).json({
-              status: 200,
-              data: { cartId, cartItemId, userId },
-              message: "Product removed and cart deleted successfully",
-            });
+            getCartItems(
+              cartId,
+              res,
+              "Product removed and cart deleted successfully"
+            );
           });
         } else {
           // Step 5: If items remain, update the cart totals (if applicable)
@@ -399,11 +387,7 @@ cartRouter.post("/cart-items/remove", (req, res) => {
                 .status(500)
                 .json({ status: 500, message: "Failed to update totals" });
             }
-            return res.status(200).json({
-              status: 200,
-              data: { cartId, cartItemId, userId },
-              message: "Product removed successfully",
-            });
+            getCartItems(cartId, res, "Product removed successfully");
           });
         }
       });
@@ -483,11 +467,7 @@ cartRouter.post("/cart-items/reduce", (req, res) => {
                   message: "Error updating cart totals",
                 });
               }
-
-              res.status(200).json({
-                status: 200,
-                message: "Product removed from cart",
-              });
+              getCartItems(cartId, res, "Product removed from cart");
             });
           });
         } else {
@@ -515,12 +495,11 @@ cartRouter.post("/cart-items/reduce", (req, res) => {
                   message: "Error updating cart totals",
                 });
               }
-
-              res.status(200).json({
-                status: 200,
-                message: "Product quantity reduced successfully",
-                data: cartId,
-              });
+              getCartItems(
+                cartId,
+                res,
+                "Product quantity reduced successfully"
+              );
             });
           });
         }
