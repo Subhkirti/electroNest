@@ -59,7 +59,7 @@ function Cart({
           />
         </div>
       ) : isLoading ? (
-        <></>
+        <div className="h-[20vh]"></div>
       ) : (
         <EmptyCart />
       )}
