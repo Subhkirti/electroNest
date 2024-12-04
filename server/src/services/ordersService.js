@@ -39,6 +39,7 @@ ordersRouter.post("/order/create", async (req, res) => {
     );
     res.status(result.status).json(result);
   } catch (error) {
+    console.log("error creating order:", error);
     res.status(500).json({ status: 500, message: "Internal server error" });
   }
 });
@@ -49,6 +50,7 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
     const cartItems = await getCartItems(cartId);
     const cart = await getTotalAmountFromCart(cartId);
     const cartDetail = cart ? cart?.[0] : null;
+    console.log("cartDetail ===>", cartDetail);
     const totalAmount = cartDetail
       ? (
           Number(cartDetail?.totalPrice) -
@@ -63,9 +65,12 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
     }
 
     for (let item of cartItems) {
-      const transactionAmount =
-        (item.price + item.delivery_charges - item.discount_price) *
-        item.quantity;
+      const transactionAmount = (
+        (Number(item.price) +
+          Number(item.delivery_charges) -
+          Number(item.discount_price)) *
+        Number(item.quantity)
+      ).toFixed(2);
       // If order does not exist, insert a new order
       const orderId = await insertOrder(
         userId,
@@ -99,7 +104,9 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
       return { status: 400, message: "Product not found" };
     }
 
-    const transactionAmount = product.net_price + product.delivery_charges;
+    const transactionAmount = (
+      Number(product.net_price) + Number(product.delivery_charges)
+    ).toFixed(2);
 
     // If order does not exist, insert a new order
     const orderId = await insertOrder(
