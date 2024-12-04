@@ -50,12 +50,11 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
     const cartItems = await getCartItems(cartId);
     const cart = await getTotalAmountFromCart(cartId);
     const cartDetail = cart ? cart?.[0] : null;
-    console.log("cartDetail ===>", cartDetail);
     const totalAmount = cartDetail
       ? (
-          Number(cartDetail?.totalPrice) -
-          Number(cartDetail?.totalDiscountPrice) +
-          Number(cartDetail?.totalDeliveryCharges)
+          Number(cartDetail?.total_price) -
+          Number(cartDetail?.total_discount_price) +
+          Number(cartDetail?.total_delivery_charges)
         ).toFixed(2)
       : "0.00";
 
@@ -83,6 +82,7 @@ async function createNewOrder(userId, cartId, addressId, status, productId) {
 
       await insertOrderStatusHistory(orderId, status || OrderStatus.PENDING);
       if (!orderId) throw new Error("Error inserting order");
+
       res = await createPayment(
         userId,
         orderId,
@@ -225,7 +225,6 @@ async function createPayment(userId, orderId, amount, totalAmount) {
         throw error; // If there's an error, throw it
       });
 
-    console.log("paymentResponse:", paymentResponse); // Log the payment response
 
     return paymentResponse; // Return the payment response
   } catch (error) {
