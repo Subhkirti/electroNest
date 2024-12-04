@@ -36,8 +36,11 @@ export default function ProductDetails() {
   useEffect(() => {
     // Fetch product details
     const timer = setTimeout(() => {
-      productId && dispatch(findProductsById(productId));
+      productId &&
+        Number(productId) !== Number(product?.productId) &&
+        dispatch(findProductsById(productId));
       product &&
+        Number(productId) !== Number(product?.productId) &&
         dispatch(
           findProducts({
             categoryId: product?.categoryId || "",
@@ -64,7 +67,7 @@ export default function ProductDetails() {
   return (
     <div className="bg-white">
       {cartLoader && <Loader suspenseLoader={true} fixed={true} />}
-      
+
       {isLoading ? (
         <Loader suspenseLoader={true} />
       ) : product ? (

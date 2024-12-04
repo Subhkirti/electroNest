@@ -19,7 +19,7 @@ const ApiUrls = {
   addItemToCart: apiBaseUrl + "/cart-items/add",
   removeItemFromCart: apiBaseUrl + "/cart-items/remove",
   reduceItemFromCart: apiBaseUrl + "/cart-items/reduce",
-  getCartItems: apiBaseUrl + "/cart_items?",
+  getCartItems: apiBaseUrl + "/cart-items?",
   getOrders: apiBaseUrl + "/orders",
   filterOrders: apiBaseUrl + "/orders/filter",
   getOrder: apiBaseUrl + "/order-details?id=",

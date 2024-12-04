@@ -34,7 +34,7 @@ cartRouter.get("/cart", (req, res) => {
 });
 
 // Get cart Items
-cartRouter.get("/cart_items", (req, res) => {
+cartRouter.get("/cart-items", (req, res) => {
   const { id } = req.query;
   let cartId;
   if (!id) {
@@ -42,14 +42,10 @@ cartRouter.get("/cart_items", (req, res) => {
       .status(400)
       .json({ status: 400, message: "Cart Id not found in request" });
   }
-  getCartItems(cartId, res);
-});
-
-function getCartItems(cartId, res, message) {
   connection.query(
     `SELECT * FROM ${cartTableName} WHERE user_id = ?`,
     [id],
-    (err, results) => {
+    async (err, results) => {
       if (err) {
         console.log("Error while getting cart details:", err);
         return res.status(400).json({
@@ -58,99 +54,103 @@ function getCartItems(cartId, res, message) {
         });
       }
       cartId = results[0]?.id || 0;
-      // Step 1: Get all cart items for the given cart_id
+      await getCartItems(cartId, res);
+    }
+  );
+});
+
+async function getCartItems(cartId, res, message) {
+  // Step 1: Get all cart items for the given cart_id
+  connection.query(
+    `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ?`,
+    [cartId],
+    (err, cartItems) => {
+      if (err) {
+        console.log("Error while getting cart items:", err);
+        return res.status(400).json({
+          status: 400,
+          message: "Error while getting cart items",
+        });
+      }
+
+      if (cartItems.length === 0) {
+        return res.status(200).json({
+          status: 200,
+          data: [],
+          message: message,
+          totalCount: 0,
+        });
+      }
+
+      // Step 2: Get product details for each cart item (based on product_id)
+      const productIds = cartItems.map((item) => item.product_id);
+
       connection.query(
-        `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ?`,
-        [cartId],
-        (err, cartItems) => {
+        `SELECT * FROM products WHERE product_id IN (?)`,
+        [productIds],
+        (err, productDetails) => {
           if (err) {
-            console.log("Error while getting cart items:", err);
+            console.log("Error while getting product details:", err);
             return res.status(400).json({
               status: 400,
-              message: "Error while getting cart items",
+              message: "Error while getting product details",
             });
           }
 
-          if (cartItems.length === 0) {
-            return res.status(200).json({
-              status: 200,
-              data: [],
-              message: message,
-              totalCount: 0,
-            });
-          }
+          // Step 3: Map product details to each cart item
+          const cartItemsWithDetails = cartItems.map((item) => {
+            const productDetail = productDetails.find(
+              (product) => product.product_id === item.product_id
+            );
 
-          // Step 2: Get product details for each cart item (based on product_id)
-          const productIds = cartItems.map((item) => item.product_id);
+            return {
+              ...item,
+              product_details: productDetail
+                ? {
+                    product_id: productDetail.product_id,
+                    product_name: productDetail.product_name,
+                    description: productDetail.description,
+                    net_price: productDetail.net_price,
+                    price: productDetail.price,
+                    discount_percentage: productDetail.discount_percentage,
+                    brand: productDetail.brand,
+                    color: productDetail.color,
+                    size: productDetail.size,
+                    stock: productDetail.stock,
+                    rating: productDetail.rating,
+                    reviews: productDetail.reviews,
+                    warranty_info: productDetail.warranty_info,
+                    return_policy: productDetail.return_policy,
+                    images: productDetail.images,
+                    category_id: productDetail.category_id,
+                    section_id: productDetail.section_id,
+                    item_id: productDetail.item_id,
+                    delivery_charges: productDetail.delivery_charges,
+                  }
+                : null, // If no matching product found, set `product_details` to null
+            };
+          });
 
+          // Step 4: Get the total count of cart items
           connection.query(
-            `SELECT * FROM products WHERE product_id IN (?)`,
-            [productIds],
-            (err, productDetails) => {
-              if (err) {
-                console.log("Error while getting product details:", err);
+            `SELECT COUNT(*) AS totalCount FROM ${cartItemsTableName} WHERE cart_id = ?`,
+            [id],
+            (countErr, countResult) => {
+              if (countErr) {
                 return res.status(400).json({
                   status: 400,
-                  message: "Error while getting product details",
+                  message: "Error while counting cart items",
                 });
               }
+              const totalCount = countResult[0].totalCount;
 
-              // Step 3: Map product details to each cart item
-              const cartItemsWithDetails = cartItems.map((item) => {
-                const productDetail = productDetails.find(
-                  (product) => product.product_id === item.product_id
-                );
-
-                return {
-                  ...item,
-                  product_details: productDetail
-                    ? {
-                        product_id: productDetail.product_id,
-                        product_name: productDetail.product_name,
-                        description: productDetail.description,
-                        net_price: productDetail.net_price,
-                        price: productDetail.price,
-                        discount_percentage: productDetail.discount_percentage,
-                        brand: productDetail.brand,
-                        color: productDetail.color,
-                        size: productDetail.size,
-                        stock: productDetail.stock,
-                        rating: productDetail.rating,
-                        reviews: productDetail.reviews,
-                        warranty_info: productDetail.warranty_info,
-                        return_policy: productDetail.return_policy,
-                        images: productDetail.images,
-                        category_id: productDetail.category_id,
-                        section_id: productDetail.section_id,
-                        item_id: productDetail.item_id,
-                        delivery_charges: productDetail.delivery_charges,
-                      }
-                    : null, // If no matching product found, set `product_details` to null
-                };
+              // Return the cart items along with product details in the response
+              return res.status(200).json({
+                status: 200,
+                message: message,
+                data: cartItemsWithDetails,
+                totalCount: totalCount,
               });
-
-              // Step 4: Get the total count of cart items
-              connection.query(
-                `SELECT COUNT(*) AS totalCount FROM ${cartItemsTableName} WHERE cart_id = ?`,
-                [id],
-                (countErr, countResult) => {
-                  if (countErr) {
-                    return res.status(400).json({
-                      status: 400,
-                      message: "Error while counting cart items",
-                    });
-                  }
-                  const totalCount = countResult[0].totalCount;
-
-                  // Return the cart items along with product details in the response
-                  return res.status(200).json({
-                    status: 200,
-                    message: message,
-                    data: cartItemsWithDetails,
-                    totalCount: totalCount,
-                  });
-                }
-              );
             }
           );
         }
@@ -192,20 +192,15 @@ cartRouter.post("/cart-items/add", (req, res) => {
           });
         }
         cartId = result.insertId;
-        console.log("cartId====>1= ", cartId);
 
         proceedWithCart(cartId);
       });
     } else {
-      console.log("cartId====>2= ", cartId);
-
       proceedWithCart(cartId);
     }
   });
 
   const proceedWithCart = (cartId) => {
-    console.log("cartId====> ", cartId);
-
     // Step 2: Check if the product is already in the user's cart
     const checkProductInCartQuery = `SELECT * FROM ${cartItemsTableName} WHERE cart_id = ? AND product_id = ?`;
 
@@ -246,7 +241,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
                   message: "Error updating cart item quantity",
                 });
               } else {
-                updateCartTotal(cartId, (err) => {
+                updateCartTotal(cartId, async (err) => {
                   if (err) {
                     console.error("Error updating cart totals:", err);
                     return res.status(400).json({
@@ -254,7 +249,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
                       message: "Error updating cart totals",
                     });
                   }
-                  getCartItems(
+                  await getCartItems(
                     cartId,
                     res,
                     "Product quantity updated in cart."
@@ -278,7 +273,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
                   message: "Failed to add product to cart",
                 });
               }
-              updateCartTotal(cartId, (err) => {
+              updateCartTotal(cartId, async (err) => {
                 if (err) {
                   console.error("Error updating cart totals:", err);
                   return res.status(400).json({
@@ -286,7 +281,7 @@ cartRouter.post("/cart-items/add", (req, res) => {
                     message: "Error updating cart totals",
                   });
                 }
-                getCartItems(cartId, res, "Product added to cart.");
+                await getCartItems(cartId, res, "Product added to cart.");
               });
             }
           );
@@ -315,7 +310,6 @@ function updateCartTotal(cartId, callback) {
         console.error("Error updating cart totals:", err);
         return callback(err);
       } else {
-        console.log("Cart totals updated successfully.");
         callback(null);
       }
     }
@@ -365,14 +359,14 @@ cartRouter.post("/cart-items/remove", (req, res) => {
         if (itemCount === 0) {
           // Step 4: Delete the cart itself if it's empty
           const deleteCartQuery = `DELETE FROM ${cartTableName} WHERE id = ?`;
-          connection.query(deleteCartQuery, [cartId], (err) => {
+          connection.query(deleteCartQuery, [cartId], async (err) => {
             if (err) {
               console.error("Error deleting empty cart:", err);
               return res
                 .status(500)
                 .json({ status: 500, message: "Failed to delete cart" });
             }
-            getCartItems(
+            await getCartItems(
               cartId,
               res,
               "Product removed and cart deleted successfully"
@@ -380,14 +374,14 @@ cartRouter.post("/cart-items/remove", (req, res) => {
           });
         } else {
           // Step 5: If items remain, update the cart totals (if applicable)
-          updateCartTotal(cartId, (err) => {
+          updateCartTotal(cartId, async (err) => {
             if (err) {
               console.error("Error updating cart totals:", err);
               return res
                 .status(500)
                 .json({ status: 500, message: "Failed to update totals" });
             }
-            getCartItems(cartId, res, "Product removed successfully");
+            await getCartItems(cartId, res, "Product removed successfully");
           });
         }
       });
@@ -459,7 +453,7 @@ cartRouter.post("/cart-items/reduce", (req, res) => {
             }
 
             // Update cart totals after removal
-            updateCartTotal(cartId, (err) => {
+            updateCartTotal(cartId, async (err) => {
               if (err) {
                 console.error("Error updating cart totals:", err);
                 return res.status(400).json({
@@ -467,7 +461,7 @@ cartRouter.post("/cart-items/reduce", (req, res) => {
                   message: "Error updating cart totals",
                 });
               }
-              getCartItems(cartId, res, "Product removed from cart");
+              await getCartItems(cartId, res, "Product removed from cart");
             });
           });
         } else {
@@ -487,7 +481,7 @@ cartRouter.post("/cart-items/reduce", (req, res) => {
             }
 
             // Update cart totals after quantity reduction
-            updateCartTotal(cartId, (err) => {
+            updateCartTotal(cartId, async (err) => {
               if (err) {
                 console.error("Error updating cart totals:", err);
                 return res.status(400).json({
@@ -495,7 +489,7 @@ cartRouter.post("/cart-items/reduce", (req, res) => {
                   message: "Error updating cart totals",
                 });
               }
-              getCartItems(
+              await getCartItems(
                 cartId,
                 res,
                 "Product quantity reduced successfully"
