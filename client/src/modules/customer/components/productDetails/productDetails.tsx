@@ -56,7 +56,7 @@ export default function ProductDetails() {
       clearTimeout(timer);
     };
     // eslint-disable-next-line
-  }, [productId, product?.productId]);
+  }, [productId, product?.productId, pageNumber]);
 
   useEffect(() => {
     // Fetch category breadcrumbs
@@ -176,9 +176,11 @@ export default function ProductDetails() {
               products={products}
               productId={Number(productId)}
             />
-            {totalCount > 0 && products.length < totalCount && (
-              <ViewMoreButton onClick={() => setPageNumber(pageNumber + 1)} />
-            )}
+            <div className="flex justify-center">
+              {totalCount > 0 && products.length < totalCount && (
+                <ViewMoreButton onClick={() => setPageNumber(pageNumber + 1)} />
+              )}
+            </div>
           </div>
         </div>
       ) : !product ? (

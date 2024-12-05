@@ -39,6 +39,7 @@ import { FilterAltOff } from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
 import Breadcrumbs from "../productDetails/breadcrumbs";
 import ProductTotalCount from "./productTotalCount";
+import ViewMoreButton from "../../../../common/components/viewMoreButton";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -60,8 +61,8 @@ export default function ProductFilters() {
   const priceValue = searchParams.get("price");
   const discountValue = searchParams.get("discount")?.split(",");
   const sortValue = searchParams.get("sort");
-  const pageNumber = searchParams.get("page");
   const stockValue = searchParams.get("availability");
+  const [pageNumber, setPageNumber] = useState<number>(0);
   const [categoryBreadcrumbs, setCategoryBreadcrumbs] = useState<
     CategoryBreadcrumbs[]
   >([]);
@@ -75,6 +76,18 @@ export default function ProductFilters() {
   const maxPriceList = minMaxPrices.map(([min, max]) => max);
 
   useEffect(() => {
+    findFilteredProducts(pageNumber);
+    // eslint-disable-next-line
+  }, [
+    params,
+    colorValue?.length,
+    priceValue?.length,
+    discountValue?.length,
+    sortValue,
+    stockValue,
+  ]);
+
+  function findFilteredProducts(pageNumber: number, isViewMore?: boolean) {
     const reqData: ProductSearchReqBody = {
       categoryId: params?.categoryId || "",
       sectionId: params?.sectionId || "",
@@ -84,31 +97,20 @@ export default function ProductFilters() {
       maxPrice: maxPriceList,
       discount: discountValue || [],
       sort: sortValue || "",
-      pageNumber: pageNumber ? parseInt(pageNumber) - 1 : 1,
-      pageSize: 10,
+      pageNumber: pageNumber + 1,
+      pageSize: 20,
       stock: stockValue,
       searchQuery: queryValue,
     };
 
     const timer = setTimeout(() => {
-      dispatch(findProducts(reqData));
+      dispatch(findProducts(reqData, isViewMore));
     }, 10);
 
     return () => {
       clearTimeout(timer);
     };
-
-    // eslint-disable-next-line
-  }, [
-    params,
-    colorValue?.length,
-    priceValue?.length,
-    discountValue?.length,
-    sortValue,
-    pageNumber,
-    stockValue,
-  ]);
-
+  }
   useEffect(() => {
     // Fetch category breadcrumbs
     categories?.length &&
@@ -128,7 +130,7 @@ export default function ProductFilters() {
     singleSelection?: boolean
   ) {
     const searchParams = new URLSearchParams(location.search);
-
+    setPageNumber(0);
     if (singleSelection) {
       // For single-selection sections, replace the existing value with the new one
       searchParams.set(sectionId, value);
@@ -376,14 +378,24 @@ export default function ProductFilters() {
                   />
                 ) : (
                   <>
-                    {isLoading && <Loader suspenseLoader={true} />}
-
                     <div className="flex flex-wrap justify-center md:justify-start bg-white py-5">
                       {/* Products grid */}
 
                       {products.map((product, index) => {
                         return <ProductCard key={index} product={product} />;
                       })}
+                    </div>
+                    {isLoading && <Loader suspenseLoader={true} />}
+
+                    <div className="flex justify-center">
+                      {totalCount > 0 && products.length < totalCount && (
+                        <ViewMoreButton
+                          onClick={() => {
+                            setPageNumber(pageNumber + 1);
+                            findFilteredProducts(pageNumber + 1, true);
+                          }}
+                        />
+                      )}
                     </div>
                   </>
                 )}

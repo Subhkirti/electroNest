@@ -58,7 +58,9 @@ function productReducer(
         ...state,
         isLoading: false,
         error: null,
-        products: action?.payload?.data,
+        products: action?.payload?.isViewMore
+          ? [...state.products, ...action?.payload?.data]
+          : action?.payload?.data,
         totalCount: action?.payload?.totalCount,
       };
     case ActionTypes.FIND_PRODUCT_BY_ID_SUCCESS:

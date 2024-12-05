@@ -31,7 +31,7 @@ function HomeSectionCarousel({
             return <HomeSectionCard product={product} key={index} />;
           })}
         {/* View More button */}
-        {productsList.length > 4 && (
+        {productsList.length > 10 && (
           <div className="h-full flex items-center">
             <ViewMoreButton
               onClick={() => {

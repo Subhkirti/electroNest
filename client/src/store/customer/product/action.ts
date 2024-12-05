@@ -322,7 +322,7 @@ const deleteThirdLevelCategory =
 
 /* Products section starts here */
 const getProducts =
-  (pageNumber: number, pageSize: number) =>
+  (pageNumber: number, pageSize: number,) =>
   async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.GET_PRODUCTS_REQUEST });
 
@@ -350,7 +350,7 @@ const getProducts =
     }
   };
 const findProducts =
-  (reqData: ProductSearchReqBody) => async (dispatch: ActionDispatch) => {
+  (reqData: ProductSearchReqBody,  isViewMore?: boolean) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.FIND_PRODUCTS_REQUEST });
 
     try {
@@ -358,6 +358,7 @@ const findProducts =
       dispatch({
         type: ActionTypes.FIND_PRODUCTS_SUCCESS,
         payload: {
+          isViewMore: isViewMore,
           data:
             res?.data?.data?.length > 0 ? res.data.data.map(productMap) : [],
           totalCount: res?.data?.totalCount,

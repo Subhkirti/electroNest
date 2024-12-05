@@ -36,10 +36,6 @@ function Orders() {
     };
   }, [pageNumber, pageSize, statusValues?.length, order?.status]);
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPageNumber(newPage);
-  };
-
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -67,7 +63,7 @@ function Orders() {
               count={totalCount}
               rowsPerPage={pageSize}
               page={pageNumber}
-              onPageChange={handleChangePage}
+              onPageChange={(e, newPage) => setPageNumber(newPage)}
               onRowsPerPageChange={handleChangeRowsPerPage}
               sx={{ mb: 3 }}
             />
