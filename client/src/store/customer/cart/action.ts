@@ -97,7 +97,8 @@ const removeItemFromCart =
 
       dispatch({
         type: ActionTypes.REMOVE_CART_ITEM_SUCCESS,
-        payload: res?.data?.data,
+        payload:
+          res?.data?.data?.length > 0 ? res?.data?.data.map(cartItemsMap) : [],
       });
     } catch (error) {
       handleCatchError({
@@ -120,7 +121,8 @@ const reduceItemFromCart =
 
       dispatch({
         type: ActionTypes.REDUCE_CART_ITEM_SUCCESS,
-        payload: res?.data?.data,
+        payload:
+          res?.data?.data?.length > 0 ? res?.data?.data.map(cartItemsMap) : [],
       });
     } catch (error) {
       handleCatchError({

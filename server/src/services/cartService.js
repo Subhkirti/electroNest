@@ -127,7 +127,7 @@ async function getCartItems(cartId, res, message) {
                     item_id: productDetail.item_id,
                     delivery_charges: productDetail.delivery_charges,
                   }
-                : null, // If no matching product found, set `product_details` to null
+                : null, 
             };
           });
 

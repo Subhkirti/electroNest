@@ -40,12 +40,12 @@ const adminMenuItems: AdminMenuItem[] = [
     icon: Groups2,
     active: true,
   },
-  {
-    name: "Customers",
-    path: AdminAppRoutes.customers,
-    icon: Group,
-    active: true,
-  },
+  // {
+  //   name: "Customers",
+  //   path: AdminAppRoutes.customers,
+  //   icon: Group,
+  //   active: true,
+  // },
   {
     name: "Orders",
     path: AdminAppRoutes.orders,
