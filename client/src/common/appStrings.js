@@ -28,7 +28,7 @@ const AppStrings = {
   users: "Users",
   shopWith: "Shop with ElectroNest",
   congratulations: "Congratulations",
-  viewSales: "View Sales",
+  viewSales: "Customer panel ",
   viewProductDetails: "View Product Details",
   viewUserDetails: "View User Details",
   monthlyOverview: "Monthly Overview",

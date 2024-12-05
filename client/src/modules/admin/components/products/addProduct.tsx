@@ -73,6 +73,7 @@ function AddProduct() {
     product.secondLevelCategory,
     topLCategoryCount,
   ]);
+  console.log('product:', product)
 
   function handleOnChange(value: any, fieldId: string) {
     setProduct({ ...product, [fieldId]: value });
@@ -91,6 +92,7 @@ function AddProduct() {
         navigate
       )
     );
+    setProduct(productInitState);
   }
 
   return (
