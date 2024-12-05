@@ -258,7 +258,7 @@ ordersRouter.get("/orders", (req, res) => {
 
   // Query to fetch orders
   const fetchOrdersQuery = `SELECT * FROM ${ordersTableName} WHERE user_id = ? ${
-    req.query.pageNumber ? `LIMIT ? OFFSET ?` : ""
+    req.query.pageNumber ? `LIMIT ? OFFSET ? DESC` : ""
   }`;
 
   // Fetch orders first
