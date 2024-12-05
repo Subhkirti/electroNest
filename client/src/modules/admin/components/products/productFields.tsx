@@ -33,7 +33,7 @@ const ProductFields = ({
           id={productStateIds.title}
           value={product.title}
           onChange={handleOnChange}
-          maxLength={80}
+          maxLength={120}
         />
       </Grid>
       <Grid item xs={12} lg={6}>
@@ -44,7 +44,7 @@ const ProductFields = ({
           id={productStateIds.brand}
           value={product.brand}
           onChange={handleOnChange}
-          maxLength={40}
+          maxLength={20}
         />
       </Grid>
 
