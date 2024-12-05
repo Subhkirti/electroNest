@@ -11,6 +11,7 @@ import {
   RegisterReqBody,
 } from "../../../modules/customer/types/userTypes";
 import AdminAppRoutes from "../../../common/adminRoutes";
+import { toast } from "react-toastify";
 
 // register user actions
 const register =
@@ -25,7 +26,11 @@ const register =
           type: ActionTypes.REGISTER_SUCCESS,
           payload: user,
         });
-        window.location.pathname = AppRoutes.home;
+        user?.name && toast.success(`Welcome ${user?.name}!`);
+
+        setTimeout(() => {
+          window.location.pathname = AppRoutes.home;
+        }, 1500);
       }
     } catch (error) {
       handleCatchError({
@@ -48,10 +53,13 @@ const login =
         payload: user,
       });
 
-      window.location.pathname =
-        window.location.pathname === "/admin"
-          ? AdminAppRoutes.dashboard
-          : AppRoutes.home;
+      user?.name && toast.success(`Welcome Back ${user?.name}!`);
+      setTimeout(() => {
+        window.location.pathname =
+          window.location.pathname === "/admin"
+            ? AdminAppRoutes.dashboard
+            : AppRoutes.home;
+      }, 1500);
     } catch (error) {
       handleCatchError({
         error,
@@ -63,12 +71,13 @@ const login =
 // logout action
 const logout = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.LOGOUT_REQUEST });
+  toast.success("Logout Successfully");
 
   setTimeout(() => {
     localStorage.clear();
     dispatch({ type: ActionTypes.LOGOUT_SUCCESS });
     window.location.pathname = "/";
-  }, 2000);
+  }, 1000);
 };
 
 export { register, login, logout };

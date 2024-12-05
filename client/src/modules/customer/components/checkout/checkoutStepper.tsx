@@ -93,7 +93,7 @@ export default function CheckoutStepper() {
 
   return (
     <Box sx={{ width: "100%" }}>
-      {isLoading && <Loader color="primary" fixed={true} />}
+      {isLoading && <Loader color="primary" suspenseLoader={true} fixed={true} />}
       {activeStep <= checkoutSteps.length && (
         <Stepper
           activeStep={activeStep - 1}
