@@ -24,11 +24,12 @@ export default function ProductDetails() {
   const [categoryBreadcrumbs, setCategoryBreadcrumbs] = useState<
     CategoryBreadcrumbs[]
   >([]);
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(0);
   const productId = params?.productId;
   const { isLoading, product, categories, products, totalCount } = useSelector(
     (state: RootState) => state.product
   );
+
   const { isLoading: cartLoader } = useSelector(
     (state: RootState) => state.cart
   );
@@ -39,14 +40,14 @@ export default function ProductDetails() {
       productId &&
         Number(productId) !== Number(product?.productId) &&
         dispatch(findProductsById(productId));
+
       product &&
-        Number(productId) !== Number(product?.productId) &&
         dispatch(
           findProducts({
             categoryId: product?.categoryId || "",
             sectionId: product?.sectionId || "",
             itemId: product?.itemId || "",
-            pageNumber: pageNumber,
+            pageNumber: pageNumber + 1,
             pageSize: 20,
           })
         );
