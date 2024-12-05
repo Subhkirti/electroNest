@@ -257,9 +257,12 @@ ordersRouter.get("/orders", (req, res) => {
   const offset = (pageNumber - 1) * pageSize;
 
   // Query to fetch orders
-  const fetchOrdersQuery = `SELECT * FROM ${ordersTableName} WHERE user_id = ? ${
-    req.query.pageNumber ? `LIMIT ? OFFSET ? DESC` : ""
-  }`;
+  const fetchOrdersQuery = `
+  SELECT * 
+  FROM ${ordersTableName} 
+  WHERE user_id = ? 
+  ${req.query.pageNumber ? `ORDER BY created_at DESC LIMIT ? OFFSET ?` : "ORDER BY created_at DESC"}
+`;
 
   // Fetch orders first
   connection.query(
