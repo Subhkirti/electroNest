@@ -46,6 +46,10 @@ const productColors = [
   { label: "Navy", value: "navy" },
   { label: "Cyan", value: "cyan" },
   { label: "Magenta", value: "magenta" },
+  { label: "Mocha Maroon", value: "mocha-maroon" },
+  { label: "Sea Blue", value: "sea-blue" },
+
+
 ];
 
 const productsHeader = [
