@@ -4,7 +4,6 @@ import AppRoutes from "../../common/appRoutes";
 const Profile = lazy(() =>
   import("../../modules/customer/components/user/profile")
 );
-const Cart = lazy(() => import("../../modules/customer/components/cart/cart"));
 const CheckoutStepper = lazy(() =>
   import("../../modules/customer/components/checkout/checkoutStepper")
 );
@@ -29,10 +28,7 @@ const authRoutes = [
     path: AppRoutes.orderDetail,
     component: OrderDetails,
   },
-  {
-    path: AppRoutes.cart,
-    component: Cart,
-  },
+
   {
     path: AppRoutes.checkout,
     component: CheckoutStepper,

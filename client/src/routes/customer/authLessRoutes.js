@@ -1,6 +1,8 @@
 import { lazy } from "react";
 import AppRoutes from "../../common/appRoutes";
 
+const Cart = lazy(() => import("../../modules/customer/components/cart/cart"));
+
 const HomeScreen = lazy(() =>
   import("../../modules/customer/components/home/homeScreen")
 );
@@ -16,7 +18,10 @@ const authLessRoutes = [
     path: AppRoutes.home,
     component: HomeScreen,
   },
-
+  {
+    path: AppRoutes.cart,
+    component: Cart,
+  },
   {
     path: AppRoutes.productDetail,
     component: ProductDetails,
