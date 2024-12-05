@@ -23,9 +23,11 @@ function AddProduct() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [product, setProduct] = useState<ProductReqBody>(productInitState);
-  const { isLoading, newProduct: productRes } = useSelector(
-    (state: RootState) => state.product
-  );
+  const {
+    isLoading,
+    newProduct: productRes,
+    topLCategoryCount,
+  } = useSelector((state: RootState) => state.product);
 
   useEffect(() => {
     // set header props
@@ -35,7 +37,7 @@ function AddProduct() {
         showBackIcon: true,
       })
     );
-    loadCategories();
+
     // set product details after submission
     const timer = setTimeout(() => {
       if (productRes && productRes.productId) {
@@ -50,17 +52,27 @@ function AddProduct() {
     // eslint-disable-next-line
   }, [product, productRes?.productId]);
 
-  function loadCategories() {
-    dispatch(getTopLevelCategories());
+  useEffect(() => {
+    !topLCategoryCount && dispatch(getTopLevelCategories());
     if (product.topLevelCategory)
       dispatch(
-        getSecondLevelCategories({ categoryId: product.topLevelCategory,  newData:true  })
+        getSecondLevelCategories({
+          categoryId: product.topLevelCategory,
+          newData: true,
+        })
       );
     if (product.secondLevelCategory)
       dispatch(
-        getThirdLevelCategories({ sectionId: product.secondLevelCategory,  newData:true  })
+        getThirdLevelCategories({
+          sectionId: product.secondLevelCategory,
+          newData: true,
+        })
       );
-  }
+  }, [
+    product.topLevelCategory,
+    product.secondLevelCategory,
+    topLCategoryCount,
+  ]);
 
   function handleOnChange(value: any, fieldId: string) {
     setProduct({ ...product, [fieldId]: value });
