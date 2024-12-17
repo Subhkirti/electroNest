@@ -4,17 +4,19 @@ import {
   formatAmountRange,
   textTruncate,
 } from "../../../admin/utils/productUtil";
-import { LocalShipping } from "@mui/icons-material";
+import { FavoriteOutlined, LocalShipping } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
+import AppColors from "../../../../common/appColors";
 
 function ProductCard({ product }: { product: Product }) {
   const navigate = useNavigate();
   return product.productId ? (
-    <div
-      onClick={() => navigate(product.path)}
-      className="productCard relative hover:shadow-lg hover:border-gray-300 border rounded-md w-[15rem] bg-white m-2 transition-all cursor-pointer"
-    >
+    <div className="productCard relative hover:shadow-lg hover:border-gray-300 border rounded-md w-[15rem] bg-white m-2 transition-all cursor-pointer">
       {/* image section */}
-      <div className="aspect-w-1 aspect-h-1 flex justify-center my-4 hover:scale-105 transition-all duration-700 px-3">
+      <div
+        className="aspect-w-1 aspect-h-1 flex justify-center my-4 hover:scale-105 transition-all duration-700 px-3"
+        onClick={() => navigate(product.path)}
+      >
         <img src={product?.images?.[0]} alt="" className="object-contain" />
       </div>
 
@@ -26,8 +28,23 @@ function ProductCard({ product }: { product: Product }) {
         </div>
       )}
 
+      <div className="absolute top-0 right-0 font-bold text-sm">
+        <FavoriteOutlined
+          sx={{
+            fontSize: "24px",
+            color: AppColors.primary,
+            backgroundColor: "rgba(255, 255, 255, 0.5)", // Ensure a background is present for backdrop-filter
+            boxShadow: "12px 4px 6px rgba(79, 69, 228, 1)",
+          }}
+        />
+      </div>
+
       {/* meta details section */}
-      <div className="productCardText bg-white p-3">
+
+      <div
+        className="productCardText bg-white p-3"
+        onClick={() => navigate(product.path)}
+      >
         {/* description section */}
         <div>
           {product?.stock <= 0 && (

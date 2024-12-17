@@ -69,7 +69,6 @@ export default function Navbar() {
     // eslint-disable-next-line
   }, [anchorEl, categories?.length, cart?.totalItems, cartItems?.length]);
 
-
   const handleUserClick = (event: { currentTarget: any }) => {
     setAnchorEl(event.currentTarget);
   };
@@ -102,14 +101,15 @@ export default function Navbar() {
   };
 
   const handleClickMenu = (
-    e: { preventDefault: () => void },
-    type: "orders" | "profile"
+    e: { preventDefault: () => void; stopPropagation: () => void },
+    type: "orders" | "profile" | "wishlist"
   ) => {
-    e.preventDefault();
     handleCloseUserMenu();
 
     if (type === "orders") {
       navigate(AppRoutes.orders);
+    } else if (type === "wishlist") {
+      navigate(AppRoutes.wishList);
     } else if (type === "profile") {
       user?.role === "admin"
         ? navigate(AdminAppRoutes.dashboard)
@@ -445,6 +445,11 @@ export default function Navbar() {
                             onClick={(e) => handleClickMenu(e, "orders")}
                           >
                             {"My Orders"}
+                          </MenuItem>
+                          <MenuItem
+                            onClick={(e) => handleClickMenu(e, "wishlist")}
+                          >
+                            {"My Wishlist"}
                           </MenuItem>
                         </Menu>
                       </div>
