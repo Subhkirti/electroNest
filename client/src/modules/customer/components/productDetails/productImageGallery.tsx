@@ -48,7 +48,11 @@ function ProductImageGallery({ product }: { product: Product }) {
           />
         </div>
 
-        <LikeButton isLiked={false} isProductDetail={true} />
+        <LikeButton
+          isLiked={false}
+          isProductDetail={true}
+          productId={product?.productId}
+        />
 
         <Carousel
           responsive={carouselBreakpoints}

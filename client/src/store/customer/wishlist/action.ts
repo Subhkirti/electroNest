@@ -35,7 +35,7 @@ const addToWishlist =
   (productId: number) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.ADD_ITEM_TO_WISHLIST_REQUEST });
     try {
-      const res = await axios.delete(
+      const res = await axios.get(
         `${ApiUrls.addItemToWishlist}id=${productId}`,
         headersConfig
       );
@@ -55,7 +55,7 @@ const addToWishlist =
 const getWishlist = (userId: number) => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_WISHLIST_REQUEST });
   try {
-    const res = await axios.delete(
+    const res = await axios.get(
       `${ApiUrls.getWishlist}id=${userId}`,
       headersConfig
     );
@@ -67,7 +67,6 @@ const getWishlist = (userId: number) => async (dispatch: ActionDispatch) => {
         totalCount: res?.data?.totalCount,
       },
     });
-
   } catch (error) {
     handleCatchError({
       error,

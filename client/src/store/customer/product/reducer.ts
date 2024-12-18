@@ -5,6 +5,7 @@ import {
 } from "../../../modules/customer/types/productTypes";
 import { ProductState, RootAction } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
+import WishlistActionTypes from "../wishlist/actionTypes";
 
 const initState: ProductState = {
   topLevelCategories: [],
@@ -53,6 +54,26 @@ function productReducer(
         error: null,
         productsCarousel: action?.payload,
       };
+
+    case WishlistActionTypes.ADD_ITEM_TO_WISHLIST_SUCCESS:
+      return {
+        ...state,
+        products: state.products.map((product) =>
+          product.productId === action.payload.id
+            ? { ...product, isLiked: true }
+            : product
+        ),
+      };
+    case WishlistActionTypes.ADD_ITEM_TO_WISHLIST_SUCCESS:
+      return {
+        ...state,
+        products: state.products.map((product) =>
+          product.productId === action.payload.id
+            ? { ...product, isLiked: false }
+            : product
+        ),
+      };
+
     case ActionTypes.FIND_PRODUCTS_SUCCESS:
       return {
         ...state,

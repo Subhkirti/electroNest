@@ -14,7 +14,7 @@ function HomeSectionCard({ product }: { product: Product }) {
         <img src={product?.images?.[0]} alt="" className="object-contain" />
       </div>
 
-      <LikeButton isLiked={false} />
+      <LikeButton isLiked={false} productId={product?.productId} />
       <div className="px-4 py-2 w-full">
         <h3 className="text-md md:text-lg  font-medium text-gray-900">
           {product?.brand}

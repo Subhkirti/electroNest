@@ -1,14 +1,23 @@
+import { useDispatch } from "react-redux";
 import AppColors from "../../../../common/appColors";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
+import { addToWishlist } from "../../../../store/customer/wishlist/action";
 
 function LikeButton({
   isLiked,
+  productId,
   isProductDetail,
 }: {
   isLiked: boolean;
+  productId: number;
   isProductDetail?: boolean;
 }) {
+  const dispatch = useDispatch<AppDispatch>();
   return (
-    <button className="absolute top-2 right-2 font-bold text-sm bg-primary bg-opacity-10 rounded-[6px] p-[3px]">
+    <button
+      onClick={() => dispatch(addToWishlist(productId))}
+      className="absolute top-2 right-2 font-bold text-sm bg-primary bg-opacity-10 rounded-[6px] p-[3px]"
+    >
       {isLiked ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
