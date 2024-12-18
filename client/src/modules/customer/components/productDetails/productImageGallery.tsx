@@ -17,6 +17,7 @@ import { addItemToCart } from "../../../../store/customer/cart/action";
 import { getCurrentUser } from "../../utils/localStorageUtils";
 import { AppDispatch } from "../../../../store/storeTypes";
 import { toast } from "react-toastify";
+import LikeButton from "../product/likeButton";
 
 function ProductImageGallery({ product }: { product: Product }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
@@ -36,9 +37,9 @@ function ProductImageGallery({ product }: { product: Product }) {
     );
   }
   return (
-    <section className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-10 px-4 pt-4">
+    <section className=" grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-10 px-4 pt-4">
       {/* Image gallery */}
-      <div className="flex flex-col items-center">
+      <div className="relative flex flex-col items-center">
         <div className="overflow-hidden rounded-lg max-w-[30rem] max-h-[35rem]">
           <img
             alt={"thumbnail"}
@@ -46,6 +47,8 @@ function ProductImageGallery({ product }: { product: Product }) {
             className="h-full w-full object-cover object-center"
           />
         </div>
+
+        <LikeButton isLiked={false} isProductDetail={true} />
 
         <Carousel
           responsive={carouselBreakpoints}

@@ -4,9 +4,14 @@ import {
   formatAmountRange,
   textTruncate,
 } from "../../../admin/utils/productUtil";
-import { FavoriteOutlined, LocalShipping } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
+import {
+  FavoriteBorderOutlined,
+  FavoriteOutlined,
+  LocalShipping,
+} from "@mui/icons-material";
+import { Button, IconButton } from "@mui/material";
 import AppColors from "../../../../common/appColors";
+import LikeButton from "./likeButton";
 
 function ProductCard({ product }: { product: Product }) {
   const navigate = useNavigate();
@@ -28,19 +33,9 @@ function ProductCard({ product }: { product: Product }) {
         </div>
       )}
 
-      <div className="absolute top-0 right-0 font-bold text-sm">
-        <FavoriteOutlined
-          sx={{
-            fontSize: "24px",
-            color: AppColors.primary,
-            backgroundColor: "rgba(255, 255, 255, 0.5)", // Ensure a background is present for backdrop-filter
-            boxShadow: "12px 4px 6px rgba(79, 69, 228, 1)",
-          }}
-        />
-      </div>
+      <LikeButton isLiked={false} />
 
       {/* meta details section */}
-
       <div
         className="productCardText bg-white p-3"
         onClick={() => navigate(product.path)}
