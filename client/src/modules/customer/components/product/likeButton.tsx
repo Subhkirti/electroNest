@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToWishlist } from "../../../../store/customer/wishlist/action";
 import AppColors from "../../../../common/appColors";
-import { AppDispatch } from "../../../../store/storeTypes";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { getCurrentUser } from "../../utils/localStorageUtils";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
+import Loader from "../../../../common/components/loader";
 
 function LikeButton({
   productId,
@@ -19,6 +20,7 @@ function LikeButton({
   const userId = getCurrentUser()?.id;
   const [isPinging, setIsPinging] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
+  const { isLoading } = useSelector((state: RootState) => state.wishlist);
 
   const handleClick = () => {
     if (!userId) return toast.info(AppStrings.registerYourselfFirst);
@@ -36,7 +38,9 @@ function LikeButton({
       onClick={handleClick}
       className="absolute top-2 right-2 font-bold text-sm bg-primary bg-opacity-10 rounded-[6px] p-[3px]"
     >
-      {isLiked ? (
+      {isLoading ? (
+        <Loader color="primary" />
+      ) : isLiked ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"

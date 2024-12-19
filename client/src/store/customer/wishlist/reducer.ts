@@ -11,8 +11,8 @@ const initState: WishlistState = {
 function wishlistReducer(state: WishlistState = initState, action: RootAction) {
   switch (action.type) {
     case ActionTypes.GET_WISHLIST_REQUEST:
-    case ActionTypes.REMOVE_ITEM_TO_WISHLIST_FAILURE:
-    case ActionTypes.ADD_ITEM_TO_WISHLIST_FAILURE:
+    case ActionTypes.REMOVE_ITEM_FROM_WISHLIST_REQUEST:
+    case ActionTypes.ADD_ITEM_TO_WISHLIST_REQUEST:
       return { ...state, isLoading: true, error: null };
     case ActionTypes.GET_WISHLIST_SUCCESS:
       return {
@@ -33,14 +33,14 @@ function wishlistReducer(state: WishlistState = initState, action: RootAction) {
           : [action?.payload?.data],
         totalCount: state.totalCount + 1,
       };
-    case ActionTypes.REMOVE_ITEM_TO_WISHLIST_SUCCESS:
+    case ActionTypes.REMOVE_ITEM_FROM_WISHLIST_SUCCESS:
       return {
         ...state,
         isLoading: false,
         error: null,
       };
 
-    case ActionTypes.REMOVE_ITEM_TO_WISHLIST_FAILURE:
+    case ActionTypes.REMOVE_ITEM_FROM_WISHLIST_FAILURE:
     case ActionTypes.ADD_ITEM_TO_WISHLIST_FAILURE:
     case ActionTypes.GET_WISHLIST_FAILURE:
       return { ...state, isLoading: false, error: action?.payload };

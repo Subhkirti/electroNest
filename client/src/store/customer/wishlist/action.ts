@@ -13,7 +13,7 @@ const userId = getCurrentUser()?.id;
 
 const removeFromWishlist =
   (productId: number) => async (dispatch: ActionDispatch) => {
-    dispatch({ type: ActionTypes.REMOVE_ITEM_TO_WISHLIST_REQUEST });
+    dispatch({ type: ActionTypes.REMOVE_ITEM_FROM_WISHLIST_REQUEST });
     try {
       const res = await axios.post(
         ApiUrls.removeItemFromWishlist,
@@ -22,14 +22,14 @@ const removeFromWishlist =
       );
 
       dispatch({
-        type: ActionTypes.REMOVE_ITEM_TO_WISHLIST_SUCCESS,
+        type: ActionTypes.REMOVE_ITEM_FROM_WISHLIST_SUCCESS,
         payload: productId,
       });
       res?.data?.data && toast.success("Product is removed from wishlist");
     } catch (error) {
       handleCatchError({
         error,
-        actionType: ActionTypes.REMOVE_ITEM_TO_WISHLIST_FAILURE,
+        actionType: ActionTypes.REMOVE_ITEM_FROM_WISHLIST_FAILURE,
       });
     }
   };

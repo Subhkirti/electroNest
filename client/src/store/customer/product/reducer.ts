@@ -63,13 +63,21 @@ function productReducer(
             ? { ...state?.product, isLiked: true }
             : state.product
           : null,
+        productsCarousel: state.productsCarousel.map((carouselCategory) => ({
+          ...carouselCategory,
+          products: carouselCategory.products.map((product) =>
+            product.productId === action.payload?.productId
+              ? { ...product, isLiked: true }
+              : product
+          ),
+        })),
         products: state.products.map((product) =>
           product.productId === action.payload?.productId
             ? { ...product, isLiked: true }
             : product
         ),
       };
-    case WishlistActionTypes.REMOVE_ITEM_TO_WISHLIST_SUCCESS:
+    case WishlistActionTypes.REMOVE_ITEM_FROM_WISHLIST_SUCCESS:
       return {
         ...state,
         products: state.products.map((product) =>
