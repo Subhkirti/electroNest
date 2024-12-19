@@ -52,11 +52,6 @@ function Orders() {
       <Grid item xs={12} md={8} lg={9}>
         {orders?.length > 0 ? (
           <>
-            <div className="space-y-5">
-              {orders.map((order, index) => {
-                return <OrderCard key={index} order={order} />;
-              })}
-            </div>
             <TablePagination
               rowsPerPageOptions={pageSizes}
               component="div"
@@ -67,6 +62,11 @@ function Orders() {
               onRowsPerPageChange={handleChangeRowsPerPage}
               sx={{ mb: 3 }}
             />
+            <div className="space-y-5">
+              {orders.map((order, index) => {
+                return <OrderCard key={index} order={order} />;
+              })}
+            </div>
           </>
         ) : (
           !isLoading && <NotFound message={AppStrings.ordersNotFound} />
