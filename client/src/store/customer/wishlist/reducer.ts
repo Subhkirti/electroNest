@@ -27,7 +27,6 @@ function wishlistReducer(state: WishlistState = initState, action: RootAction) {
         ...state,
         isLoading: false,
         error: null,
-        newUser: action?.payload,
         products: state?.products
           ? [...state.products, action?.payload?.data]
           : [action?.payload?.data],
@@ -38,6 +37,12 @@ function wishlistReducer(state: WishlistState = initState, action: RootAction) {
         ...state,
         isLoading: false,
         error: null,
+        products: state?.products
+          ? state.products.filter(
+              (product) => product.productId !== action.payload?.productId
+            )
+          : [],
+        totalCount: state.totalCount - 1,
       };
 
     case ActionTypes.REMOVE_ITEM_FROM_WISHLIST_FAILURE:

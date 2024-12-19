@@ -80,11 +80,24 @@ function productReducer(
     case WishlistActionTypes.REMOVE_ITEM_FROM_WISHLIST_SUCCESS:
       return {
         ...state,
-        products: state.products.map((product) =>
+        product: state?.product
+        ? state?.product?.productId === action.payload?.productId
+          ? { ...state?.product, isLiked: false }
+          : state.product
+        : null,
+      productsCarousel: state.productsCarousel.map((carouselCategory) => ({
+        ...carouselCategory,
+        products: carouselCategory.products.map((product) =>
           product.productId === action.payload?.productId
             ? { ...product, isLiked: false }
             : product
         ),
+      })),
+      products: state.products.map((product) =>
+        product.productId === action.payload?.productId
+          ? { ...product, isLiked: false }
+          : product
+      ),
       };
 
     case ActionTypes.FIND_PRODUCTS_SUCCESS:

@@ -30,7 +30,7 @@ const ApiUrls = {
   addAddress: apiBaseUrl + "/address/add",
   getAddresses: apiBaseUrl + "/addresses?",
   addItemToWishlist: apiBaseUrl + "/wishlist/add",
-  removeItemFromWishlist: apiBaseUrl + "/wishlist/delete",
+  removeItemFromWishlist: apiBaseUrl + "/wishlist/remove",
   getWishlist: apiBaseUrl + "/wishlist?",
   setActiveAddress: apiBaseUrl + "/address/set-active",
   editAddress: apiBaseUrl + "/address/edit",

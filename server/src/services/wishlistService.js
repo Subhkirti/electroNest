@@ -15,7 +15,7 @@ wishlistRouter.post("/wishlist/remove", (req, res) => {
     });
   }
 
-  const deleteWishlistQuery = `DELETE FROM ${tableName} WHERE user_id = ?, product_id = ?`;
+  const deleteWishlistQuery = `DELETE FROM ${tableName} WHERE user_id = ? AND product_id = ?`;
   connection.query(deleteWishlistQuery, [userId, productId], (err, results) => {
     if (err) {
       return res.status(400).json({

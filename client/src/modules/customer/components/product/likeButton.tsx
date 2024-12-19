@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addToWishlist } from "../../../../store/customer/wishlist/action";
+import {
+  addToWishlist,
+  removeFromWishlist,
+} from "../../../../store/customer/wishlist/action";
 import AppColors from "../../../../common/appColors";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { getCurrentUser } from "../../utils/localStorageUtils";
@@ -25,7 +28,9 @@ function LikeButton({
   const handleClick = () => {
     if (!userId) return toast.info(AppStrings.registerYourselfFirst);
     setIsPinging(true);
-    dispatch(addToWishlist(productId));
+    dispatch(
+      isLiked ? removeFromWishlist(productId) : addToWishlist(productId)
+    );
 
     // Remove the animate-ping class after the animation finishes
     setTimeout(() => {

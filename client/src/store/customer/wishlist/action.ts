@@ -15,17 +15,22 @@ const removeFromWishlist =
   (productId: number) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.REMOVE_ITEM_FROM_WISHLIST_REQUEST });
     try {
-      const res = await axios.post(
+      const { data } = await axios.post(
         ApiUrls.removeItemFromWishlist,
         { userId, productId },
         headersConfig
       );
 
-      dispatch({
-        type: ActionTypes.REMOVE_ITEM_FROM_WISHLIST_SUCCESS,
-        payload: productId,
-      });
-      res?.data?.data && toast.success("Product is removed from wishlist");
+      if (data.status === 200) {
+        dispatch({
+          type: ActionTypes.REMOVE_ITEM_FROM_WISHLIST_SUCCESS,
+          payload: {
+            productId,
+          },
+        });
+      } else {
+        toast.error("Failed to remove product in your wishlist");
+      }
     } catch (error) {
       handleCatchError({
         error,
