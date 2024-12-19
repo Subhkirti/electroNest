@@ -3,8 +3,74 @@ const productsTableName = "products";
 const connection = require("../connection");
 const express = require("express");
 const wishlistRouter = express.Router();
+const { getUserIdFromToken } = require("./jwtService");
+
 checkTableExistence();
 
+// fetch user wishlist
+wishlistRouter.get("/wishlist", (req, res) => {
+  const userId = getUserIdFromToken(req);
+
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+
+  const getWishlistQuery = `
+    SELECT p.*, 
+           true AS is_liked
+    FROM ${tableName} w
+    JOIN ${productsTableName} p ON w.product_id = p.product_id
+    WHERE w.user_id = ?
+  `;
+
+  connection.query(getWishlistQuery, [userId], (err, results) => {
+    if (err) {
+      return res.status(400).json({
+        status: 400,
+        message: "Error retrieving user's wishlist.",
+      });
+    }
+
+    // SQL query to get the total count of wishlist items for the user
+    const getTotalCountQuery = `
+      SELECT COUNT(*) AS totalCount
+      FROM ${tableName}
+      WHERE user_id = ?
+    `;
+
+    connection.query(getTotalCountQuery, [userId], (countErr, countResult) => {
+      if (countErr) {
+        return res.status(400).json({
+          status: 400,
+          message: "Error retrieving total count of wishlist items.",
+        });
+      }
+
+      const totalCount = countResult[0]?.totalCount || 0;
+
+      if (results.length === 0) {
+        return res.status(200).json({
+          status: 200,
+          message: "No items found in the wishlist.",
+          data: [],
+          totalCount,
+        });
+      }
+
+      return res.status(200).json({
+        status: 200,
+        message: "Wishlist items retrieved successfully.",
+        data: results,
+        totalCount,
+      });
+    });
+  });
+});
+
+// remove product from wishlist
 wishlistRouter.post("/wishlist/remove", (req, res) => {
   const { userId, productId } = req.body;
 
@@ -31,6 +97,7 @@ wishlistRouter.post("/wishlist/remove", (req, res) => {
   });
 });
 
+// add product to wishlist
 wishlistRouter.post("/wishlist/add", (req, res) => {
   const { userId, productId } = req.body;
 

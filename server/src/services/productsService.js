@@ -6,8 +6,9 @@ const secondLevelCateTableName = "second_level_categories"; // also known as sec
 const thirdLevelCateTableName = "third_level_categories"; // also known as items
 const express = require("express");
 const productsRouter = express.Router();
-createProductCateSectionItemsTable();
 const { getUserIdFromToken } = require("./jwtService");
+
+createProductCateSectionItemsTable();
 
 productsRouter.post("/product/categories/sections/items", (req, res) => {
   const { categories } = req.body;

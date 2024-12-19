@@ -68,13 +68,10 @@ const addToWishlist =
     }
   };
 
-const getWishlist = (userId: number) => async (dispatch: ActionDispatch) => {
+const getWishlist = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_WISHLIST_REQUEST });
   try {
-    const res = await axios.get(
-      `${ApiUrls.getWishlist}id=${userId}`,
-      headersConfig
-    );
+    const res = await axios.get(ApiUrls.getWishlist, headersConfig);
 
     dispatch({
       type: ActionTypes.GET_WISHLIST_SUCCESS,
