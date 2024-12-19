@@ -1,21 +1,39 @@
+import { useState } from "react";
 import { useDispatch } from "react-redux";
-import AppColors from "../../../../common/appColors";
-import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { addToWishlist } from "../../../../store/customer/wishlist/action";
+import AppColors from "../../../../common/appColors";
+import { AppDispatch } from "../../../../store/storeTypes";
+import { getCurrentUser } from "../../utils/localStorageUtils";
+import { toast } from "react-toastify";
+import AppStrings from "../../../../common/appStrings";
 
 function LikeButton({
-  isLiked,
   productId,
+  isLiked,
   isProductDetail,
 }: {
-  isLiked: boolean;
   productId: number;
+  isLiked: boolean;
   isProductDetail?: boolean;
 }) {
+  const userId = getCurrentUser()?.id;
+  const [isPinging, setIsPinging] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
+
+  const handleClick = () => {
+    if (!userId) return toast.info(AppStrings.registerYourselfFirst);
+    setIsPinging(true);
+    dispatch(addToWishlist(productId));
+
+    // Remove the animate-ping class after the animation finishes
+    setTimeout(() => {
+      setIsPinging(false);
+    }, 350);
+  };
+
   return (
     <button
-      onClick={() => dispatch(addToWishlist(productId))}
+      onClick={handleClick}
       className="absolute top-2 right-2 font-bold text-sm bg-primary bg-opacity-10 rounded-[6px] p-[3px]"
     >
       {isLiked ? (
@@ -23,7 +41,11 @@ function LikeButton({
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill={AppColors.primary}
-          className={isProductDetail ? "size-9" : "size-6"}
+          className={
+            isProductDetail
+              ? `size-9 ${isPinging ? "animate-ping" : ""}`
+              : `size-6 ${isPinging ? "animate-ping" : ""}`
+          }
         >
           <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
         </svg>
@@ -34,7 +56,11 @@ function LikeButton({
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke={AppColors.primary}
-          className={isProductDetail ? "size-9" : "size-6"}
+          className={
+            isProductDetail
+              ? `size-9 ${isPinging ? "animate-ping" : ""}`
+              : `size-6 ${isPinging ? "animate-ping" : ""}`
+          }
         >
           <path
             stroke-linecap="round"

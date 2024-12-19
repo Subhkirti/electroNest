@@ -8,13 +8,16 @@ import { ActionDispatch } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
 import { toast } from "react-toastify";
 import { productMap } from "../../../modules/customer/mappers/productsMapper";
+import { getCurrentUser } from "../../../modules/customer/utils/localStorageUtils";
+const userId = getCurrentUser()?.id;
 
 const removeFromWishlist =
   (productId: number) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.REMOVE_ITEM_TO_WISHLIST_REQUEST });
     try {
-      const res = await axios.delete(
-        `${ApiUrls.removeItemFromWishlist}id=${productId}`,
+      const res = await axios.post(
+        ApiUrls.removeItemFromWishlist,
+        { userId, productId },
         headersConfig
       );
 
@@ -35,15 +38,23 @@ const addToWishlist =
   (productId: number) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.ADD_ITEM_TO_WISHLIST_REQUEST });
     try {
-      const res = await axios.get(
-        `${ApiUrls.addItemToWishlist}id=${productId}`,
+      const { data } = await axios.post(
+        ApiUrls.addItemToWishlist,
+        { userId, productId },
         headersConfig
       );
-      dispatch({
-        type: ActionTypes.ADD_ITEM_TO_WISHLIST_SUCCESS,
-        payload: productId,
-      });
-      res?.data?.data && toast.success("Product is added from wishlist");
+
+      if (data.status === 200) {
+        dispatch({
+          type: ActionTypes.ADD_ITEM_TO_WISHLIST_SUCCESS,
+          payload: {
+            productId,
+            data: data?.data ? productMap(data?.data) : null,
+          },
+        });
+      } else {
+        toast.error("Failed to add product in your wishlist");
+      }
     } catch (error) {
       handleCatchError({
         error,

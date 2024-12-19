@@ -29,8 +29,8 @@ function wishlistReducer(state: WishlistState = initState, action: RootAction) {
         error: null,
         newUser: action?.payload,
         products: state?.products
-          ? [...state.products, action?.payload]
-          : [action?.payload],
+          ? [...state.products, action?.payload?.data]
+          : [action?.payload?.data],
         totalCount: state.totalCount + 1,
       };
     case ActionTypes.REMOVE_ITEM_TO_WISHLIST_SUCCESS:

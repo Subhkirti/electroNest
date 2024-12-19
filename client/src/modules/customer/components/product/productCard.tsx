@@ -33,7 +33,7 @@ function ProductCard({ product }: { product: Product }) {
         </div>
       )}
 
-      <LikeButton isLiked={false} productId={product.productId} />
+      <LikeButton isLiked={product.isLiked} productId={product.productId} />
 
       {/* meta details section */}
       <div

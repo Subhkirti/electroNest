@@ -6,9 +6,19 @@ function generateToken(userId) {
   return token;
 }
 
-function getUserIdFromToken(token) {
-  const decodeToken = jwt.verify(token, jwtSecretKey);
-  return decodeToken.userId;
-}
+const getUserIdFromToken = (req) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const decoded = jwt.verify(token, jwtSecretKey);
+    return decoded.userId;
+  } catch (error) {
+    return null;
+  }
+};
 
 module.exports = { generateToken, getUserIdFromToken };

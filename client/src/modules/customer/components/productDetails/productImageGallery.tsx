@@ -49,7 +49,7 @@ function ProductImageGallery({ product }: { product: Product }) {
         </div>
 
         <LikeButton
-          isLiked={false}
+          isLiked={product.isLiked}
           isProductDetail={true}
           productId={product?.productId}
         />
@@ -191,7 +191,7 @@ function ProductImageGallery({ product }: { product: Product }) {
                 onClick={() =>
                   userId
                     ? addToCart()
-                    : toast.info("Register yourself to proceed.")
+                    : toast.info(AppStrings.registerYourselfFirst)
                 }
                 className="lg:w-[50%] px-8 py-3 shadow-none hover:shadow-none hover:bg-primary hover:border-transparent hover:bg-opacity-10"
               >
@@ -208,7 +208,7 @@ function ProductImageGallery({ product }: { product: Product }) {
                     ? navigate(
                         `${AppRoutes.checkout}?product_id=${product.productId}`
                       )
-                    : toast.info("Register yourself to proceed.")
+                    : toast.info(AppStrings.registerYourselfFirst)
                 }
                 className="lg:w-[50%]  px-8 py-3 shadow-none hover:shadow-none"
               >

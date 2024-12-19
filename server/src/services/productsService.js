@@ -1,11 +1,13 @@
 const connection = require("../connection");
 const tableName = "products";
+const wishlistTableName = "wishlist";
 const topLevelCateTableName = "top_level_categories"; // also known as categories
 const secondLevelCateTableName = "second_level_categories"; // also known as sections
 const thirdLevelCateTableName = "third_level_categories"; // also known as items
 const express = require("express");
 const productsRouter = express.Router();
 createProductCateSectionItemsTable();
+const { getUserIdFromToken } = require("./jwtService");
 
 productsRouter.post("/product/categories/sections/items", (req, res) => {
   const { categories } = req.body;
@@ -396,28 +398,50 @@ productsRouter.delete("/product/delete", (req, res) => {
 /* Get product details by id */
 productsRouter.get("/product-details", (req, res) => {
   const { id } = req.query;
+
   if (!id) {
     return res
       .status(400)
       .json({ status: 400, message: "Product Id not found in request" });
   }
-  connection.query(
-    `SELECT * FROM ${tableName} WHERE product_id = ?`,
-    [id],
-    (err, result) => {
-      if (err) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "Error while getting products" });
-      }
-      return res.status(200).json({ status: 200, data: result });
+  const userId = getUserIdFromToken(req);
+  const query = `
+    SELECT p.*, 
+     CASE 
+             WHEN ? IS NOT NULL AND w.user_id = ? THEN true 
+             ELSE false 
+           END AS is_liked
+    FROM ${tableName} p
+    LEFT JOIN ${wishlistTableName} w ON p.product_id = w.product_id AND w.user_id = ? WHERE p.product_id = ?
+  `;
+
+  const queryParams = [userId, userId, userId, id];
+
+  connection.query(query, queryParams, (err, result) => {
+    if (err) {
+      console.error("Error while getting product details:", err);
+      return res
+        .status(400)
+        .json({ status: 400, message: "Error while getting product details" });
     }
-  );
+
+    if (result.length === 0) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "Product not found" });
+    }
+
+    return res.status(200).json({ status: 200, data: result });
+  });
 });
 
 /* Get products list */
+
 productsRouter.get("/products", (req, res) => {
   const { pageNumber, pageSize } = req.query;
+
+  const userId = getUserIdFromToken(req);
+
   const limit = parseInt(pageSize);
   const offset = (parseInt(pageNumber) - 1) * limit;
 
@@ -432,10 +456,22 @@ productsRouter.get("/products", (req, res) => {
       }
 
       const totalCount = countResult[0].totalCount;
-      /* Get Products query */
+
+      /* Get Products with wishlist status */
+      const query = `
+        SELECT p.*, 
+               CASE 
+                 WHEN w.user_id = ? THEN true 
+                 ELSE false 
+               END AS is_liked
+        FROM ${tableName} p
+        LEFT JOIN ${wishlistTableName} w 
+        ON p.product_id = w.product_id AND w.user_id = ?
+        LIMIT ? OFFSET ?`;
+
       connection.query(
-        `SELECT * FROM ${tableName} LIMIT ? OFFSET ?`,
-        [limit, offset],
+        query,
+        [userId, userId, limit, offset],
         (err, result) => {
           if (err) {
             return res
@@ -477,6 +513,7 @@ productsRouter.post("/find-products", (req, res) => {
   let queryParams = [];
   let whereClauses = [];
 
+  const userId = getUserIdFromToken(req);
   // Handling colors filter
   if (colors && colors.length > 0) {
     whereClauses.push("color IN (?)");
@@ -533,7 +570,7 @@ productsRouter.post("/find-products", (req, res) => {
 
   // Handling item filter
   if (itemId) {
-    whereClauses.push("item_id	 = ?");
+    whereClauses.push("item_id = ?");
     queryParams.push(itemId);
   }
 
@@ -544,7 +581,18 @@ productsRouter.post("/find-products", (req, res) => {
   }
 
   // Create the SQL query with dynamic WHERE clauses
-  let query = `SELECT * FROM ${tableName}`;
+  let query = `
+    SELECT p.*, 
+           CASE 
+             WHEN ? IS NOT NULL AND w.user_id = ? THEN true 
+             ELSE false 
+           END AS is_liked
+    FROM ${tableName} p
+    LEFT JOIN ${wishlistTableName} w 
+    ON p.product_id = w.product_id AND w.user_id = ?
+  `;
+
+  queryParams.unshift(userId, userId, userId);
 
   if (whereClauses.length > 0) {
     query += ` WHERE ${whereClauses.join(" AND ")}`;
@@ -566,13 +614,15 @@ productsRouter.post("/find-products", (req, res) => {
     }
 
     // Optional: get the total count of products matching the filter criteria
-    const countQuery = `SELECT COUNT(*) AS totalCount FROM ${tableName} ${
-      whereClauses?.length ? "WHERE " + whereClauses.join(" AND ") : ""
-    }`;
+    const countQuery = `
+      SELECT COUNT(*) AS totalCount
+      FROM ${tableName} p
+      ${whereClauses.length ? "WHERE " + whereClauses.join(" AND ") : ""}
+    `;
 
     connection.query(
       countQuery,
-      queryParams.slice(0, -2),
+      queryParams.slice(3, -2), // Exclude userId and pagination parameters
       (countErr, countResult) => {
         if (countErr) {
           console.log("countErr:", countErr);
@@ -727,25 +777,39 @@ productsRouter.get("/products-carousel", (req, res) => {
   const limit = parseInt(pageSize);
   const offset = (parseInt(pageNumber) - 1) * limit;
 
-  // First query to get top-level categories
+  const userId = getUserIdFromToken(req);
+
+  // Query to get top-level categories
   connection.query(
     `SELECT * FROM ${topLevelCateTableName} LIMIT 6`,
     (err, results) => {
       if (err) {
         return res.status(400).json({
           status: 400,
-          message: "Error while getting top level categories",
+          message: "Error while getting top-level categories",
         });
       }
 
       // Use Promise.all to handle multiple asynchronous queries
       const categoryPromises = results.map((category) => {
-        const selectQuery = `SELECT * FROM ${tableName} WHERE LOWER(category_id) = ? LIMIT ? OFFSET ?`;
+        const selectQuery = `
+          SELECT p.*, 
+                 CASE 
+                   WHEN ? IS NOT NULL AND w.user_id = ? THEN true 
+                   ELSE false 
+                 END AS is_liked
+          FROM ${tableName} p
+          LEFT JOIN ${wishlistTableName} w 
+          ON p.product_id = w.product_id AND w.user_id = ?
+          WHERE LOWER(p.category_id) = ? 
+          LIMIT ? OFFSET ?
+        `;
         const categoryId = category?.category_id?.trim().toLowerCase();
+
         return new Promise((resolve, reject) => {
           connection.query(
             selectQuery,
-            [categoryId, limit, offset],
+            [userId, userId, userId, categoryId, limit, offset],
             (err, products) => {
               if (err) {
                 reject(err);
@@ -769,6 +833,7 @@ productsRouter.get("/products-carousel", (req, res) => {
           });
         })
         .catch((err) => {
+          console.error("Error while getting products:", err);
           res.status(400).json({
             status: 400,
             message: "Error while getting products",
@@ -1488,4 +1553,4 @@ function generateSlug(name) {
         .replace(/^-+|-+$/g, "")
     : ""; // Remove leading and trailing hyphens
 }
-module.exports = productsRouter; 
+module.exports = productsRouter;

@@ -58,6 +58,7 @@ const AppStrings = {
   userDetailsNotFound: "User details not Found!",
   ordersNotFound: "Orders not Found!",
   yourOrderHasBeenCancelled: "Your Order has been Cancelled.",
+  registerYourselfFirst: "Sign up to explore this functionality!",
 
   /* success messages */
   categoryAddedSuccessfully: "Category added successfully",
