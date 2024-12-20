@@ -15,9 +15,8 @@ const removeFromWishlist =
   (productId: number) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.REMOVE_ITEM_FROM_WISHLIST_REQUEST });
     try {
-      const { data } = await axios.post(
-        ApiUrls.removeItemFromWishlist,
-        { userId, productId },
+      const { data } = await axios.delete(
+        `${ApiUrls.removeItemFromWishlist}/${productId}`,
         headersConfig
       );
 
@@ -43,9 +42,8 @@ const addToWishlist =
   (productId: number) => async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.ADD_ITEM_TO_WISHLIST_REQUEST });
     try {
-      const { data } = await axios.post(
-        ApiUrls.addItemToWishlist,
-        { userId, productId },
+      const { data } = await axios.get(
+        `${ApiUrls.addItemToWishlist}/${productId}`,
         headersConfig
       );
 
@@ -68,23 +66,29 @@ const addToWishlist =
     }
   };
 
-const getWishlist = () => async (dispatch: ActionDispatch) => {
-  dispatch({ type: ActionTypes.GET_WISHLIST_REQUEST });
-  try {
-    const res = await axios.get(ApiUrls.getWishlist, headersConfig);
+const getWishlist =
+  (pageNumber: number, pageSize: number) =>
+  async (dispatch: ActionDispatch) => {
+    dispatch({ type: ActionTypes.GET_WISHLIST_REQUEST });
+    try {
+      const res = await axios.get(
+        `${ApiUrls.getWishlist}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+        headersConfig
+      );
 
-    dispatch({
-      type: ActionTypes.GET_WISHLIST_SUCCESS,
-      payload: {
-        data: res?.data?.data?.length > 0 ? res.data.data.map(productMap) : [],
-        totalCount: res?.data?.totalCount,
-      },
-    });
-  } catch (error) {
-    handleCatchError({
-      error,
-      actionType: ActionTypes.GET_WISHLIST_FAILURE,
-    });
-  }
-};
+      dispatch({
+        type: ActionTypes.GET_WISHLIST_SUCCESS,
+        payload: {
+          data:
+            res?.data?.data?.length > 0 ? res.data.data.map(productMap) : [],
+          totalCount: res?.data?.totalCount,
+        },
+      });
+    } catch (error) {
+      handleCatchError({
+        error,
+        actionType: ActionTypes.GET_WISHLIST_FAILURE,
+      });
+    }
+  };
 export { removeFromWishlist, addToWishlist, getWishlist };

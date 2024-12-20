@@ -10,6 +10,9 @@ checkTableExistence();
 // fetch user wishlist
 wishlistRouter.get("/wishlist", (req, res) => {
   const userId = getUserIdFromToken(req);
+  const pageNumber = req.query?.pageNumber ? parseInt(req.query.pageNumber) : 1;
+  const pageSize = req.query?.pageSize ? parseInt(req.query.pageSize) : 10;
+  const offset = (pageNumber - 1) * pageSize;
 
   if (!userId) {
     return res.status(400).json({
@@ -23,72 +26,86 @@ wishlistRouter.get("/wishlist", (req, res) => {
            true AS is_liked
     FROM ${tableName} w
     JOIN ${productsTableName} p ON w.product_id = p.product_id
-    WHERE w.user_id = ?
+    WHERE w.user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?
   `;
 
-  connection.query(getWishlistQuery, [userId], (err, results) => {
-    if (err) {
-      return res.status(400).json({
-        status: 400,
-        message: "Error retrieving user's wishlist.",
-      });
-    }
+  connection.query(
+    getWishlistQuery,
+    [userId, pageSize, offset],
+    (err, results) => {
+      if (err) {
+        console.log("err:", err);
+        return res.status(400).json({
+          status: 400,
+          message: "Error retrieving user's wishlist.",
+        });
+      }
 
-    // SQL query to get the total count of wishlist items for the user
-    const getTotalCountQuery = `
+      // SQL query to get the total count of wishlist items for the user
+      const getTotalCountQuery = `
       SELECT COUNT(*) AS totalCount
       FROM ${tableName}
       WHERE user_id = ?
     `;
 
-    connection.query(getTotalCountQuery, [userId], (countErr, countResult) => {
-      if (countErr) {
-        return res.status(400).json({
-          status: 400,
-          message: "Error retrieving total count of wishlist items.",
-        });
-      }
+      connection.query(
+        getTotalCountQuery,
+        [userId],
+        (countErr, countResult) => {
+          if (countErr) {
+            return res.status(400).json({
+              status: 400,
+              message: "Error retrieving total count of wishlist items.",
+            });
+          }
 
-      const totalCount = countResult[0]?.totalCount || 0;
+          const totalCount = countResult[0]?.totalCount || 0;
 
-      if (results.length === 0) {
-        return res.status(200).json({
-          status: 200,
-          message: "No items found in the wishlist.",
-          data: [],
-          totalCount,
-        });
-      }
+          if (results.length === 0) {
+            return res.status(200).json({
+              status: 200,
+              message: "No items found in the wishlist.",
+              data: [],
+              totalCount,
+            });
+          }
 
-      return res.status(200).json({
-        status: 200,
-        message: "Wishlist items retrieved successfully.",
-        data: results,
-        totalCount,
-      });
-    });
-  });
+          return res.status(200).json({
+            status: 200,
+            message: "Wishlist items retrieved successfully.",
+            data: results,
+            totalCount,
+          });
+        }
+      );
+    }
+  );
 });
 
 // remove product from wishlist
-wishlistRouter.post("/wishlist/remove", (req, res) => {
-  const { userId, productId } = req.body;
+wishlistRouter.delete("/wishlist/remove/:id", (req, res) => {
+  const userId = getUserIdFromToken(req);
+  const productId = req.params?.id;
 
-  if (!userId || !productId) {
+  if (!userId)
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+
+  if (!productId || productId === "null" || productId === "undefined")
     return res.status(400).json({
       status: 400,
       message: "Missing parameters in request.",
     });
-  }
 
   const deleteWishlistQuery = `DELETE FROM ${tableName} WHERE user_id = ? AND product_id = ?`;
   connection.query(deleteWishlistQuery, [userId, productId], (err, results) => {
-    if (err) {
+    if (err)
       return res.status(400).json({
         status: 400,
         message: "Error removing user's wishlist.",
       });
-    }
 
     return res.status(200).json({
       status: 200,
@@ -98,15 +115,21 @@ wishlistRouter.post("/wishlist/remove", (req, res) => {
 });
 
 // add product to wishlist
-wishlistRouter.post("/wishlist/add", (req, res) => {
-  const { userId, productId } = req.body;
+wishlistRouter.get("/wishlist/add/:id", (req, res) => {
+  const userId = getUserIdFromToken(req);
+  const productId = req.params?.id;
 
-  if (!userId || !productId) {
+  if (!userId)
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+
+  if (!productId || productId === "null" || productId === "undefined")
     return res.status(400).json({
       status: 400,
       message: "Missing parameters in request.",
     });
-  }
 
   const addWishlistQuery = `INSERT INTO ${tableName} (user_id, product_id) VALUES(?, ?)`;
   const findProductQuery = `SELECT * FROM ${productsTableName} WHERE product_id = ?`;

@@ -4,13 +4,7 @@ import {
   formatAmountRange,
   textTruncate,
 } from "../../../admin/utils/productUtil";
-import {
-  FavoriteBorderOutlined,
-  FavoriteOutlined,
-  LocalShipping,
-} from "@mui/icons-material";
-import { Button, IconButton } from "@mui/material";
-import AppColors from "../../../../common/appColors";
+import { LocalShipping } from "@mui/icons-material";
 import LikeButton from "./likeButton";
 
 function ProductCard({ product }: { product: Product }) {

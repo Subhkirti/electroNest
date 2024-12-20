@@ -19,14 +19,13 @@ function WishList() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      dispatch(getWishlist());
+      dispatch(getWishlist(pageNumber + 1, pageSize));
     }, 10);
 
     return () => {
       clearTimeout(timer);
     };
-  }, []);
-
+  }, [pageNumber, pageSize]);
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -35,31 +34,37 @@ function WishList() {
     setPageNumber(0);
   };
 
-  return isLoading ? (
-    <Loader suspenseLoader={true} />
-  ) : products && products?.length > 0 ? (
+  return (
     <>
-      <TablePagination
-        rowsPerPageOptions={pageSizes}
-        component="div"
-        count={totalCount}
-        rowsPerPage={pageSize}
-        page={pageNumber}
-        onPageChange={(e, newPage) => setPageNumber(newPage)}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        sx={{ mb: 3 }}
-      />
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold mb-4">My Wishlist</h1>
+        {products && products?.length > 0 && (
+          <TablePagination
+            rowsPerPageOptions={pageSizes}
+            component="div"
+            count={totalCount}
+            rowsPerPage={pageSize}
+            page={pageNumber}
+            onPageChange={(e, newPage) => setPageNumber(newPage)}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            sx={{ mb: 3 }}
+          />
+        )}
+      </div>
+      <hr />
 
-      <div className="lg:col-span-4 w-full">
-        <div className="flex flex-wrap justify-center md:justify-start bg-white py-5">
+      {isLoading ? (
+        <Loader suspenseLoader={true} color="primary" />
+      ) : products && products?.length > 0 ? (
+        <div className="flex flex-wrap justify-start bg-white py-5">
           {products.map((product, index) => {
             return <ProductCard key={index} product={product} />;
           })}
         </div>
-      </div>
+      ) : (
+        <NotFound message={AppStrings.productsNotFound} isGoBack={true} />
+      )}
     </>
-  ) : (
-    <NotFound message={AppStrings.productsNotFound} isGoBack={true} />
   );
 }
 
