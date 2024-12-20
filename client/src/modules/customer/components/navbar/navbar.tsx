@@ -107,13 +107,16 @@ export default function Navbar() {
     handleCloseUserMenu();
 
     if (type === "orders") {
-      navigate(AppRoutes.orders);
+      window.location.href = AppRoutes.orders;
     } else if (type === "wishlist") {
-      navigate(AppRoutes.wishList);
+      window.location.href = AppRoutes.wishList;
     } else if (type === "profile") {
-      user?.role === "admin"
-        ? navigate(AdminAppRoutes.dashboard)
-        : user?.id && navigate(`/user/${user?.id}`);
+      window.location.href =
+        user?.role === "admin"
+          ? AdminAppRoutes.dashboard
+          : user?.id
+          ? `/user/${user?.id}`
+          : "";
     }
   };
 
