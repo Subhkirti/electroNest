@@ -80,6 +80,7 @@ function productMap(doc: any): Product {
     stock: doc?.stock || 0,
     rating: doc?.rating || 0,
     reviews: doc?.reviews || [],
+    isLiked: doc?.is_liked || false,
     warrantyInfo: doc?.warranty_info || "",
     returnPolicy: doc?.return_policy || "",
     deliveryCharges: doc?.delivery_charges || 0,

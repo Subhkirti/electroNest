@@ -5,6 +5,7 @@ import {
 } from "../../../modules/customer/types/productTypes";
 import { ProductState, RootAction } from "../../storeTypes";
 import ActionTypes from "./actionTypes";
+import WishlistActionTypes from "../wishlist/actionTypes";
 
 const initState: ProductState = {
   topLevelCategories: [],
@@ -53,6 +54,52 @@ function productReducer(
         error: null,
         productsCarousel: action?.payload,
       };
+
+    case WishlistActionTypes.ADD_ITEM_TO_WISHLIST_SUCCESS:
+      return {
+        ...state,
+        product: state?.product
+          ? state?.product?.productId === action.payload?.productId
+            ? { ...state?.product, isLiked: true }
+            : state.product
+          : null,
+        productsCarousel: state.productsCarousel.map((carouselCategory) => ({
+          ...carouselCategory,
+          products: carouselCategory.products.map((product) =>
+            product.productId === action.payload?.productId
+              ? { ...product, isLiked: true }
+              : product
+          ),
+        })),
+        products: state.products.map((product) =>
+          product.productId === action.payload?.productId
+            ? { ...product, isLiked: true }
+            : product
+        ),
+      };
+    case WishlistActionTypes.REMOVE_ITEM_FROM_WISHLIST_SUCCESS:
+      return {
+        ...state,
+        product: state?.product
+        ? state?.product?.productId === action.payload?.productId
+          ? { ...state?.product, isLiked: false }
+          : state.product
+        : null,
+      productsCarousel: state.productsCarousel.map((carouselCategory) => ({
+        ...carouselCategory,
+        products: carouselCategory.products.map((product) =>
+          product.productId === action.payload?.productId
+            ? { ...product, isLiked: false }
+            : product
+        ),
+      })),
+      products: state.products.map((product) =>
+        product.productId === action.payload?.productId
+          ? { ...product, isLiked: false }
+          : product
+      ),
+      };
+
     case ActionTypes.FIND_PRODUCTS_SUCCESS:
       return {
         ...state,

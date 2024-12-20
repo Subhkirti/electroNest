@@ -45,6 +45,7 @@ ordersRouter.post("/order/create", async (req, res) => {
 });
 
 async function createNewOrder(userId, cartId, addressId, status, productId) {
+  console.log("cartId:", cartId);
   // Order through Cart
   if (cartId) {
     const cartItems = await getCartItems(cartId);
@@ -225,7 +226,6 @@ async function createPayment(userId, orderId, amount, totalAmount) {
         throw error; // If there's an error, throw it
       });
 
-
     return paymentResponse; // Return the payment response
   } catch (error) {
     console.error("Error in createPayment:", error);
@@ -261,7 +261,11 @@ ordersRouter.get("/orders", (req, res) => {
   SELECT * 
   FROM ${ordersTableName} 
   WHERE user_id = ? 
-  ${req.query.pageNumber ? `ORDER BY created_at DESC LIMIT ? OFFSET ?` : "ORDER BY created_at DESC"}
+  ${
+    req.query.pageNumber
+      ? `ORDER BY created_at DESC LIMIT ? OFFSET ?`
+      : "ORDER BY created_at DESC"
+  }
 `;
 
   // Fetch orders first
@@ -574,10 +578,7 @@ ordersRouter.put("/order/update-status", (req, res) => {
                 status: 500,
                 message: "Error updating payment status",
               });
-            if (result.affectedRows === 0)
-              return res
-                .status(404)
-                .json({ status: 404, message: "Payment not found" });
+
             res.status(200).json({
               status: 200,
               message: "Order status updated successfully",

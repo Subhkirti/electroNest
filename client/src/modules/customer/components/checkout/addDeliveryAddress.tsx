@@ -44,6 +44,8 @@ function AddDeliveryAddress({
       {isLoading && <Loader suspenseLoader={true} fixed={true} />}
 
       <AddressCard onNextCallback={onNextCallback} />
+
+      {/* add new address section */}
       <Grid item xs={12} lg={7}>
         <div className="border rounded-md p-5 bg-white">
           <form onSubmit={handleSubmit}>

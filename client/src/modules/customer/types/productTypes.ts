@@ -78,6 +78,7 @@ interface Product {
   stock: number;
   rating: number;
   reviews: Review[];
+  isLiked: boolean;
   warrantyInfo: string | null;
   returnPolicy: string | null;
   deliveryCharges: number;

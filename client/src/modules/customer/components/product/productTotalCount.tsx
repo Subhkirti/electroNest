@@ -18,7 +18,7 @@ function ProductTotalCount({
     navigate(window.location.pathname, { replace: true });
   }
   return (
-    <div className="flex w-full justify-between py-4 border-b border-black">
+    <div className="flex w-full justify-between py-4 border-b">
       <div className="flex flex-col">
         <p className="text-xl font-semibold">Filters </p>
         {totalCount > 0 && (
