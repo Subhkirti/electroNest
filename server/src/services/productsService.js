@@ -215,6 +215,14 @@ productsRouter.get("/product/categories", (req, res) => {
 
 /* Set products list */
 productsRouter.post("/product/add", (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+
   const {
     images,
     brand,
@@ -295,6 +303,14 @@ productsRouter.post("/product/add", (req, res) => {
 
 /* Edit product details */
 productsRouter.post("/product/edit", (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+
   const productId = req.query?.id;
   const {
     images,
@@ -374,6 +390,14 @@ productsRouter.post("/product/edit", (req, res) => {
 
 /* Delete product */
 productsRouter.delete("/product/delete", (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+
   const { id } = req.query;
   if (!id) {
     return res
@@ -399,7 +423,6 @@ productsRouter.delete("/product/delete", (req, res) => {
 /* Get product details by id */
 productsRouter.get("/product-details", (req, res) => {
   const { id } = req.query;
-
   if (!id) {
     return res
       .status(400)
@@ -846,6 +869,14 @@ productsRouter.get("/products-carousel", (req, res) => {
 
 /* Add top level category */
 productsRouter.post("/top-level-categories/add", (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+
   const { categoryName } = req.body;
   const category_id = generateSlug(categoryName);
 
@@ -904,6 +935,14 @@ productsRouter.post("/top-level-categories/add", (req, res) => {
 
 /* Add second level category  */
 productsRouter.post("/second-level-categories/add", (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+
   const { categoryName, sectionName } = req.body;
   const category_id = generateSlug(categoryName);
   const section_id = generateSlug(sectionName);
@@ -962,6 +1001,14 @@ productsRouter.post("/second-level-categories/add", (req, res) => {
 
 /* Add third level category  */
 productsRouter.post("/third-level-categories/add", (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+
   const { sectionName, itemName } = req.body;
   const section_id = generateSlug(sectionName);
   const item_id = generateSlug(itemName);
@@ -1021,6 +1068,14 @@ productsRouter.post("/third-level-categories/add", (req, res) => {
 
 /* Delete top level category */
 productsRouter.delete("/top-level-categories/delete", (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+
   const categoryId = req.query.id;
   if (!categoryId) {
     return res
@@ -1107,6 +1162,14 @@ productsRouter.delete("/top-level-categories/delete", (req, res) => {
 
 /* Delete second-level category */
 productsRouter.delete("/second-level-categories/delete", (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+
   const sectionId = req.query.id;
   if (!sectionId) {
     return res
@@ -1211,6 +1274,14 @@ productsRouter.delete("/second-level-categories/delete", (req, res) => {
 
 /* Delete third-level category */
 productsRouter.delete("/third-level-categories/delete", (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+  
   const itemId = req.query.id;
   if (!itemId) {
     return res
