@@ -6,7 +6,7 @@
 <br/>
 <p>Frontend Endpoint: https://electronest-backend.onrender.com/</p>
 <p>Api Endpoint: https://electronest-backend.onrender.com/</p>
-
+<hr/>
 ElectroNest is the go-to e-commerce platform for all electronics things. Whether you’re a tech enthusiast or a casual shopper, ElectroNest aims to revolutionize your online shopping experience by blending cutting-edge technology with a clean, intuitive design.
 
 🚀 What Sets ElectroNest Apart?
@@ -46,3 +46,7 @@ Personalized Experience:
 <br/> 
 Responsive Design:
 <br/> Shop effortlessly on any device—be it desktop, tablet, or mobile. ElectroNest is built to handle high traffic, support extensive product catalogs, and offer a smooth, enjoyable shopping journey.
+
+<b>Project Report:</b>
+[View Document](https://github.com/user-attachments/files/18212892/last.pdf)
+
