@@ -206,7 +206,7 @@ function ProductImageGallery({ product }: { product: Product }) {
                 onClick={() =>
                   userId
                     ? navigate(
-                        `${AppRoutes.checkout}?product_id=${product?.productId}&source=buy_now`
+                        `${AppRoutes.checkout}?product_id=${product?.productId}`
                       )
                     : toast.info(AppStrings.registerYourselfFirst)
                 }

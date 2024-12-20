@@ -20,13 +20,13 @@ function PriceDetails({
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const querySearch = new URLSearchParams(window.location.search);
+  const productId = parseInt(querySearch.get("product_id") || "");
   const { cart, cartItems } = useSelector((state: RootState) => state.cart);
   const { isLoading, product } = useSelector(
     (state: RootState) => state.product
   );
-  const querySearch = new URLSearchParams(window.location.search);
-  const isBuyNow = querySearch.get("source") === "buy_now" || false;
-  const checkout = isBuyNow
+  const checkout = productId
     ? {
         totalPrice: product?.price || 0,
         totalDiscountPrice:
@@ -34,7 +34,6 @@ function PriceDetails({
         totalDeliveryCharges: product?.deliveryCharges || 0,
       }
     : cart;
-  const productId = parseInt(querySearch.get("product_id") || "");
   const totalItems = cartItems.length || 1;
   const totalAmount = calculateTotalPrice(checkout);
 
@@ -55,7 +54,7 @@ function PriceDetails({
   return (
     <div className="px-5 sticky top-0 h-[100vh] mt-5 lg:mt-0">
       {isLoading && <Loader suspenseLoader={true} />}
-      {cart || isBuyNow ? (
+      {cart || productId ? (
         <div className="border rounded-lg p-4 bg-white">
           <div className="flex justify-between">
             <p className="uppercase font-bold opacity-60 pb-3">Price Details</p>
@@ -106,11 +105,7 @@ function PriceDetails({
           <Button
             variant="contained"
             onClick={() =>
-              productId
-                ? navigate(
-                    `${AppRoutes.checkout}?step=2&product_id=${productId}&source=buy_now`
-                  )
-                : isOrderSummary
+              isOrderSummary || productId
                 ? onNextCallback && onNextCallback()
                 : location.pathname === AppRoutes.cart
                 ? navigate(AppRoutes.checkout)

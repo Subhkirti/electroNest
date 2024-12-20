@@ -5,7 +5,11 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
-import { calculateTotalPrice, getCheckoutStep, getQuerySearch } from "../../utils/productUtils";
+import {
+  calculateTotalPrice,
+  getCheckoutStep,
+  getQuerySearch,
+} from "../../utils/productUtils";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
 import {
@@ -42,7 +46,6 @@ export default function CheckoutStepper() {
   const { cart } = useSelector((state: RootState) => state.cart);
   const { activeAddress } = useSelector((state: RootState) => state.address);
   const totalAmount = calculateTotalPrice(cart);
-  const isBuyNow = querySearch.get("source") === "buy_now" || false;
 
   useEffect(() => {
     if (activeStep === 3) {
@@ -53,8 +56,8 @@ export default function CheckoutStepper() {
   const handleNext = async () => {
     if (activeStep === 1) {
       return navigate(
-        productId && isBuyNow
-          ? `${AppRoutes.checkout}?step=2&product_id=${productId}&source=buy_now`
+        productId
+          ? `${AppRoutes.checkout}?step=2&product_id=${productId}`
           : `${AppRoutes.checkout}?step=2`
       );
     }
@@ -63,7 +66,9 @@ export default function CheckoutStepper() {
     }
     if (activeStep === 3) {
       return navigate(
-        `?step=4&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}&order_id=${orderId}`
+        productId
+          ? `?step=4&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}&order_id=${orderId}&product_id=${productId}`
+          : `?step=4&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}&order_id=${orderId}`
       );
     }
   };
@@ -91,18 +96,19 @@ export default function CheckoutStepper() {
 
   const handleBack = () => {
     const params = new URLSearchParams(window.location.search);
-    const currentStep = parseInt(params.get('step') || '0') || 0;
+    const currentStep = parseInt(params.get("step") || "0") || 0;
     const previousStep = currentStep - 1;
     // Update only the step parameter, other params should same
-    params.set('step', previousStep.toString());
+    params.set("step", previousStep.toString());
     // Navigate with the updated query parameters
     navigate(`?${params}`);
   };
-  
 
   return (
     <Box sx={{ width: "100%" }}>
-      {isLoading && <Loader color="primary" suspenseLoader={true} fixed={true} />}
+      {isLoading && (
+        <Loader color="primary" suspenseLoader={true} fixed={true} />
+      )}
       {activeStep <= checkoutSteps.length && (
         <Stepper
           activeStep={activeStep - 1}

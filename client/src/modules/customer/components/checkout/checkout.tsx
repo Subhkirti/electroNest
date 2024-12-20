@@ -19,7 +19,6 @@ function Checkout({
   const productId = parseInt(querySearch.get("product_id") || "");
   const { cart } = useSelector((state: RootState) => state.cart);
   const { product } = useSelector((state: RootState) => state.product);
-  const isBuyNow = querySearch.get("source") === "buy_now" || false;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,10 +38,10 @@ function Checkout({
         <CartItemSection
           quantity={1}
           cartItemProduct={product}
-          isOrderSummary={isBuyNow || isOrderSummary}
+          isOrderSummary={Boolean(productId) || isOrderSummary}
         />
       </div>
-      <PriceDetails onNextCallback={onNextCallback} />
+      <PriceDetails isOrderSummary={isOrderSummary} onNextCallback={onNextCallback} />
     </div>
   ) : cart ? (
     <Cart />
