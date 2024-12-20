@@ -16,7 +16,7 @@ function Checkout({
 }) {
   const dispatch = useDispatch<AppDispatch>();
   const querySearch = new URLSearchParams(window.location.search);
-  const productId = querySearch.get("product_id") || "";
+  const productId = parseInt(querySearch.get("product_id") || "");
   const { cart } = useSelector((state: RootState) => state.cart);
   const { product } = useSelector((state: RootState) => state.product);
 
@@ -38,10 +38,10 @@ function Checkout({
         <CartItemSection
           quantity={1}
           cartItemProduct={product}
-          isOrderSummary={isOrderSummary}
+          isOrderSummary={Boolean(productId) || isOrderSummary}
         />
       </div>
-      <PriceDetails onNextCallback={onNextCallback} />
+      <PriceDetails isOrderSummary={isOrderSummary} onNextCallback={onNextCallback} />
     </div>
   ) : cart ? (
     <Cart />

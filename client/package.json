@@ -1,6 +1,6 @@
 {
   "name": "electronics_ecommerce",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.13.3",

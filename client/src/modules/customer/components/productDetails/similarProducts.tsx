@@ -8,7 +8,15 @@ function SimilarProducts({
   products: Product[];
   productId: number;
 }) {
-  return products?.length > 0 ? (
+  
+  const showSimilarProduct =
+    products?.length > 0
+      ? products.some(
+          (product) => Number(product.productId) !== Number(productId)
+        )
+      : false;
+
+  return products?.length > 0 && showSimilarProduct ? (
     <section className="pt-10">
       <h1 className="py-5 text-xl font-bold">Similar Products</h1>
       <div className="flex  flex-wrap  space-x-4">

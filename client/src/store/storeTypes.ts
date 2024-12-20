@@ -19,6 +19,7 @@ interface RootState {
   header: HeaderState;
   users: UsersState;
   address: AddressState;
+  wishlist: WishlistState;
 }
 
 interface RootAction {
@@ -92,6 +93,13 @@ interface UsersState {
   totalCount: number;
 }
 
+interface WishlistState {
+  products: Product[] | null;
+  isLoading: boolean;
+  error: string | null;
+  totalCount: number;
+}
+
 interface HeaderButtons {
   icon?: OverridableComponent<SvgIconTypeMap<{}, "svg">>;
   onClick: () => void;
@@ -114,6 +122,7 @@ export type {
   CartState,
   OrderState,
   HeaderState,
+  WishlistState,
   UsersState,
   AddressState,
 };

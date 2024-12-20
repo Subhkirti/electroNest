@@ -18,18 +18,20 @@ if (result.error) {
 
 require("./connection");
 const usersRouter = require("./services/userService");
-const productsRouter = require("./services/productsService");
 const cartRouter = require("./services/cartService");
+const productsRouter = require("./services/productsService");
 const ordersRouter = require("./services/ordersService");
 const paymentsRouter = require("./services/paymentsService");
 const addressRouter = require("./services/addressService");
+const wishlistRouter = require("./services/wishlistService");
 
 app.use(usersRouter);
-app.use(productsRouter);
 app.use(cartRouter);
+app.use(productsRouter);
 app.use(ordersRouter);
 app.use(paymentsRouter);
 app.use(addressRouter);
+app.use(wishlistRouter);
 
 const PORT = process.env.PORT || 4000;
 

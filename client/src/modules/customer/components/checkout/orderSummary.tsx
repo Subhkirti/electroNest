@@ -10,7 +10,6 @@ import Checkout from "./checkout";
 function OrderSummary({ onNextCallback }: { onNextCallback: () => void }) {
   const { activeAddress } = useSelector((state: RootState) => state.address);
   const productId = getQuerySearch("product_id");
-
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {

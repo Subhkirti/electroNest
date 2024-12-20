@@ -50,13 +50,10 @@ function Orders() {
         <OrderFilter statusValues={statusValues} totalCount={totalCount} />
       </Grid>
       <Grid item xs={12} md={8} lg={9}>
-        {orders?.length > 0 ? (
-          <>
-            <div className="space-y-5">
-              {orders.map((order, index) => {
-                return <OrderCard key={index} order={order} />;
-              })}
-            </div>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold mb-5">My Orders</h1>
+
+          {orders?.length > 0 && (
             <TablePagination
               rowsPerPageOptions={pageSizes}
               component="div"
@@ -67,7 +64,16 @@ function Orders() {
               onRowsPerPageChange={handleChangeRowsPerPage}
               sx={{ mb: 3 }}
             />
-          </>
+          )}
+        </div>
+
+        <hr />
+        {orders?.length > 0 ? (
+          <div className="space-y-5 my-6">
+            {orders.map((order, index) => {
+              return <OrderCard key={index} order={order} />;
+            })}
+          </div>
         ) : (
           !isLoading && <NotFound message={AppStrings.ordersNotFound} />
         )}

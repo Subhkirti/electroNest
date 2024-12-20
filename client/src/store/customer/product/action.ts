@@ -322,7 +322,7 @@ const deleteThirdLevelCategory =
 
 /* Products section starts here */
 const getProducts =
-  (pageNumber: number, pageSize: number,) =>
+  (pageNumber: number, pageSize: number) =>
   async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.GET_PRODUCTS_REQUEST });
 
@@ -330,7 +330,8 @@ const getProducts =
       const res = await axios.get(
         `${ApiUrls.getProducts}pageNumber=${pageNumber}&pageSize=${
           pageSize || 10
-        }`
+        }`,
+        headersConfig
       );
 
       dispatch({
@@ -350,11 +351,16 @@ const getProducts =
     }
   };
 const findProducts =
-  (reqData: ProductSearchReqBody,  isViewMore?: boolean) => async (dispatch: ActionDispatch) => {
+  (reqData: ProductSearchReqBody, isViewMore?: boolean) =>
+  async (dispatch: ActionDispatch) => {
     dispatch({ type: ActionTypes.FIND_PRODUCTS_REQUEST });
 
     try {
-      const res = await axios.post(`${ApiUrls.findProducts}`, reqData);
+      const res = await axios.post(
+        `${ApiUrls.findProducts}`,
+        reqData,
+        headersConfig
+      );
       dispatch({
         type: ActionTypes.FIND_PRODUCTS_SUCCESS,
         payload: {
@@ -376,7 +382,10 @@ const findProductsById =
     dispatch({ type: ActionTypes.FIND_PRODUCT_BY_ID_REQUEST });
 
     try {
-      const res = await axios.get(`${ApiUrls.productDetails}id=${productId}`);
+      const res = await axios.get(
+        `${ApiUrls.productDetails}id=${productId}`,
+        headersConfig
+      );
 
       dispatch({
         type: ActionTypes.FIND_PRODUCT_BY_ID_SUCCESS,
@@ -497,12 +506,14 @@ const getHomeProductsCarousel = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_PRODUCTS_CAROUSEL_REQUEST });
 
   try {
-    const res = await axios.get(ApiUrls.getProductsCarousel, );
+    const res = await axios.get(ApiUrls.getProductsCarousel, headersConfig);
 
     dispatch({
       type: ActionTypes.GET_PRODUCTS_CAROUSEL_SUCCESS,
       payload:
-        res?.data?.data?.length > 0 ? res?.data?.data.map(productsCarouselMap) : [],
+        res?.data?.data?.length > 0
+          ? res?.data?.data.map(productsCarouselMap)
+          : [],
     });
   } catch (error) {
     handleCatchError({
@@ -511,7 +522,6 @@ const getHomeProductsCarousel = () => async (dispatch: ActionDispatch) => {
     });
   }
 };
-
 
 export {
   getProducts,
@@ -531,5 +541,5 @@ export {
   deleteTopLevelCategory,
   deleteSecondLevelCategory,
   deleteThirdLevelCategory,
-  getHomeProductsCarousel
+  getHomeProductsCarousel,
 };

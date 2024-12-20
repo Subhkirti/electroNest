@@ -5,16 +5,17 @@ import {
   textTruncate,
 } from "../../../admin/utils/productUtil";
 import { LocalShipping } from "@mui/icons-material";
+import LikeButton from "./likeButton";
 
 function ProductCard({ product }: { product: Product }) {
   const navigate = useNavigate();
   return product.productId ? (
-    <div
-      onClick={() => navigate(product.path)}
-      className="productCard relative hover:shadow-lg hover:border-gray-300 border rounded-md w-[15rem] bg-white m-2 transition-all cursor-pointer"
-    >
+    <div className="productCard relative hover:shadow-lg hover:border-gray-300 border rounded-md w-[15rem] bg-white m-2 transition-all cursor-pointer">
       {/* image section */}
-      <div className="aspect-w-1 aspect-h-1 flex justify-center my-4 hover:scale-105 transition-all duration-700 px-3">
+      <div
+        className="aspect-w-1 aspect-h-1 flex justify-center my-4 hover:scale-105 transition-all duration-700 px-3"
+        onClick={() => navigate(product.path)}
+      >
         <img src={product?.images?.[0]} alt="" className="object-contain" />
       </div>
 
@@ -26,8 +27,13 @@ function ProductCard({ product }: { product: Product }) {
         </div>
       )}
 
+      <LikeButton isLiked={product.isLiked} productId={product.productId} />
+
       {/* meta details section */}
-      <div className="productCardText bg-white p-3">
+      <div
+        className="productCardText bg-white p-3"
+        onClick={() => navigate(product.path)}
+      >
         {/* description section */}
         <div>
           {product?.stock <= 0 && (

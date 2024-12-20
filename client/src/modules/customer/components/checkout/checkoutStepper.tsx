@@ -5,7 +5,11 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
-import { calculateTotalPrice, getCheckoutStep, getQuerySearch } from "../../utils/productUtils";
+import {
+  calculateTotalPrice,
+  getCheckoutStep,
+  getQuerySearch,
+} from "../../utils/productUtils";
 import { toast } from "react-toastify";
 import AppStrings from "../../../../common/appStrings";
 import {
@@ -28,6 +32,7 @@ const checkoutSteps = [
 ];
 
 export default function CheckoutStepper() {
+  const querySearch = new URLSearchParams(window.location.search);
   const activeStep = getCheckoutStep();
   const navigate = useNavigate();
   const user = getCurrentUser();
@@ -61,7 +66,9 @@ export default function CheckoutStepper() {
     }
     if (activeStep === 3) {
       return navigate(
-        `?step=4&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}&order_id=${orderId}`
+        productId
+          ? `?step=4&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}&order_id=${orderId}&product_id=${productId}`
+          : `?step=4&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}&order_id=${orderId}`
       );
     }
   };
@@ -88,12 +95,20 @@ export default function CheckoutStepper() {
   };
 
   const handleBack = () => {
-    navigate(`?step=${activeStep - 1}`);
+    const params = new URLSearchParams(window.location.search);
+    const currentStep = parseInt(params.get("step") || "0") || 0;
+    const previousStep = currentStep - 1;
+    // Update only the step parameter, other params should same
+    params.set("step", previousStep.toString());
+    // Navigate with the updated query parameters
+    navigate(`?${params}`);
   };
 
   return (
     <Box sx={{ width: "100%" }}>
-      {isLoading && <Loader color="primary" suspenseLoader={true} fixed={true} />}
+      {isLoading && (
+        <Loader color="primary" suspenseLoader={true} fixed={true} />
+      )}
       {activeStep <= checkoutSteps.length && (
         <Stepper
           activeStep={activeStep - 1}
