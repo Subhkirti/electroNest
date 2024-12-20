@@ -13,6 +13,9 @@ const Orders = lazy(() =>
 const OrderDetails = lazy(() =>
   import("../../modules/customer/components/order/orderDetails")
 );
+const WishList = lazy(() =>
+  import("../../modules/customer/components/wishList/wishList")
+);
 
 const authRoutes = [
   {
@@ -23,7 +26,10 @@ const authRoutes = [
     path: AppRoutes.orders,
     component: Orders,
   },
-
+  {
+    path: AppRoutes.wishList,
+    component: WishList,
+  },
   {
     path: AppRoutes.orderDetail,
     component: OrderDetails,

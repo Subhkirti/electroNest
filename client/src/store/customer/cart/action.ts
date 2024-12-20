@@ -19,10 +19,7 @@ const userId = getCurrentUser()?.id || 0;
 const getCart = () => async (dispatch: ActionDispatch) => {
   dispatch({ type: ActionTypes.GET_CART_REQUEST });
   try {
-    const res = await axios.get(
-      `${ApiUrls.getCart}?id=${userId}`,
-      headersConfig
-    );
+    const res = await axios.get(ApiUrls.getCart, headersConfig);
     dispatch({
       type: ActionTypes.GET_CART_SUCCESS,
       payload: res?.data?.data ? cartMap(res?.data?.data) : null,
@@ -39,10 +36,7 @@ const getCartItems = () => async (dispatch: ActionDispatch) => {
   if (userId) {
     dispatch({ type: ActionTypes.GET_CART_ITEMS_REQUEST });
     try {
-      const res = await axios.get(
-        `${ApiUrls.getCartItems}id=${userId}`,
-        headersConfig
-      );
+      const res = await axios.get(ApiUrls.getCartItems, headersConfig);
       dispatch({
         type: ActionTypes.GET_CART_ITEMS_SUCCESS,
         payload:
@@ -90,8 +84,8 @@ const removeItemFromCart =
 
     try {
       const res = await axios.post(
-        `${ApiUrls.removeItemFromCart}`,
-        { cartItemId, userId },
+        ApiUrls.removeItemFromCart,
+        { cartItemId },
         headersConfig
       );
 
@@ -114,8 +108,8 @@ const reduceItemFromCart =
 
     try {
       const res = await axios.post(
-        `${ApiUrls.reduceItemFromCart}`,
-        { userId, productId },
+        ApiUrls.reduceItemFromCart,
+        { productId },
         headersConfig
       );
 
@@ -132,33 +126,10 @@ const reduceItemFromCart =
     }
   };
 
-const updateItemToCart =
-  (cartItemId: number, reqData: any) => async (dispatch: ActionDispatch) => {
-    dispatch({ type: ActionTypes.UPDATE_CART_ITEM_REQUEST });
-
-    try {
-      const res = await axios.put(
-        `${ApiUrls.getCartItems}id=${cartItemId}`,
-        reqData,
-        headersConfig
-      );
-      dispatch({
-        type: ActionTypes.UPDATE_CART_ITEM_SUCCESS,
-        payload: res?.data?.data,
-      });
-    } catch (error) {
-      handleCatchError({
-        error,
-        actionType: ActionTypes.UPDATE_CART_ITEM_FAILURE,
-      });
-    }
-  };
-
 export {
   getCart,
   addItemToCart,
   removeItemFromCart,
   reduceItemFromCart,
-  updateItemToCart,
   getCartItems,
 };

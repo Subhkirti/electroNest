@@ -1,7 +1,8 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require("bcryptjs");
 const express = require("express");
 const connection = require("../connection");
-const { generateToken } = require("./jwtService");
+const { generateToken, getUserIdFromToken } = require("./jwtService");
+
 const tableName = "users";
 
 checkTableExistence();
@@ -77,7 +78,7 @@ usersRouter.post("/register", (req, res) => {
                           message: "Failed to register",
                         });
                       }
-                      
+
                       // Respond with success and token
                       res.status(200).json({
                         status: 200,
@@ -181,89 +182,120 @@ usersRouter.get("/users", (req, res) => {
 // Add user API for admins
 usersRouter.post("/user/add", (req, res) => {
   const { firstName, lastName, email, password, role, mobile } = req.body;
+  const userId = getUserIdFromToken(req);
+
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+
+  // Check if user has admin role
   connection.query(
-    `SELECT * FROM ${tableName} WHERE email = ?`,
-    [email],
+    `SELECT role FROM ${tableName} WHERE id = ?`,
+    [userId],
     (err, result) => {
       if (err) {
         return res
-          .status(400)
-          .json({ status: 400, message: "Error checking user" });
+          .status(500)
+          .json({ status: 500, message: "Error verifying user role" });
       }
-      if (result.length > 0) {
-        return res.status(400).json({
-          status: 400,
-          message: "This User already exists.",
+
+      if (!result.length || result[0].role !== "admin") {
+        return res.status(403).json({
+          status: 403,
+          message: "Access denied. Only admins can add users.",
         });
       }
 
-      // Hash password before saving
-      bcrypt.hash(password, 8, (err, hashedPassword) => {
-        if (err) {
-          return res
-            .status(500)
-            .json({ status: 500, message: "Error hashing password" });
-        }
+      // Proceed to check if email already exists
+      connection.query(
+        `SELECT * FROM ${tableName} WHERE email = ?`,
+        [email],
+        (err, result) => {
+          if (err) {
+            return res
+              .status(400)
+              .json({ status: 400, message: "Error checking user" });
+          }
+          if (result.length > 0) {
+            return res.status(400).json({
+              status: 400,
+              message: "This User already exists.",
+            });
+          }
 
-        // Inserted the new user
-        connection.query(
-          `INSERT INTO ${tableName} (first_name, last_name, email, password, role, mobile) VALUES (?, ?, ?, ?, ?, ?)`,
-          [firstName, lastName, email, hashedPassword, role, mobile],
-          (err, result) => {
+          // Hash password before saving
+          bcrypt.hash(password, 8, (err, hashedPassword) => {
             if (err) {
               return res
                 .status(500)
-                .json({ status: 500, message: "Error while adding user" });
+                .json({ status: 500, message: "Error hashing password" });
             }
 
-            // Generated token after user is created
-            const userId = result.insertId;
-            const token = generateToken(userId);
-
-            // Update user with token
+            // Insert the new user
             connection.query(
-              `UPDATE ${tableName} SET token = ? WHERE id = ?`,
-              [token, userId],
-              (err) => {
+              `INSERT INTO ${tableName} (first_name, last_name, email, password, role, mobile) VALUES (?, ?, ?, ?, ?, ?)`,
+              [firstName, lastName, email, hashedPassword, role, mobile],
+              (err, result) => {
                 if (err) {
                   return res
                     .status(500)
-                    .json({ status: 500, message: "Error saving token" });
-                } else {
-                  // give user details
-                  connection.query(
-                    `SELECT * FROM ${tableName} WHERE id = ?`,
-                    [userId],
-                    (err, result) => {
-                      if (err) {
-                        return res.status(400).json({
-                          status: 400,
-                          message: "Error checking user",
-                        });
-                      }
-                      if (!result.length) {
-                        return res.status(400).json({
-                          status: 400,
-                          message: "Failed to add",
-                        });
-                      }
-                      // Respond with success and token
-                      res.status(200).json({
-                        status: 200,
-                        message: "User added successfully",
-                        data: result[0],
-                      });
-                    }
-                  );
+                    .json({ status: 500, message: "Error while adding user" });
                 }
+
+                // Generate token after user is created
+                const userId = result.insertId;
+                const token = generateToken(userId);
+
+                // Update user with token
+                connection.query(
+                  `UPDATE ${tableName} SET token = ? WHERE id = ?`,
+                  [token, userId],
+                  (err) => {
+                    if (err) {
+                      return res
+                        .status(500)
+                        .json({ status: 500, message: "Error saving token" });
+                    } else {
+                      // Get user details
+                      connection.query(
+                        `SELECT * FROM ${tableName} WHERE id = ?`,
+                        [userId],
+                        (err, result) => {
+                          if (err) {
+                            return res.status(400).json({
+                              status: 400,
+                              message: "Error fetching user",
+                            });
+                          }
+                          if (!result.length) {
+                            return res.status(400).json({
+                              status: 400,
+                              message: "Failed to add user",
+                            });
+                          }
+                          // Respond with success and user details
+                          res.status(200).json({
+                            status: 200,
+                            message: "User added successfully",
+                            data: result[0],
+                          });
+                        }
+                      );
+                    }
+                  }
+                );
               }
             );
-          }
-        );
-      });
+          });
+        }
+      );
     }
   );
 });
+
 
 /* Get user details by id */
 usersRouter.get("/user-details", (req, res) => {
@@ -296,31 +328,76 @@ usersRouter.get("/user-details", (req, res) => {
 /* Delete user */
 usersRouter.delete("/user/delete", (req, res) => {
   const { id } = req.query;
+  const userId = getUserIdFromToken(req);
+
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Authorization failed." });
+  }
+
   if (!id) {
     return res
       .status(400)
       .json({ status: 400, message: "User Id not found in request" });
   }
+
+  // Check if the logged-in user has an admin role
   connection.query(
-    `DELETE FROM ${tableName} WHERE id = ?`,
-    [parseInt(id)],
-    (err) => {
+    `SELECT role FROM ${tableName} WHERE id = ?`,
+    [userId],
+    (err, result) => {
       if (err) {
         return res
-          .status(400)
-          .json({ status: 400, message: "Error while getting users" });
+          .status(500)
+          .json({ status: 500, message: "Error verifying user role" });
       }
-      return res
-        .status(200)
-        .json({ status: 200, data: "User deleted successfully" });
+
+      if (!result.length || result[0].role !== "admin") {
+        return res.status(403).json({
+          status: 403,
+          message: "Access denied. Only admins can delete users.",
+        });
+      }
+
+      // Proceed to delete the user
+      connection.query(
+        `DELETE FROM ${tableName} WHERE id = ?`,
+        [parseInt(id)],
+        (err, result) => {
+          if (err) {
+            return res
+              .status(500)
+              .json({ status: 500, message: "Error while deleting user" });
+          }
+
+          if (result.affectedRows === 0) {
+            return res
+              .status(404)
+              .json({ status: 404, message: "User not found." });
+          }
+
+          return res
+            .status(200)
+            .json({ status: 200, message: "User deleted successfully" });
+        }
+      );
     }
   );
 });
+
 
 /* Edit user details */
 usersRouter.post("/user/edit", (req, res) => {
   const userId = req.query?.id;
   const { firstName, lastName, email, password, role, mobile } = req.body;
+  const loggedInUserId = getUserIdFromToken(req);
+
+  if (!loggedInUserId) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Authorization failed." });
+  }
 
   if (!userId) {
     return res
@@ -328,39 +405,62 @@ usersRouter.post("/user/edit", (req, res) => {
       .json({ status: 400, message: "User Id not found in request" });
   }
 
+  // Check if the logged-in user has admin role
   connection.query(
-    `UPDATE ${tableName} SET first_name = ?, last_name = ?, email = ?, password = ?, role = ?, mobile = ? WHERE id = ?`,
-    [firstName, lastName, email, password, role, mobile, userId],
+    `SELECT role FROM ${tableName} WHERE id = ?`,
+    [loggedInUserId],
     (err, result) => {
       if (err) {
         return res
-          .status(400)
-          .json({ status: 400, message: "Error while updating user" });
+          .status(500)
+          .json({ status: 500, message: "Error verifying user role" });
       }
-      if (result.affectedRows === 0) {
-        return res.status(404).json({
-          status: 404,
-          message: "User not found",
+
+      if (!result.length || result[0].role !== "admin") {
+        return res.status(403).json({
+          status: 403,
+          message: "Access denied. Only admins can edit users.",
         });
       }
 
-      // return the updated user details
+      // Proceed to update the user details
       connection.query(
-        `SELECT * FROM ${tableName} WHERE id = ?`,
-        [userId],
+        `UPDATE ${tableName} SET first_name = ?, last_name = ?, email = ?, password = ?, role = ?, mobile = ? WHERE id = ?`,
+        [firstName, lastName, email, password, role, mobile, userId],
         (err, result) => {
           if (err) {
-            return res.status(400).json({
-              status: 400,
-              message: "Error fetching updated user",
+            return res
+              .status(400)
+              .json({ status: 400, message: "Error while updating user" });
+          }
+
+          if (result.affectedRows === 0) {
+            return res.status(404).json({
+              status: 404,
+              message: "User not found",
             });
           }
-          return res.status(200).json({ status: 200, data: result[0] });
+
+          // Return the updated user details
+          connection.query(
+            `SELECT * FROM ${tableName} WHERE id = ?`,
+            [userId],
+            (err, result) => {
+              if (err) {
+                return res.status(400).json({
+                  status: 400,
+                  message: "Error fetching updated user",
+                });
+              }
+              return res.status(200).json({ status: 200, data: result[0] });
+            }
+          );
         }
       );
     }
   );
 });
+
 
 function checkTableExistence() {
   // Checked and created users table if it does not exist
@@ -390,4 +490,4 @@ function checkTableExistence() {
   });
 }
 
-module.exports = usersRouter; 
+module.exports = usersRouter;

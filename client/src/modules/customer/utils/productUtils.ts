@@ -223,7 +223,16 @@ function getCategoryPath({
   }
 }
 
-function calculateTotalPrice(cart: Cart | null) {
+function calculateTotalPrice(
+  cart:
+    | {
+        totalPrice: number;
+        totalDiscountPrice: number;
+        totalDeliveryCharges: number;
+      }
+    | Cart
+    | null
+) {
   const totalAmount = cart
     ? (
         Number(cart?.totalPrice) -

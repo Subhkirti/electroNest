@@ -163,8 +163,7 @@ const createOrder =
             })
           : reqData?.productId &&
             navigate({
-              search: `step=3&product_id=${reqData?.productId}
-          `,
+              search: `step=3&receipt_id=${receiptId}&razorpay_id=${razorpayOrderId}&order_id=${orderId}&product_id=${reqData?.productId}`,
             });
       } else {
         toast.error("Something went wrong while placing the order.");
@@ -207,8 +206,7 @@ const verifyPayment = async ({
       },
       headersConfig
     );
-
-    if (paymentVerification.data.status >= 200) {
+    if (paymentVerification.status >= 200) {
       toast.success("Order placed. Thanks for shopping with us.");
       dispatch(getCart());
       window.location.href = AppRoutes.products;

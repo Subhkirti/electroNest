@@ -3,21 +3,24 @@ const cartTableName = "cart";
 const cartItemsTableName = "cart_items";
 const express = require("express");
 const cartRouter = express.Router();
+const { getUserIdFromToken } = require("./jwtService");
+
 checkCartTableExistence();
 checkCartItemsTable();
 
 // Get cart details
 cartRouter.get("/cart", (req, res) => {
-  const { id } = req.query;
-  if (!id) {
-    return res
-      .status(400)
-      .json({ status: 400, message: "User Id not found in request" });
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
   }
 
   connection.query(
     `SELECT * FROM ${cartTableName} WHERE user_id = ?`,
-    [id],
+    [userId],
     (err, result) => {
       if (err) {
         return res
@@ -35,16 +38,18 @@ cartRouter.get("/cart", (req, res) => {
 
 // Get cart Items
 cartRouter.get("/cart-items", (req, res) => {
-  const { id } = req.query;
-  let cartId;
-  if (!id) {
-    return res
-      .status(400)
-      .json({ status: 400, message: "Cart Id not found in request" });
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
   }
+
+  let cartId;
   connection.query(
     `SELECT * FROM ${cartTableName} WHERE user_id = ?`,
-    [id],
+    [userId],
     async (err, results) => {
       if (err) {
         console.log("Error while getting cart details:", err);
@@ -127,7 +132,7 @@ async function getCartItems(cartId, res, message) {
                     item_id: productDetail.item_id,
                     delivery_charges: productDetail.delivery_charges,
                   }
-                : null, 
+                : null,
             };
           });
 
@@ -161,8 +166,15 @@ async function getCartItems(cartId, res, message) {
 
 // Add cart items
 cartRouter.post("/cart-items/add", (req, res) => {
-  const { userId, productId, price, discountPercentage, deliveryCharges } =
-    req.body;
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+
+  const { productId, price, discountPercentage, deliveryCharges } = req.body;
   const discountPrice = (price * discountPercentage) / 100;
 
   // Step 1: Check if the user already has an active cart
@@ -318,8 +330,15 @@ function updateCartTotal(cartId, callback) {
 
 // Remove an item from the user's cart
 cartRouter.post("/cart-items/remove", (req, res) => {
-  const { userId, cartItemId } = req.body;
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
 
+  const { cartItemId } = req.body;
   // Step 1: Check if the user has an active cart
   const checkCartQuery = `SELECT id FROM ${cartTableName} WHERE user_id = ?`;
   connection.query(checkCartQuery, [userId], (err, cartResults) => {
@@ -391,7 +410,15 @@ cartRouter.post("/cart-items/remove", (req, res) => {
 
 // Reduce the quantity of an item in the cart
 cartRouter.post("/cart-items/reduce", (req, res) => {
-  const { userId, productId } = req.body;
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(400).json({
+      status: 400,
+      message: "Authorization failed.",
+    });
+  }
+
+  const { productId } = req.body;
 
   // Step 1: Check if the user has an active cart
   const checkCartQuery = `SELECT id FROM ${cartTableName} WHERE user_id = ? AND total_items > 0`;

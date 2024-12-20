@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store/storeTypes";
 import { toast } from "react-toastify";
 import { OrderStatus } from "../../types/orderTypes";
+import { findProductsById } from "../../../../store/customer/product/action";
 
 function Payment() {
   const navigate = useNavigate();
@@ -28,9 +29,33 @@ function Payment() {
   const receiptId = getQuerySearch("receipt_id");
   const razorpayOrderId = getQuerySearch("razorpay_id");
   const orderId = getQuerySearch("order_id");
+  const productId = getQuerySearch("product_id");
   const { error, isLoading: razorpayLoading, Razorpay } = useRazorpay();
   const { cart } = useSelector((state: RootState) => state.cart);
-  const totalAmount = calculateTotalPrice(cart);
+  const { product } = useSelector((state: RootState) => state.product);
+  const checkout = productId
+    ? {
+        totalPrice: product?.price || 0,
+        totalDiscountPrice:
+          ((product?.price || 0) * (product?.discountPercentage || 0)) / 100,
+        totalDeliveryCharges: product?.deliveryCharges || 0,
+      }
+    : cart;
+  const totalAmount = calculateTotalPrice(checkout);
+
+  useEffect(() => {
+    // Fetch product details in buy now case
+    if (productId) {
+      const timer = setTimeout(() => {
+        productId &&
+          Number(productId) !== Number(product?.productId) &&
+          dispatch(findProductsById(productId));
+      }, 10);
+
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line
+  }, []);
 
   useEffect(() => {
     if (activeStep === 4) {
@@ -54,9 +79,11 @@ function Payment() {
           };
         }
       }
-      setTimeout(() => {
-        paymentDialog();
-      }, 1000);
+
+      ((productId && product) || !productId) &&
+        setTimeout(() => {
+          paymentDialog();
+        }, 1000);
     }
   }, [paymentError, seconds]);
 
