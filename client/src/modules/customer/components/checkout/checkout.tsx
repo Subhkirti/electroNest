@@ -16,9 +16,10 @@ function Checkout({
 }) {
   const dispatch = useDispatch<AppDispatch>();
   const querySearch = new URLSearchParams(window.location.search);
-  const productId = querySearch.get("product_id") || "";
+  const productId = parseInt(querySearch.get("product_id") || "");
   const { cart } = useSelector((state: RootState) => state.cart);
   const { product } = useSelector((state: RootState) => state.product);
+  const isBuyNow = querySearch.get("source") === "buy_now" || false;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -38,7 +39,7 @@ function Checkout({
         <CartItemSection
           quantity={1}
           cartItemProduct={product}
-          isOrderSummary={isOrderSummary}
+          isOrderSummary={isBuyNow || isOrderSummary}
         />
       </div>
       <PriceDetails onNextCallback={onNextCallback} />

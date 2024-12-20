@@ -28,6 +28,7 @@ const checkoutSteps = [
 ];
 
 export default function CheckoutStepper() {
+  const querySearch = new URLSearchParams(window.location.search);
   const activeStep = getCheckoutStep();
   const navigate = useNavigate();
   const user = getCurrentUser();
@@ -41,6 +42,7 @@ export default function CheckoutStepper() {
   const { cart } = useSelector((state: RootState) => state.cart);
   const { activeAddress } = useSelector((state: RootState) => state.address);
   const totalAmount = calculateTotalPrice(cart);
+  const isBuyNow = querySearch.get("source") === "buy_now" || false;
 
   useEffect(() => {
     if (activeStep === 3) {
@@ -51,8 +53,8 @@ export default function CheckoutStepper() {
   const handleNext = async () => {
     if (activeStep === 1) {
       return navigate(
-        productId
-          ? `${AppRoutes.checkout}?step=2&product_id=${productId}`
+        productId && isBuyNow
+          ? `${AppRoutes.checkout}?step=2&product_id=${productId}&source=buy_now`
           : `${AppRoutes.checkout}?step=2`
       );
     }
@@ -88,8 +90,15 @@ export default function CheckoutStepper() {
   };
 
   const handleBack = () => {
-    navigate(`?step=${activeStep - 1}`);
+    const params = new URLSearchParams(window.location.search);
+    const currentStep = parseInt(params.get('step') || '0') || 0;
+    const previousStep = currentStep - 1;
+    // Update only the step parameter, other params should same
+    params.set('step', previousStep.toString());
+    // Navigate with the updated query parameters
+    navigate(`?${params}`);
   };
+  
 
   return (
     <Box sx={{ width: "100%" }}>

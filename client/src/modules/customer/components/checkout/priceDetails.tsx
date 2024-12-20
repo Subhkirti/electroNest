@@ -1,11 +1,14 @@
 import { Button } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
-import { RootState } from "../../../../store/storeTypes";
-import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../store/storeTypes";
+import { useDispatch, useSelector } from "react-redux";
 import { formatAmount } from "../../../admin/utils/productUtil";
 import AppStrings from "../../../../common/appStrings";
 import AppRoutes from "../../../../common/appRoutes";
 import { calculateTotalPrice } from "../../utils/productUtils";
+import { findProductsById } from "../../../../store/customer/product/action";
+import { useEffect } from "react";
+import Loader from "../../../../common/components/loader";
 
 function PriceDetails({
   isOrderSummary,
@@ -16,19 +19,49 @@ function PriceDetails({
 }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const { cart, cartItems } = useSelector((state: RootState) => state.cart);
+  const { isLoading, product } = useSelector(
+    (state: RootState) => state.product
+  );
+  const querySearch = new URLSearchParams(window.location.search);
+  const isBuyNow = querySearch.get("source") === "buy_now" || false;
+  const checkout = isBuyNow
+    ? {
+        totalPrice: product?.price || 0,
+        totalDiscountPrice:
+          ((product?.price || 0) * (product?.discountPercentage || 0)) / 100,
+        totalDeliveryCharges: product?.deliveryCharges || 0,
+      }
+    : cart;
+  const productId = parseInt(querySearch.get("product_id") || "");
+  const totalItems = cartItems.length || 1;
+  const totalAmount = calculateTotalPrice(checkout);
 
-  const totalAmount = calculateTotalPrice(cart);
+  useEffect(() => {
+    // Fetch product details
+    if (productId) {
+      const timer = setTimeout(() => {
+        productId &&
+          Number(productId) !== Number(product?.productId) &&
+          dispatch(findProductsById(productId));
+      }, 10);
+
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <div className="px-5 sticky top-0 h-[100vh] mt-5 lg:mt-0">
-      {cart ? (
+      {isLoading && <Loader suspenseLoader={true} />}
+      {cart || isBuyNow ? (
         <div className="border rounded-lg p-4 bg-white">
           <div className="flex justify-between">
             <p className="uppercase font-bold opacity-60 pb-3">Price Details</p>
-            {cartItems.length > 0 && (
+            {totalItems && (
               <p className="uppercase font-bold opacity-60 pb-3">
-                Total Items: {cartItems.length}
+                Total Items: {totalItems}
               </p>
             )}
           </div>
@@ -38,14 +71,14 @@ function PriceDetails({
           <div className="space-y-3 font-semibold ">
             <div className="flex justify-between pt-3 text-black">
               <span>Price</span>
-              <span> + {formatAmount(cart.totalPrice)}</span>
+              <span> + {formatAmount(checkout?.totalPrice ?? 0)}</span>
             </div>
 
             {/* discount price */}
             <div className="flex justify-between pt-3">
               <span>Discount</span>
               <span className="text-secondary">
-                - {formatAmount(cart.totalDiscountPrice)}
+                - {formatAmount(checkout?.totalDiscountPrice ?? 0)}
               </span>
             </div>
 
@@ -53,8 +86,9 @@ function PriceDetails({
             <div className="flex justify-between pt-3">
               <span>Delivery Charges</span>
               <span className="text-secondary">
-                {cart.totalDeliveryCharges > 0
-                  ? "+ " + formatAmount(cart.totalDeliveryCharges)
+                {checkout?.totalDeliveryCharges &&
+                checkout?.totalDeliveryCharges > 0
+                  ? "+ " + formatAmount(checkout?.totalDeliveryCharges ?? 0)
                   : "Free"}
               </span>
             </div>
@@ -72,7 +106,11 @@ function PriceDetails({
           <Button
             variant="contained"
             onClick={() =>
-              isOrderSummary
+              productId
+                ? navigate(
+                    `${AppRoutes.checkout}?step=2&product_id=${productId}&source=buy_now`
+                  )
+                : isOrderSummary
                 ? onNextCallback && onNextCallback()
                 : location.pathname === AppRoutes.cart
                 ? navigate(AppRoutes.checkout)

@@ -45,6 +45,7 @@ ordersRouter.post("/order/create", async (req, res) => {
 });
 
 async function createNewOrder(userId, cartId, addressId, status, productId) {
+  console.log('cartId:', cartId);
   // Order through Cart
   if (cartId) {
     const cartItems = await getCartItems(cartId);

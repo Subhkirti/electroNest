@@ -206,11 +206,11 @@ function ProductImageGallery({ product }: { product: Product }) {
                 onClick={() =>
                   userId
                     ? navigate(
-                        `${AppRoutes.checkout}?product_id=${product.productId}`
+                        `${AppRoutes.checkout}?product_id=${product?.productId}&source=buy_now`
                       )
                     : toast.info(AppStrings.registerYourselfFirst)
                 }
-                className="lg:w-[50%]  px-8 py-3 shadow-none hover:shadow-none"
+                className="lg:w-[50%] px-8 py-3 shadow-none hover:shadow-none"
               >
                 {AppStrings.buyNow}
               </Button>
