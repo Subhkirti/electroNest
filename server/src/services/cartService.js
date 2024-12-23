@@ -11,13 +11,6 @@ checkCartItemsTable();
 // Get cart details
 cartRouter.get("/cart", (req, res) => {
   const userId = getUserIdFromToken(req);
-  if (!userId) {
-    return res.status(400).json({
-      status: 400,
-      message: "Authorization failed.",
-    });
-  }
-
   connection.query(
     `SELECT * FROM ${cartTableName} WHERE user_id = ?`,
     [userId],
@@ -39,13 +32,6 @@ cartRouter.get("/cart", (req, res) => {
 // Get cart Items
 cartRouter.get("/cart-items", (req, res) => {
   const userId = getUserIdFromToken(req);
-  if (!userId) {
-    return res.status(400).json({
-      status: 400,
-      message: "Authorization failed.",
-    });
-  }
-
   let cartId;
   connection.query(
     `SELECT * FROM ${cartTableName} WHERE user_id = ?`,
@@ -166,13 +152,7 @@ async function getCartItems(cartId, res, message) {
 
 // Add cart items
 cartRouter.post("/cart-items/add", (req, res) => {
-  const userId = getUserIdFromToken(req);
-  if (!userId) {
-    return res.status(400).json({
-      status: 400,
-      message: "Authorization failed.",
-    });
-  }
+  const userId = getUserIdFromToken(req, res);
 
   const { productId, price, discountPercentage, deliveryCharges } = req.body;
   const discountPrice = (price * discountPercentage) / 100;
@@ -330,13 +310,7 @@ function updateCartTotal(cartId, callback) {
 
 // Remove an item from the user's cart
 cartRouter.post("/cart-items/remove", (req, res) => {
-  const userId = getUserIdFromToken(req);
-  if (!userId) {
-    return res.status(400).json({
-      status: 400,
-      message: "Authorization failed.",
-    });
-  }
+  const userId = getUserIdFromToken(req, res);
 
   const { cartItemId } = req.body;
   // Step 1: Check if the user has an active cart
@@ -410,13 +384,7 @@ cartRouter.post("/cart-items/remove", (req, res) => {
 
 // Reduce the quantity of an item in the cart
 cartRouter.post("/cart-items/reduce", (req, res) => {
-  const userId = getUserIdFromToken(req);
-  if (!userId) {
-    return res.status(400).json({
-      status: 400,
-      message: "Authorization failed.",
-    });
-  }
+  const userId = getUserIdFromToken(req, res);
 
   const { productId } = req.body;
 

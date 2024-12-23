@@ -181,16 +181,10 @@ usersRouter.get("/users", (req, res) => {
 
 // Add user API for admins
 usersRouter.post("/user/add", (req, res) => {
+  const userId = getUserIdFromToken(req, res);
+  if (!userId) return;
+
   const { firstName, lastName, email, password, role, mobile } = req.body;
-  const userId = getUserIdFromToken(req);
-
-  if (!userId) {
-    return res.status(400).json({
-      status: 400,
-      message: "Authorization failed.",
-    });
-  }
-
   // Check if user has admin role
   connection.query(
     `SELECT role FROM ${tableName} WHERE id = ?`,
@@ -296,7 +290,6 @@ usersRouter.post("/user/add", (req, res) => {
   );
 });
 
-
 /* Get user details by id */
 usersRouter.get("/user-details", (req, res) => {
   const { id } = req.query;
@@ -327,15 +320,9 @@ usersRouter.get("/user-details", (req, res) => {
 
 /* Delete user */
 usersRouter.delete("/user/delete", (req, res) => {
+  const userId = getUserIdFromToken(req, res);
+  if (!userId) return;
   const { id } = req.query;
-  const userId = getUserIdFromToken(req);
-
-  if (!userId) {
-    return res
-      .status(400)
-      .json({ status: 400, message: "Authorization failed." });
-  }
-
   if (!id) {
     return res
       .status(400)
@@ -386,19 +373,12 @@ usersRouter.delete("/user/delete", (req, res) => {
   );
 });
 
-
 /* Edit user details */
 usersRouter.post("/user/edit", (req, res) => {
+  const loggedInUserId = getUserIdFromToken(req, res);
+  if (!loggedInUserId) return;
   const userId = req.query?.id;
   const { firstName, lastName, email, password, role, mobile } = req.body;
-  const loggedInUserId = getUserIdFromToken(req);
-
-  if (!loggedInUserId) {
-    return res
-      .status(400)
-      .json({ status: 400, message: "Authorization failed." });
-  }
-
   if (!userId) {
     return res
       .status(400)
@@ -460,7 +440,6 @@ usersRouter.post("/user/edit", (req, res) => {
     }
   );
 });
-
 
 function checkTableExistence() {
   // Checked and created users table if it does not exist
