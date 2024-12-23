@@ -19,7 +19,7 @@ const getUserIdFromToken = (req, res) => {
   }
   try {
     const decoded = jwt.verify(token, jwtSecretKey);
-    return decoded.userId;
+    return decoded.id;
   } catch (error) {
     if (error?.name === "TokenExpiredError") {
       res &&
