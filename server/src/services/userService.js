@@ -1,12 +1,11 @@
+const tableName = "users";
 const bcrypt = require("bcryptjs");
 const express = require("express");
 const connection = require("../connection");
 const { generateToken, getUserIdFromToken } = require("./jwtService");
-
-const tableName = "users";
+const usersRouter = express.Router();
 
 checkTableExistence();
-const usersRouter = express.Router();
 
 // Register(signup) API for new users
 usersRouter.post("/register", (req, res) => {
@@ -36,7 +35,7 @@ usersRouter.post("/register", (req, res) => {
             .json({ status: 500, message: "Error hashing password" });
         }
 
-        // Inserted the new user
+        // Insert new user
         connection.query(
           `INSERT INTO ${tableName} (first_name, last_name, email, password) VALUES (?, ?, ?, ?)`,
           [firstName, lastName, email, hashedPassword],
@@ -47,47 +46,38 @@ usersRouter.post("/register", (req, res) => {
                 .json({ status: 500, message: "Error creating user" });
             }
 
-            // Generated token after user is created
             const userId = result.insertId;
-            const token = generateToken(userId);
+            const { token, expirationDate } = generateToken(userId);
 
-            // Update user with token
+            // Update user with token and expiration date
             connection.query(
-              `UPDATE ${tableName} SET token = ? WHERE id = ?`,
-              [token, userId],
+              `UPDATE ${tableName} SET token = ?, expires_at = ? WHERE id = ?`,
+              [token, expirationDate, userId],
               (err) => {
                 if (err) {
                   return res
                     .status(500)
                     .json({ status: 500, message: "Error saving token" });
-                } else {
-                  // give user details
-                  connection.query(
-                    `SELECT * FROM ${tableName} WHERE id = ?`,
-                    [userId],
-                    (err, result) => {
-                      if (err) {
-                        return res.status(400).json({
-                          status: 400,
-                          message: "Error checking user",
-                        });
-                      }
-                      if (!result.length) {
-                        return res.status(400).json({
-                          status: 400,
-                          message: "Failed to register",
-                        });
-                      }
-
-                      // Respond with success and token
-                      res.status(200).json({
-                        status: 200,
-                        message: "User created successfully",
-                        data: result[0],
-                      });
-                    }
-                  );
                 }
+
+                // Fetch and return user details
+                connection.query(
+                  `SELECT * FROM ${tableName} WHERE id = ?`,
+                  [userId],
+                  (err, result) => {
+                    if (err) {
+                      return res
+                        .status(400)
+                        .json({ status: 400, message: "Error fetching user" });
+                    }
+
+                    res.status(200).json({
+                      status: 200,
+                      message: "User created successfully",
+                      data: { ...result[0], expires_at: expirationDate },
+                    });
+                  }
+                );
               }
             );
           }
@@ -115,27 +105,33 @@ usersRouter.post("/signin", (req, res) => {
           .json({ status: 400, message: "Incorrect email-Id or password" });
       }
 
-      // Compared hashed password
+      // Compare hashed password
       const user = result[0];
       bcrypt.compare(password, user.password, (err, isMatch) => {
-        if (err) {
-          return res
-            .status(500)
-            .json({ status: 500, message: "Incorrect password" });
-        }
-        if (!isMatch) {
+        if (err || !isMatch) {
           return res
             .status(400)
             .json({ status: 400, message: "Incorrect password" });
         }
 
-        // Generated token for logged-in user
-        const token = generateToken(user.id);
-        res.status(200).json({
-          status: 200,
-          message: "Login successful",
-          data: { ...user, token },
-        });
+        const tokenData = generateToken(user.id);
+
+        // Update user with new token and expiration date
+        connection.query(
+          `UPDATE ${tableName} SET token = ?, expires_at = ? WHERE id = ?`,
+          [tokenData.token, tokenData.expirationDate, user.id],
+          (err) => {
+            if (err) {
+              return res.status(500).json({ status: 500, message: "Error updating token" });
+            }
+
+            res.status(200).json({
+              status: 200,
+              message: "Login successful",
+              data: { ...user, token: tokenData.token, expires_at: tokenData.expirationDate },
+            });
+          }
+        );
       });
     }
   );
@@ -185,6 +181,7 @@ usersRouter.post("/user/add", (req, res) => {
   if (!userId) return;
 
   const { firstName, lastName, email, password, role, mobile } = req.body;
+
   // Check if user has admin role
   connection.query(
     `SELECT role FROM ${tableName} WHERE id = ?`,
@@ -239,21 +236,20 @@ usersRouter.post("/user/add", (req, res) => {
                     .json({ status: 500, message: "Error while adding user" });
                 }
 
-                // Generate token after user is created
                 const userId = result.insertId;
-                const token = generateToken(userId);
+                const tokenData = generateToken(userId);
 
-                // Update user with token
+                // Update user with token and expiration date
                 connection.query(
-                  `UPDATE ${tableName} SET token = ? WHERE id = ?`,
-                  [token, userId],
+                  `UPDATE ${tableName} SET token = ?, expires_at = ? WHERE id = ?`,
+                  [tokenData.token, tokenData.expirationDate, userId],
                   (err) => {
                     if (err) {
                       return res
                         .status(500)
                         .json({ status: 500, message: "Error saving token" });
                     } else {
-                      // Get user details
+                      // Fetch and return user details
                       connection.query(
                         `SELECT * FROM ${tableName} WHERE id = ?`,
                         [userId],
@@ -264,17 +260,10 @@ usersRouter.post("/user/add", (req, res) => {
                               message: "Error fetching user",
                             });
                           }
-                          if (!result.length) {
-                            return res.status(400).json({
-                              status: 400,
-                              message: "Failed to add user",
-                            });
-                          }
-                          // Respond with success and user details
                           res.status(200).json({
                             status: 200,
                             message: "User added successfully",
-                            data: result[0],
+                            data: { ...result[0], expires_at: tokenData.expirationDate },
                           });
                         }
                       );
@@ -290,7 +279,7 @@ usersRouter.post("/user/add", (req, res) => {
   );
 });
 
-/* Get user details by id */
+// Get user details by id
 usersRouter.get("/user-details", (req, res) => {
   const { id } = req.query;
   if (!id) {
@@ -298,6 +287,7 @@ usersRouter.get("/user-details", (req, res) => {
       .status(400)
       .json({ status: 400, message: "User Id not found in request" });
   }
+
   connection.query(
     `SELECT * FROM ${tableName} WHERE id = ?`,
     [id],
@@ -305,20 +295,23 @@ usersRouter.get("/user-details", (req, res) => {
       if (err) {
         return res
           .status(400)
-          .json({ status: 400, message: "Error while getting users" });
+          .json({ status: 400, message: "Error while getting user" });
       } else {
         if (!result?.length) {
           return res
             .status(400)
             .json({ status: 400, message: "User not found" });
         }
-        return res.status(200).json({ status: 200, data: result[0] });
+        return res.status(200).json({
+          status: 200,
+          data: { ...result[0], expires_at: result[0].expires_at },
+        });
       }
     }
   );
 });
 
-/* Delete user */
+// Delete user
 usersRouter.delete("/user/delete", (req, res) => {
   const userId = getUserIdFromToken(req, res);
   if (!userId) return;
@@ -353,93 +346,22 @@ usersRouter.delete("/user/delete", (req, res) => {
         [parseInt(id)],
         (err, result) => {
           if (err) {
-            return res
-              .status(500)
-              .json({ status: 500, message: "Error while deleting user" });
-          }
-
-          if (result.affectedRows === 0) {
-            return res
-              .status(404)
-              .json({ status: 404, message: "User not found." });
-          }
-
-          return res
-            .status(200)
-            .json({ status: 200, message: "User deleted successfully" });
-        }
-      );
-    }
-  );
-});
-
-/* Edit user details */
-usersRouter.post("/user/edit", (req, res) => {
-  const loggedInUserId = getUserIdFromToken(req, res);
-  if (!loggedInUserId) return;
-  const userId = req.query?.id;
-  const { firstName, lastName, email, password, role, mobile } = req.body;
-  if (!userId) {
-    return res
-      .status(400)
-      .json({ status: 400, message: "User Id not found in request" });
-  }
-
-  // Check if the logged-in user has admin role
-  connection.query(
-    `SELECT role FROM ${tableName} WHERE id = ?`,
-    [loggedInUserId],
-    (err, result) => {
-      if (err) {
-        return res
-          .status(500)
-          .json({ status: 500, message: "Error verifying user role" });
-      }
-
-      if (!result.length || result[0].role !== "admin") {
-        return res.status(403).json({
-          status: 403,
-          message: "Access denied. Only admins can edit users.",
-        });
-      }
-
-      // Proceed to update the user details
-      connection.query(
-        `UPDATE ${tableName} SET first_name = ?, last_name = ?, email = ?, password = ?, role = ?, mobile = ? WHERE id = ?`,
-        [firstName, lastName, email, password, role, mobile, userId],
-        (err, result) => {
-          if (err) {
-            return res
-              .status(400)
-              .json({ status: 400, message: "Error while updating user" });
-          }
-
-          if (result.affectedRows === 0) {
-            return res.status(404).json({
-              status: 404,
-              message: "User not found",
+            return res.status(500).json({
+              status: 500,
+              message: "Error while deleting user",
             });
           }
-
-          // Return the updated user details
-          connection.query(
-            `SELECT * FROM ${tableName} WHERE id = ?`,
-            [userId],
-            (err, result) => {
-              if (err) {
-                return res.status(400).json({
-                  status: 400,
-                  message: "Error fetching updated user",
-                });
-              }
-              return res.status(200).json({ status: 200, data: result[0] });
-            }
-          );
+          res.status(200).json({
+            status: 200,
+            message: "User deleted successfully",
+          });
         }
       );
     }
   );
 });
+
+
 
 function checkTableExistence() {
   // Checked and created users table if it does not exist
@@ -454,7 +376,15 @@ function checkTableExistence() {
     // If the table does not exist, create it
     if (results && results?.length && results[0].count === 0) {
       // Table creation query
-      const createQuery = `CREATE TABLE ${tableName} (id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255), email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255), token VARCHAR(255) UNIQUE, role VARCHAR(255) DEFAULT 'customer', mobile VARCHAR(10), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`;
+      const createQuery = `CREATE TABLE ${tableName} (id INT AUTO_INCREMENT PRIMARY KEY,
+      first_name VARCHAR(255) NOT NULL,
+      last_name VARCHAR(255) NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      role ENUM('user', 'admin') DEFAULT 'user',
+      mobile VARCHAR(15),
+      token TEXT,
+      expires_at DATETIME)`;
 
       connection.query(createQuery, (err) => {
         if (err) {

@@ -2,8 +2,13 @@ const jwt = require("jsonwebtoken");
 const jwtSecretKey = "electroNestJwt";
 
 function generateToken(userId) {
-  const token = jwt.sign({ userId }, jwtSecretKey, { expiresIn: "48h" });
-  return token;
+  const expiresIn = 24 * 60 * 60 * 1000; //24h
+  const token = jwt.sign({ id: userId }, jwtSecretKey, { expiresIn });
+
+  const expirationDate = new Date();
+  expirationDate.setTime(expirationDate.getTime() + expiresIn); 
+
+  return { token, expirationDate };
 }
 
 const getUserIdFromToken = (req, res) => {

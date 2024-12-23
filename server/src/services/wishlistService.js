@@ -109,7 +109,7 @@ wishlistRouter.get("/wishlist/add/:id", (req, res) => {
   const productId = req.params?.id;
 
   if (!userId) return;
-  else if (!productId || productId === "null" || productId === "undefined")
+  if (!productId || productId === "null" || productId === "undefined")
     return res.status(400).json({
       status: 400,
       message: "Missing parameters in request.",

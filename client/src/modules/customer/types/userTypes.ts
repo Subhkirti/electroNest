@@ -8,6 +8,7 @@ interface User {
   role: "customer" | "admin";
   createdAt: Date;
   updatedAt: Date;
+  expiresAt: Date;
   mobile: number | null;
   avatarText?: string;
 }
