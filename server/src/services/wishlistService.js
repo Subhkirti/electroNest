@@ -9,17 +9,11 @@ checkTableExistence();
 
 // fetch user wishlist
 wishlistRouter.get("/wishlist", (req, res) => {
-  const userId = getUserIdFromToken(req);
+  const userId = getUserIdFromToken(req, res);
+  if (!userId) return;
   const pageNumber = req.query?.pageNumber ? parseInt(req.query.pageNumber) : 1;
   const pageSize = req.query?.pageSize ? parseInt(req.query.pageSize) : 10;
   const offset = (pageNumber - 1) * pageSize;
-
-  if (!userId) {
-    return res.status(400).json({
-      status: 400,
-      message: "Authorization failed.",
-    });
-  }
 
   const getWishlistQuery = `
     SELECT p.*, 
@@ -84,15 +78,10 @@ wishlistRouter.get("/wishlist", (req, res) => {
 
 // remove product from wishlist
 wishlistRouter.delete("/wishlist/remove/:id", (req, res) => {
-  const userId = getUserIdFromToken(req);
+  const userId = getUserIdFromToken(req, res);
   const productId = req.params?.id;
 
-  if (!userId)
-    return res.status(400).json({
-      status: 400,
-      message: "Authorization failed.",
-    });
-
+  if (!userId) return;
   if (!productId || productId === "null" || productId === "undefined")
     return res.status(400).json({
       status: 400,
@@ -116,15 +105,10 @@ wishlistRouter.delete("/wishlist/remove/:id", (req, res) => {
 
 // add product to wishlist
 wishlistRouter.get("/wishlist/add/:id", (req, res) => {
-  const userId = getUserIdFromToken(req);
+  const userId = getUserIdFromToken(req, res);
   const productId = req.params?.id;
 
-  if (!userId)
-    return res.status(400).json({
-      status: 400,
-      message: "Authorization failed.",
-    });
-
+  if (!userId) return;
   if (!productId || productId === "null" || productId === "undefined")
     return res.status(400).json({
       status: 400,

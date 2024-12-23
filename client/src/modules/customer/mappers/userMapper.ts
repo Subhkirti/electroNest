@@ -14,6 +14,7 @@ function userMap(doc: any): User {
     token: doc?.token,
     role: doc?.role || "customer",
     mobile: doc?.mobile,
+    expiresAt: doc?.expires_at,
     createdAt: doc?.created_at,
     updatedAt: doc?.updated_at,
   };

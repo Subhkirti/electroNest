@@ -69,7 +69,34 @@ function cartReducer(state = initState, action: RootAction) {
           action?.payload?.[0]?.cartId === state.cart.cartId
             ? {
                 ...state.cart,
-                totalItems: state.cart.totalItems + action?.payload.length,
+                totalItems: action.payload.reduce(
+                  (sum: number, item: { quantity: number }) =>
+                    sum + item.quantity,
+                  0
+                ),
+                totalPrice: action.payload
+                  .reduce(
+                    (sum: number, item: { price: string; quantity: number }) =>
+                      sum + parseFloat(item.price) * item.quantity,
+                    0
+                  )
+                  .toFixed(2),
+                totalDiscountPrice: action.payload
+                  .reduce(
+                    (
+                      sum: number,
+                      item: { discountPrice: string; quantity: number }
+                    ) => sum + parseFloat(item.discountPrice) * item.quantity,
+                    0
+                  )
+                  .toFixed(2),
+                totalDeliveryCharges: action.payload
+                  .reduce(
+                    (sum: number, item: { deliveryCharges: string }) =>
+                      sum + parseFloat(item.deliveryCharges),
+                    0
+                  )
+                  .toFixed(2),
               }
             : state.cart,
       };
@@ -81,7 +108,36 @@ function cartReducer(state = initState, action: RootAction) {
         ...state,
         isLoading: false,
         cartItems: action?.payload,
-        cart: { ...state.cart, totalItems: action?.payload?.length },
+        cart: {
+          ...state.cart,
+          totalItems: action.payload.reduce(
+            (sum: number, item: { quantity: number }) => sum + item.quantity,
+            0
+          ),
+          totalPrice: action.payload
+            .reduce(
+              (sum: number, item: { price: string; quantity: number }) =>
+                sum + parseFloat(item.price) * item.quantity,
+              0
+            )
+            .toFixed(2),
+          totalDiscountPrice: action.payload
+            .reduce(
+              (
+                sum: number,
+                item: { discountPrice: string; quantity: number }
+              ) => sum + parseFloat(item.discountPrice) * item.quantity,
+              0
+            )
+            .toFixed(2),
+          totalDeliveryCharges: action.payload
+            .reduce(
+              (sum: number, item: { deliveryCharges: string }) =>
+                sum + parseFloat(item.deliveryCharges),
+              0
+            )
+            .toFixed(2),
+        },
       };
     case ActionTypes.REDUCE_CART_ITEM_SUCCESS:
       const cartItem = action.payload?.[0];
@@ -93,7 +149,7 @@ function cartReducer(state = initState, action: RootAction) {
           item.cartItemId === cartItem.cartItemId
             ? {
                 ...item,
-                quantity: item.quantity > 1 ? item.quantity - 1 : item.quantity, // Prevent going below 1
+                quantity: item.quantity > 1 ? item.quantity - 1 : item.quantity,
               }
             : item
         ),
@@ -101,7 +157,34 @@ function cartReducer(state = initState, action: RootAction) {
           state.cart && cartItem.cartId === state.cart.cartId
             ? {
                 ...state.cart,
-                totalItems: state.cart.totalItems - 1, // Decrease total items count
+                totalItems: action.payload.reduce(
+                  (sum: number, item: { quantity: number }) =>
+                    sum + item.quantity,
+                  0
+                ),
+                totalPrice: action.payload
+                  .reduce(
+                    (sum: number, item: { price: string; quantity: number }) =>
+                      sum + parseFloat(item.price) * item.quantity,
+                    0
+                  )
+                  .toFixed(2),
+                totalDiscountPrice: action.payload
+                  .reduce(
+                    (
+                      sum: number,
+                      item: { discountPrice: string; quantity: number }
+                    ) => sum + parseFloat(item.discountPrice) * item.quantity,
+                    0
+                  )
+                  .toFixed(2),
+                totalDeliveryCharges: action.payload
+                  .reduce(
+                    (sum: number, item: { deliveryCharges: string }) =>
+                      sum + parseFloat(item.deliveryCharges),
+                    0
+                  )
+                  .toFixed(2),
               }
             : state.cart,
       };
