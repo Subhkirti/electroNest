@@ -406,15 +406,14 @@ productsRouter.delete("/product/delete", (req, res) => {
 
 /* Get product details by id */
 productsRouter.get("/product-details", (req, res) => {
+  const userId = getUserIdFromToken(req);
   const { id } = req.query;
   if (!id) {
     return res
       .status(400)
       .json({ status: 400, message: "Product Id not found in request" });
   }
-  const userId = getUserIdFromToken(req, res);
-  if (userId) {
-    const query = `
+  const query = `
     SELECT p.*, 
      CASE 
              WHEN ? IS NOT NULL AND w.user_id = ? THEN true 
@@ -424,26 +423,25 @@ productsRouter.get("/product-details", (req, res) => {
     LEFT JOIN ${wishlistTableName} w ON p.product_id = w.product_id AND w.user_id = ? WHERE p.product_id = ?
   `;
 
-    const queryParams = [userId, userId, userId, id];
+  const queryParams = [userId, userId, userId, id];
 
-    connection.query(query, queryParams, (err, result) => {
-      if (err) {
-        console.error("Error while getting product details:", err);
-        return res.status(400).json({
-          status: 400,
-          message: "Error while getting product details",
-        });
-      }
+  connection.query(query, queryParams, (err, result) => {
+    if (err) {
+      console.error("Error while getting product details:", err);
+      return res.status(400).json({
+        status: 400,
+        message: "Error while getting product details",
+      });
+    }
 
-      if (result.length === 0) {
-        return res
-          .status(404)
-          .json({ status: 404, message: "Product not found" });
-      }
+    if (result.length === 0) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "Product not found" });
+    }
 
-      return res.status(200).json({ status: 200, data: result });
-    });
-  }
+    return res.status(200).json({ status: 200, data: result });
+  });
 });
 
 /* Get products list */
@@ -503,99 +501,96 @@ productsRouter.get("/products", (req, res) => {
 
 /* Find products on the basis of filters */
 productsRouter.post("/find-products", (req, res) => {
-  const userId = getUserIdFromToken(req, res);
-  if (userId) {
-    const {
-      categoryId,
-      sectionId,
-      itemId,
-      colors,
-      minPrice,
-      maxPrice,
-      discount,
-      stock,
-      sort,
-      pageNumber,
-      pageSize,
-      searchQuery,
-    } = req.body;
+  const userId = getUserIdFromToken(req);
+  const {
+    categoryId,
+    sectionId,
+    itemId,
+    colors,
+    minPrice,
+    maxPrice,
+    discount,
+    stock,
+    sort,
+    pageNumber,
+    pageSize,
+    searchQuery,
+  } = req.body;
 
-    const limit = parseInt(pageSize);
-    const offset = (parseInt(pageNumber) - 1) * limit;
+  const limit = parseInt(pageSize);
+  const offset = (parseInt(pageNumber) - 1) * limit;
 
-    let queryParams = [];
-    let whereClauses = [];
+  let queryParams = [];
+  let whereClauses = [];
 
-    // Handling colors filter
-    if (colors && colors.length > 0) {
-      whereClauses.push("color IN (?)");
-      queryParams.push(colors);
+  // Handling colors filter
+  if (colors && colors.length > 0) {
+    whereClauses.push("color IN (?)");
+    queryParams.push(colors);
+  }
+
+  // Handling minPrice filter
+  if (minPrice && minPrice.length > 0) {
+    whereClauses.push("net_price >= ?");
+    queryParams.push(Math.min(...minPrice));
+  }
+
+  // Handling maxPrice filter
+  if (maxPrice && maxPrice.length > 0) {
+    whereClauses.push("net_price <= ?");
+    queryParams.push(Math.max(...maxPrice));
+  }
+
+  // Handling discount filter
+  if (discount && discount.length > 0) {
+    const discountConditions = discount.map((d) => `discount_percentage >= ?`);
+    whereClauses.push(`(${discountConditions.join(" OR ")})`);
+    discount.forEach((d) => queryParams.push(parseInt(d)));
+  }
+
+  if (stock) {
+    if (stock == "out_of_stock") {
+      whereClauses.push("stock <= 0");
+    } else {
+      whereClauses.push("stock > 0");
     }
+  }
 
-    // Handling minPrice filter
-    if (minPrice && minPrice.length > 0) {
-      whereClauses.push("net_price >= ?");
-      queryParams.push(Math.min(...minPrice));
+  let orderByClause = "";
+  if (sort) {
+    if (sort === "low_to_high") {
+      orderByClause = "ORDER BY net_price ASC";
+    } else if (sort === "high_to_low") {
+      orderByClause = "ORDER BY net_price DESC";
     }
+  }
 
-    // Handling maxPrice filter
-    if (maxPrice && maxPrice.length > 0) {
-      whereClauses.push("net_price <= ?");
-      queryParams.push(Math.max(...maxPrice));
-    }
+  // Handling category filter
+  if (categoryId) {
+    whereClauses.push("category_id = ?");
+    queryParams.push(categoryId);
+  }
 
-    // Handling discount filter
-    if (discount && discount.length > 0) {
-      const discountConditions = discount.map(
-        (d) => `discount_percentage >= ?`
-      );
-      whereClauses.push(`(${discountConditions.join(" OR ")})`);
-      discount.forEach((d) => queryParams.push(parseInt(d)));
-    }
+  // Handling section filter
+  if (sectionId) {
+    whereClauses.push("section_id = ?");
+    queryParams.push(sectionId);
+  }
 
-    if (stock) {
-      if (stock == "out_of_stock") {
-        whereClauses.push("stock <= 0");
-      } else {
-        whereClauses.push("stock > 0");
-      }
-    }
+  // Handling item filter
+  if (itemId) {
+    whereClauses.push("item_id = ?");
+    queryParams.push(itemId);
+  }
 
-    let orderByClause = "";
-    if (sort) {
-      if (sort === "low_to_high") {
-        orderByClause = "ORDER BY net_price ASC";
-      } else if (sort === "high_to_low") {
-        orderByClause = "ORDER BY net_price DESC";
-      }
-    }
+  if (searchQuery) {
+    whereClauses.push("(product_name LIKE ? OR description LIKE ?)");
+    const likeQuery = `%${searchQuery}%`;
+    queryParams.push(likeQuery, likeQuery);
+  }
 
-    // Handling category filter
-    if (categoryId) {
-      whereClauses.push("category_id = ?");
-      queryParams.push(categoryId);
-    }
-
-    // Handling section filter
-    if (sectionId) {
-      whereClauses.push("section_id = ?");
-      queryParams.push(sectionId);
-    }
-
-    // Handling item filter
-    if (itemId) {
-      whereClauses.push("item_id = ?");
-      queryParams.push(itemId);
-    }
-
-    if (searchQuery) {
-      whereClauses.push("(product_name LIKE ? OR description LIKE ?)");
-      const likeQuery = `%${searchQuery}%`;
-      queryParams.push(likeQuery, likeQuery);
-    }
-
-    // Create the SQL query with dynamic WHERE clauses
-    let query = `
+  // Create the SQL query with dynamic WHERE clauses
+  let query = `
     SELECT p.*, 
            CASE 
              WHEN ? IS NOT NULL AND w.user_id = ? THEN true 
@@ -606,55 +601,54 @@ productsRouter.post("/find-products", (req, res) => {
     ON p.product_id = w.product_id AND w.user_id = ?
   `;
 
-    queryParams.unshift(userId, userId, userId);
+  queryParams.unshift(userId, userId, userId);
 
-    if (whereClauses.length > 0) {
-      query += ` WHERE ${whereClauses.join(" AND ")}`;
+  if (whereClauses.length > 0) {
+    query += ` WHERE ${whereClauses.join(" AND ")}`;
+  }
+
+  if (orderByClause) {
+    query += ` ${orderByClause}`;
+  }
+
+  query += " LIMIT ? OFFSET ?";
+  queryParams.push(limit, offset);
+
+  connection.query(query, queryParams, (err, result) => {
+    if (err) {
+      console.log("err:", err);
+      return res
+        .status(400)
+        .json({ status: 400, message: "Error while getting products" });
     }
 
-    if (orderByClause) {
-      query += ` ${orderByClause}`;
-    }
-
-    query += " LIMIT ? OFFSET ?";
-    queryParams.push(limit, offset);
-
-    connection.query(query, queryParams, (err, result) => {
-      if (err) {
-        console.log("err:", err);
-        return res
-          .status(400)
-          .json({ status: 400, message: "Error while getting products" });
-      }
-
-      // Optional: get the total count of products matching the filter criteria
-      const countQuery = `
+    // Optional: get the total count of products matching the filter criteria
+    const countQuery = `
       SELECT COUNT(*) AS totalCount
       FROM ${tableName} p
       ${whereClauses.length ? "WHERE " + whereClauses.join(" AND ") : ""}
     `;
 
-      connection.query(
-        countQuery,
-        queryParams.slice(3, -2), // Exclude userId and pagination parameters
-        (countErr, countResult) => {
-          if (countErr) {
-            console.log("countErr:", countErr);
-            return res.status(400).json({
-              status: 400,
-              message: "Error while getting total count",
-            });
-          }
-
-          return res.status(200).json({
-            status: 200,
-            data: result,
-            totalCount: countResult[0].totalCount,
+    connection.query(
+      countQuery,
+      queryParams.slice(3, -2), // Exclude userId and pagination parameters
+      (countErr, countResult) => {
+        if (countErr) {
+          console.log("countErr:", countErr);
+          return res.status(400).json({
+            status: 400,
+            message: "Error while getting total count",
           });
         }
-      );
-    });
-  }
+
+        return res.status(200).json({
+          status: 200,
+          data: result,
+          totalCount: countResult[0].totalCount,
+        });
+      }
+    );
+  });
 });
 
 /* Get top level categories list */
@@ -785,7 +779,6 @@ productsRouter.get("/third-level-categories", (req, res) => {
     }
   );
 });
-
 
 /* Get products carousel list for home page */
 productsRouter.get("/products-carousel", (req, res) => {
