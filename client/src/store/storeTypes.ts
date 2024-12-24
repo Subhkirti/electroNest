@@ -96,6 +96,7 @@ interface UsersState {
 interface WishlistState {
   products: Product[] | null;
   isLoading: boolean;
+  productId: number;
   error: string | null;
   totalCount: number;
 }

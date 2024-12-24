@@ -23,7 +23,9 @@ function LikeButton({
   const userId = getCurrentUser()?.id;
   const [isPinging, setIsPinging] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-  const { isLoading } = useSelector((state: RootState) => state.wishlist);
+  const { isLoading, productId: actionProductId } = useSelector(
+    (state: RootState) => state.wishlist
+  );
 
   const handleClick = () => {
     if (!userId) return toast.info(AppStrings.registerYourselfFirst);
@@ -43,7 +45,7 @@ function LikeButton({
       onClick={handleClick}
       className="absolute top-2 right-2 font-bold text-sm bg-primary bg-opacity-10 rounded-[6px] p-[3px]"
     >
-      {isLoading ? (
+      {isLoading && actionProductId === productId ? (
         <Loader color="primary" />
       ) : isLiked ? (
         <svg

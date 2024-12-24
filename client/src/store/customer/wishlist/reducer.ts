@@ -4,6 +4,7 @@ import ActionTypes from "./actionTypes";
 const initState: WishlistState = {
   products: [],
   isLoading: false,
+  productId: -1,
   totalCount: 0,
   error: null,
 };
@@ -27,6 +28,7 @@ function wishlistReducer(state: WishlistState = initState, action: RootAction) {
         ...state,
         isLoading: false,
         error: null,
+        productId: action?.payload?.productId,
         products: state?.products
           ? [...state.products, action?.payload?.data]
           : [action?.payload?.data],
@@ -37,6 +39,7 @@ function wishlistReducer(state: WishlistState = initState, action: RootAction) {
         ...state,
         isLoading: false,
         error: null,
+        productId: action?.payload?.productId,
         products: state?.products
           ? state.products.filter(
               (product) => product.productId !== action.payload?.productId
