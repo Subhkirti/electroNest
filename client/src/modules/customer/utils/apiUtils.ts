@@ -7,6 +7,7 @@ import { logout } from "../../../store/customer/auth/action";
 
 interface ErrorResponse {
   message: string;
+  name?: string;
 }
 
 function handleCatchError({
@@ -18,14 +19,14 @@ function handleCatchError({
 }) {
   const dispatch = store.dispatch;
   const axiosError = error as AxiosError<ErrorResponse>;
-  console.log("axiosError:", axiosError);
-  if (axiosError?.name === "TokenExpiredError") return dispatch(logout());
+  if (axiosError?.response?.data?.name === "TokenExpiredError") return dispatch(logout());
 
   const errorMessage =
     axiosError?.response?.data?.message ||
     axiosError?.message ||
     AppStrings.somethingWentWrong;
   toast.error(errorMessage);
+  
   dispatch({
     type: actionType,
     payload: errorMessage,
