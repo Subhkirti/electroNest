@@ -6,7 +6,7 @@ function generateToken(userId) {
   const token = jwt.sign({ id: userId }, jwtSecretKey, { expiresIn });
 
   const expirationDate = new Date();
-  expirationDate.setTime(expirationDate.getTime() + expiresIn); 
+  expirationDate.setTime(expirationDate.getTime() + expiresIn);
 
   return { token, expirationDate };
 }
@@ -26,6 +26,7 @@ const getUserIdFromToken = (req, res) => {
         res.status(400).json({
           status: 400,
           message: "Token Expired.",
+          name: "TokenExpiredError",
         });
       return null;
     }
